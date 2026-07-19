@@ -2,6 +2,42 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 1 — Scaffold: auth, RLS, OAuth (2026-07-20)
+
+**Built:** migrations applied to the live project via direct-Postgres runner
+(`backend/scripts/apply_migrations.py`; `_migrations` table tracks state, RLS
+enabled on it). Frontend auth with @supabase/ssr: /login (Google),
+/auth/callback code exchange, middleware gating every non-public route,
+/dashboard reading the RLS-scoped profile, sign-out. Backend /me validating
+Supabase bearer tokens + CORS. Vercel env vars set via CLI (production +
+preview).
+
+**Gate evidence:**
+- Schema: 8 tables, `rls=True` on all; 10 public + 3 storage policies;
+  `on_auth_user_created` trigger present; private `resumes` bucket created.
+- `backend/scripts/gate_slice1.py` against the live project — **12/12 PASS**:
+  profiles auto-created for two fresh signups (defaults credits=0); user A
+  inserted own resume (201); user B saw zero of A's rows on resumes and
+  profiles; B forging a resume as A → 403; B self-granting credits/free flag
+  → 403 with row unchanged; anonymous callers blocked from profiles, resumes,
+  versions, payments, llm_usage. Test users deleted; cascade left 0 rows.
+- Backend tests: 16 passed (auth 401/200 paths, gateway cost rules).
+- CI on `ee577c0`: success. Production deploy verified serving `ee577c0`;
+  logged-out `/dashboard` → 307 `/login?next=%2Fdashboard`; `/login` → 200.
+- OAuth chain (verified 2026-07-20): `/auth/v1/authorize?provider=google` →
+  302 accounts.google.com with the correct client_id + redirect_uri.
+
+**USER AUDIT NEEDED (not blocking the build):**
+1. Set Supabase auth URLs (dashboard → Authentication → URL Configuration):
+   Site URL `https://resumelabai.vercel.app`; Redirect URLs add
+   `https://resumelabai.vercel.app/**` and `http://localhost:3000/**`.
+   (The in-app browser pane stopped hydrating the dashboard SPA, so I could
+   not set these two fields myself. Alternative: send an sbp_ management
+   token and I'll set them via the Management API.)
+2. After that: sign in at https://resumelabai.vercel.app with two different
+   Google accounts — expect the dashboard with your name/avatar, and a
+   profiles row per account.
+
 ## Phase 2 — repo + CI scaffold (2026-07-19)
 
 **What was built:** monorepo scaffold — Next.js 14 + Tailwind frontend

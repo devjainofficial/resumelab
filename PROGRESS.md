@@ -9,16 +9,18 @@ resume from this file alone.
       Supabase/Google/Vercel being created by user now; Gemini key held by user;
       Oracle VM, domain, UPI QR, Razorpay deferred)
 - [x] Phase 2 — repo + CI/CD scaffold. GitHub Actions green; frontend live at
-      https://resumelabai.vercel.app (user linked Vercel). Push-to-redeploy
-      verified — see BUILDLOG. Awaiting user's explicit "CI/CD confirmed" to
-      start Phase 3.
-- [ ] Phase 3 — slices 1–9
+      https://resumelabai.vercel.app; push-to-redeploy verified.
+- [ ] Phase 3 — slices 1–9 IN PROGRESS (user gave the go 2026-07-20).
+      Decisions: backend deploys to Render free tier (Oracle swap later);
+      Razorpay preferred for payments, finalized at slice 8.
+      All credentials verified; Gemini key in backend/.env (mock mode still
+      on — real calls need one-time user approval).
 
 ## Slice status
 
 | Slice | Status | Gate evidence |
 |---|---|---|
-| 1 Scaffold (auth, RLS, CI) | scaffold committed; OAuth wiring pending user's Supabase project | — |
+| 1 Scaffold (auth, RLS, CI) | **DONE** (user audit of Google sign-in pending) | BUILDLOG "Slice 1": 12/12 RLS gate checks, CI green, prod redirect verified |
 | 2 Upload + parse | not started | — |
 | 3 Wizard | not started | — |
 | 4 Rewrite + render | not started | — |
