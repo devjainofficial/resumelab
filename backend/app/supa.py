@@ -40,6 +40,16 @@ class Supa:
             r.raise_for_status()
             return r.json()[0]
 
+    async def update(self, table: str, params: dict, patch: dict) -> None:
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.patch(
+                f"{self.base}/rest/v1/{table}",
+                params=params,
+                json=patch,
+                headers=self._headers(),
+            )
+            r.raise_for_status()
+
     async def upload_file(self, bucket: str, path: str, data: bytes, content_type: str) -> None:
         async with httpx.AsyncClient(timeout=60) as c:
             r = await c.post(

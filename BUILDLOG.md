@@ -2,6 +2,36 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 4 — Rewrite + render (2026-07-20)
+
+**Built:** `rewrite/facts.py` (fact store with provenance; answers merge
+deterministically — contact fills, quant numbers attach to their bullet,
+skills dedupe, education dates); `rewrite/composer.py` (structure spec ->
+markdown; FINAL only when re-detected gaps minus answered ids is empty,
+else DRAFT with visible watermark line); flash `rewrite` polish pass whose
+output is rejected per-bullet if it introduces any number or capitalized
+term absent from the source corpus; `rewrite/renderer.py` markdown -> PDF
+(WeasyPrint when available; deterministic fpdf2 fallback locally) + DOCX
+(python-docx); `/versions/{id}/compose` + `/versions/{id}/download/{pdf,docx}`.
+CI now installs pango and runs the real WeasyPrint engine; the Windows dev
+box uses the fallback (deviation noted — production Docker uses WeasyPrint).
+
+**Gate evidence (pytest, 44 passed):**
+- One page: dense fixture with all answers renders to exactly 1 PDF page.
+- Parse-back: ≥95% of markdown words recovered from the rendered PDF text
+  (actual run: 100% minus stopword-length tokens).
+- Zero unsourced facts: every token in composed markdown exists in the
+  source corpus (parsed text + answers) or is a structural heading.
+- Draft/final: unanswered gaps -> DRAFT + watermark in markdown AND in
+  extracted PDF text; all answered -> FINAL, no watermark, answered facts
+  present in output.
+- Truthfulness guard: a lying gateway inserting "500% at Google" is
+  rejected (markdown unchanged); an honest rephrase using only sourced
+  terms is accepted; tier verified as gemini-flash.
+- Structure specs: S1 order Summary<Skills<Experience; S3 puts Education
+  before Skills.
+- fpdf2 cursor bug (multi_cell leaves x at right edge) found and fixed.
+
 ## Slice 3 — Intake wizard (2026-07-20)
 
 **Built:** `wizard/gaps.py` deterministic gap detector (contact completeness,

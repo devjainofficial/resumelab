@@ -26,6 +26,7 @@ class StartRequest(BaseModel):
 
 
 class AnswerItem(BaseModel):
+    id: str | None = None  # question id from /wizard/start
     question: str
     answer: str
 
@@ -94,9 +95,10 @@ async def save_answers(
     for item in req.answers:
         if not item.answer.strip():
             continue  # an empty answer is not a fact; never store blanks
+        question_field = f"{item.id} :: {item.question}" if item.id else item.question
         await supa.insert(
             "answers",
-            {"version_id": req.version_id, "question": item.question, "answer": item.answer.strip()},
+            {"version_id": req.version_id, "question": question_field, "answer": item.answer.strip()},
         )
         stored += 1
     return {"stored": stored}

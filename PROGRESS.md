@@ -23,7 +23,7 @@ resume from this file alone.
 | 1 Scaffold (auth, RLS, CI) | **DONE** (user audit of Google sign-in pending) | BUILDLOG "Slice 1": 12/12 RLS gate checks, CI green, prod redirect verified |
 | 2 Upload + parse | **DONE** | BUILDLOG "Slice 2": 27 tests incl. fidelity on 3 fixtures, dedup zero-cost proof |
 | 3 Wizard | **DONE** | BUILDLOG "Slice 3": 34 tests, cap/redundancy/impact-order proofs, LLM cannot inject questions |
-| 4 Rewrite + render | not started | — |
+| 4 Rewrite + render | **DONE** | BUILDLOG "Slice 4": 44 tests — 1 page, ≥95% parse-back, zero unsourced facts, lying-LLM rejection |
 | 5 Scorer | not started | — |
 | 6 Score repair | not started | — |
 | 7 JD enhancer | not started | — |
