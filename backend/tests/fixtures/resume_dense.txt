@@ -1,0 +1,34 @@
+Priya Sharma
+Bengaluru, India | priya.sharma@example.com | +91 98765 43210
+linkedin.com/in/priyasharma | github.com/priyasharma
+
+Summary
+Backend engineer with 6 years building payment systems. Led a team of 5
+through a zero-downtime migration serving 2M daily transactions.
+
+Skills
+Languages: Python, Go, SQL
+Infrastructure: AWS, Docker, Kubernetes, Terraform
+Data: PostgreSQL, Redis, Kafka
+
+Experience
+Senior Software Engineer
+FinEdge Payments, Bengaluru
+Jan 2021 - Present
+• Led migration of the settlement pipeline to Kafka, cutting p99 latency from 900ms to 210ms
+• Managed a team of 5 engineers across two product lines
+• Reduced infrastructure cost by 23% by right-sizing Kubernetes workloads
+
+Software Engineer
+CloudNine Labs, Pune
+Jun 2018 - Dec 2020
+• Built REST APIs in Python serving 40k requests per minute
+• Introduced contract testing, cutting integration failures by 60%
+
+Education
+B.Tech Computer Science, NIT Trichy
+2014 - 2018
+
+Certifications
+AWS Certified Solutions Architect - Associate
+CKA: Certified Kubernetes Administrator

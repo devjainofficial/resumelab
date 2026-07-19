@@ -2,6 +2,33 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 2 — Upload + parse (2026-07-20)
+
+**Built:** deterministic extraction (`parsing/extract.py`: pypdf + python-docx)
+and heuristic structuring (`parsing/parser.py`: sections, contact regexes,
+entry/bullet splitting, placeholder flag) — zero LLM tokens by construction;
+`POST /resumes/upload` (auth-gated, 5 MB cap, pdf/docx only) with SHA-256
+file-hash dedup, storage upload to `resumes/{uid}/{hash}`, row insert;
+`GET /resumes`; dashboard upload UI calling the API with the session token.
+
+**Gate evidence (pytest, 27 passed):**
+- Parse fidelity on 3 known fixtures (dense senior / projects-forward /
+  sparse fresher): names, emails, phone (incl. +91 5+5 format), linkedin,
+  github, summary content, skills lists, entry counts, per-entry bullet
+  counts and first-bullet text, certifications, education all asserted.
+- Same fixture routed through real PDF bytes (fpdf2) and real DOCX bytes
+  (python-docx) reparses to the same structure.
+- `test_parser_never_invents_content`: every parsed token is a substring of
+  the source — no-fabrication contract enforced at parser level.
+- Re-upload of identical bytes (even renamed): `deduped=true`, same
+  resume_id, parse function called 0 times, no second storage write or DB
+  row -> zero tokens, zero work.
+- Unsupported type -> 422; unreadable PDF -> 422; no auth -> 401.
+
+Note: gate ran on synthetic fixtures. When the user supplies their 3 real
+resumes, rerun `pytest tests/test_parsing.py` after dropping them into
+tests/fixtures (batched ask, non-blocking).
+
 ## Slice 1 — Scaffold: auth, RLS, OAuth (2026-07-20)
 
 **Built:** migrations applied to the live project via direct-Postgres runner

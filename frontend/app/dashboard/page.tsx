@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./signout-button";
+import { UploadZone } from "./upload";
 
 export default async function Dashboard() {
   const supabase = createClient();
@@ -53,9 +54,7 @@ export default async function Dashboard() {
         </dl>
       </div>
 
-      <div className="mt-8 rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-500">
-        Resume upload arrives in the next build slice.
-      </div>
+      <UploadZone />
     </main>
   );
 }

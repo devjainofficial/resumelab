@@ -1,0 +1,29 @@
+Arjun Mehta
+arjun.mehta@example.com | +91 91234 56789 | github.com/arjunm
+
+Profile
+Full-stack developer who ships side projects that people actually use.
+
+Technical Skills
+JavaScript, TypeScript, React, Node.js, Next.js, PostgreSQL, Supabase
+
+Work Experience
+Frontend Developer
+PixelWorks Studio, Remote
+Mar 2022 - Present
+• Shipped a component library adopted by 4 internal teams
+• Cut bundle size 38% via route-level code splitting
+
+Projects
+DevDeck - 1.2k GitHub stars
+2023
+• Built a keyboard-first dashboard for developers with 3k monthly users
+• Implemented offline sync with CRDTs
+
+MintSplit
+2022
+• Expense splitting PWA used by 40 college groups
+
+Education
+B.E. Information Technology, Pune University
+2017 - 2021

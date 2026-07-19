@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import CurrentUser
+from app.resumes import router as resumes_router
 
 app = FastAPI(title="ResumeLab API", version="0.1.0")
+app.include_router(resumes_router)
 
 _default_origins = "http://localhost:3000,https://resumelabai.vercel.app"
 app.add_middleware(

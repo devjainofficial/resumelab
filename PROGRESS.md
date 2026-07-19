@@ -21,7 +21,7 @@ resume from this file alone.
 | Slice | Status | Gate evidence |
 |---|---|---|
 | 1 Scaffold (auth, RLS, CI) | **DONE** (user audit of Google sign-in pending) | BUILDLOG "Slice 1": 12/12 RLS gate checks, CI green, prod redirect verified |
-| 2 Upload + parse | not started | — |
+| 2 Upload + parse | **DONE** | BUILDLOG "Slice 2": 27 tests incl. fidelity on 3 fixtures, dedup zero-cost proof |
 | 3 Wizard | not started | — |
 | 4 Rewrite + render | not started | — |
 | 5 Scorer | not started | — |
