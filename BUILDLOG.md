@@ -46,10 +46,14 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   `db.<ref>.supabase.co` is IPv6-only and unreachable from the dev network —
   always use the pooler locally. Migrations can now be applied via direct
   Postgres connection; the CLI access token is optional.
-- **Google OAuth client: FAILED.** Token endpoint returned
-  `deleted_client` for `220198560971-...c54bgi` — that client was deleted in
-  Google Cloud. Waiting on the user for the currently-existing client's ID +
-  secret.
+- **Google OAuth client: VERIFIED (2026-07-20).** Two earlier client IDs were
+  dead (`...c54bgi` deleted, `...enp79` superseded). Final client
+  `220198560971-088gq6jj18ej1u885mnee1f7uoel3l06` + secret validated against
+  Google's token endpoint (`invalid_grant` = pair accepted). User enabled the
+  provider in Supabase; `/auth/v1/settings` now reports google:true and
+  `/auth/v1/authorize?provider=google` 302s to accounts.google.com with that
+  exact client_id and the correct redirect_uri. **Credential collection
+  complete — every Slice 1 input verified.**
 - Supabase publishable key: verified earlier (200 on /auth/v1/health).
 - **Secret API key: VERIFIED.** `/rest/v1/` → 200 and privileged
   `/auth/v1/admin/users` → 200 (empty user list, as expected pre-launch).
