@@ -40,6 +40,14 @@ class Supa:
             r.raise_for_status()
             return r.json()[0]
 
+    async def rpc(self, fn: str, args: dict):
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.post(
+                f"{self.base}/rest/v1/rpc/{fn}", json=args, headers=self._headers()
+            )
+            r.raise_for_status()
+            return r.json()
+
     async def update(self, table: str, params: dict, patch: dict) -> None:
         async with httpx.AsyncClient(timeout=20) as c:
             r = await c.patch(

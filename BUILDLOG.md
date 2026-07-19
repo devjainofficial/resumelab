@@ -2,6 +2,34 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 7 — JD enhancer (2026-07-20)
+
+**Built:** `enhancer/enhance.py` — truthful moves only: skills reorder (JD
+matches first, same tokens), synonym canonicalization from a fixed table
+(only for terms the resume already proves), summary tailoring via flash
+`jd_enhance` with the truthfulness guard; experience never touched; coverage
+report lists present AND missing keywords with an honest "we don't add
+unproven skills" note. `billing/access.py` — fixed-order access chain with
+every allowed run written to llm_usage (model = free_flag | allowance |
+credit). Migration `20260720000003_billing.sql` — `use_jd_credit(uuid)`
+SECURITY DEFINER RPC: decrement + usage row in one transaction, execute
+revoked from anon/authenticated. Applied to the live DB. `POST
+/versions/{id}/enhance` refuses non-FINAL and placeholder resumes with the
+exact contract message; paywall is HTTP 402 with a friendly payload.
+
+**Gate evidence (pytest, 71 passed):**
+- Zero new facts: output token set ⊆ input token set (property test).
+- Experience section byte-identical before/after.
+- Skills lead with JD matches; coverage honestly lists rust/graphql missing.
+- Lying summary ("Ex-Google", "15 years", "Rust") rejected wholesale.
+- Refusals: draft -> 409 exact message; placeholder resume -> 409 exact
+  message even for free-flag users.
+- Access chain: free flag runs + logs, touches no credits; allowance lane
+  when runs < FREE_JD_RUNS; credit lane calls use_jd_credit exactly once
+  and balance drops 3->2; zero balance -> 402 paywall payload (price from
+  env) and NO variant is created.
+- Success path: new FINAL variant version created on the same resume.
+
 ## Slice 6 — Score repair (2026-07-20)
 
 **Built:** `repair/findings.py` — pasted text classified deterministically

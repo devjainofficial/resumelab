@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import CurrentUser
+from app.enhance import router as enhance_router
 from app.repair import router as repair_router
 from app.resumes import router as resumes_router
 from app.scores import router as scores_router
@@ -16,6 +17,7 @@ app.include_router(wizard_router)
 app.include_router(versions_router)
 app.include_router(scores_router)
 app.include_router(repair_router)
+app.include_router(enhance_router)
 
 _default_origins = "http://localhost:3000,https://resumelabai.vercel.app"
 app.add_middleware(
