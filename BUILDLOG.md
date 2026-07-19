@@ -51,8 +51,9 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   Google Cloud. Waiting on the user for the currently-existing client's ID +
   secret.
 - Supabase publishable key: verified earlier (200 on /auth/v1/health).
-- Secret API key: still pending from user (in-app browser clipboard is
-  sandboxed; user will copy from their own browser).
+- **Secret API key: VERIFIED.** `/rest/v1/` → 200 and privileged
+  `/auth/v1/admin/users` → 200 (empty user list, as expected pre-launch).
+  Stored in backend/.env (gitignored).
 
 ## Batched questions (answer whenever)
 
