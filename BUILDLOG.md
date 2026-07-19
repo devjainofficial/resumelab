@@ -54,6 +54,15 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   `/auth/v1/authorize?provider=google` 302s to accounts.google.com with that
   exact client_id and the correct redirect_uri. **Credential collection
   complete — every Slice 1 input verified.**
+- **Gemini key: VERIFIED (2026-07-20).** Found in the user's Mole /
+  job-search-app projects, confirmed with a free models.list call (HTTP 200;
+  gemini-2.5-flash and flash-lite tiers available). Stored in backend/.env.
+  Real calls still require the user's explicit go-ahead per working rules.
+- **Deploy-target change:** user cannot obtain the Oracle ARM free-tier VM.
+  Backend hosting decision deferred to slice 9; leading candidates: Render
+  free tier (Docker, weasyprint-friendly, sleeps when idle), Koyeb free, or
+  Fly.io. Caddy/systemd steps in the spec will be adapted to whatever is
+  chosen. UPI QR image arrives from the user before slice 8.
 - Supabase publishable key: verified earlier (200 on /auth/v1/health).
 - **Secret API key: VERIFIED.** `/rest/v1/` → 200 and privileged
   `/auth/v1/admin/users` → 200 (empty user list, as expected pre-launch).
