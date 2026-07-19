@@ -10,10 +10,15 @@ facts, metrics, employers, or achievements. Everything else serves that promise.
    using a chosen reference structure -> render PDF + DOCX -> built-in ATS
    score -> download. Output is FINAL only when every needed input is answered;
    otherwise DRAFT, clearly watermarked.
-2. SCORE REPAIR: user pastes external feedback (e.g. Resume Worded findings)
-   -> map each finding to a targeted patch -> re-render -> re-score. Never a
-   full rewrite. If a finding needs a number we don't have, generate a wizard
-   question instead of inventing one.
+2. SCORE REPAIR: user submits external feedback either as pasted text or
+   as screenshots of the Resume Worded results page. A vision pass (Gemini
+   flash) extracts the finding categories and counts (e.g. "Quantify
+   impact: 6", "Buzzwords: 8") so users don't have to transcribe. Each
+   finding maps to a targeted patch: buzzword lists become deterministic
+   deletions, quantification gaps become wizard questions, verb repetition
+   triggers a rewrite pass. Never a full rewrite. If a finding needs a
+   number we don't have, generate a wizard question instead of inventing
+   one. Show a before/after score comparison on completion.
 3. JD ENHANCER: takes a FINAL resume + a job description. Keyword mirroring
    where truthful, skills reorder, summary tailoring. Never adds experience.
    If the uploaded resume contains placeholder markers or fails parse checks,
@@ -148,6 +153,15 @@ webhook that fires twice can never grant twice.
 Credits are a ledger: never mutate a balance without a payments row or a
 usage row explaining the change.
 
+## Scoring flow (what the user sees)
+
+After a FINAL is generated, show the built-in ATS score with the breakdown,
+then a "Get a second opinion on Resume Worded" link. Below that link, a
+prominent "Not happy with the score? Paste the screenshot here" upload area
+feeds Score Repair mode directly. Frame this as a single loop, not two
+disconnected features. First-run copy for the upload zone: "We've seen
+scores jump 65 to 83 from a screenshot alone. Drop yours in."
+
 ## Build slices (in order, each ends with a gate the user can verify)
 
 1. SCAFFOLD: repos, envs, Supabase project, migrations, RLS, Google OAuth
@@ -165,8 +179,10 @@ usage row explaining the change.
    claims against inputs).
 5. SCORER: built-in score with breakdown. GATE: scores a finished resume
    high and a sparse one low for stated reasons; refuses DRAFTs.
-6. SCORE REPAIR: paste findings -> targeted patches only. GATE: a finding
-   needing a number produces a question, not a number.
+6. SCORE REPAIR: paste text or upload a Resume Worded screenshot -> vision
+   extraction -> targeted patches only. GATE: a finding needing a number
+   produces a question, not a number; a screenshot from Resume Worded is
+   correctly parsed into structured findings; before/after scores displayed.
 7. JD ENHANCER: FINAL + JD -> tailored variant + coverage report. GATE:
    refuses non-FINAL input; zero new facts introduced; access check enforced
    (free flag bypasses, allowance counts, credits decrement atomically,
