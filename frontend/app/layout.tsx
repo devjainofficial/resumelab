@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ResumeLab",
   description: "A truthful, ATS-strong resume. No invented facts, ever.",
+  other: {
+    // Vercel injects the SHA at build time; lets us verify which commit is live.
+    commit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
+  },
 };
 
 export default function RootLayout({

@@ -8,8 +8,10 @@ resume from this file alone.
 - [x] Phase 1 — requirements collection (partial by user choice: repo first,
       Supabase/Google/Vercel being created by user now; Gemini key held by user;
       Oracle VM, domain, UPI QR, Razorpay deferred)
-- [x] Phase 2 — repo + CI/CD scaffold (this commit). WAITING on user to link
-      Vercel and say "CI/CD confirmed".
+- [x] Phase 2 — repo + CI/CD scaffold. GitHub Actions green; frontend live at
+      https://resumelabai.vercel.app (user linked Vercel). Push-to-redeploy
+      verified — see BUILDLOG. Awaiting user's explicit "CI/CD confirmed" to
+      start Phase 3.
 - [ ] Phase 3 — slices 1–9
 
 ## Slice status
