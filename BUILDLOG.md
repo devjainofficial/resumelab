@@ -2,6 +2,37 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 6 — Score repair (2026-07-20)
+
+**Built:** `repair/findings.py` — pasted text classified deterministically
+into known categories (quantify, buzzwords, verb_repetition, weak_verbs,
+pronouns, passive, length, readability) with counts; screenshot path goes
+through the gateway (`screenshot_extract`, flash tier, cached by image hash)
+and the model's output is normalized through the SAME deterministic mapper —
+unknown categories are dropped, so vision can only supply labels+counts.
+`repair/patcher.py` — per-finding targeted patches: buzzwords/pronouns =
+deterministic deletions; quantification gaps = wizard questions (NEVER a
+number); verb repetition = flash `repair` rewrite with the slice-4
+truthfulness guard. `/versions/{id}/repair` (+ `/repair/screenshot`) refuses
+non-FINAL, stores the external findings and the internal re-score, returns
+before/after scores + patched markdown.
+
+**Gate evidence (pytest, 59 passed):**
+- Resume Worded-style text -> 4 structured findings with correct counts;
+  unclassifiable lines ignored.
+- Buzzword patch: phrases deleted, exactly ONE line changed, all other lines
+  byte-identical (never a full rewrite).
+- Quantify: bullet without a number -> `number`-kind wizard question quoting
+  the bullet; markdown byte-identical (zero invented digits) with action
+  text "nothing was invented".
+- Verb repetition: lying model output ("$2M", "90%") rejected -> markdown
+  untouched; truthful rephrase accepted; tier = gemini-flash `repair`.
+- Screenshot: canned vision output -> normalized structured findings;
+  invented category dropped; MOCK mode returns zero findings with an honest
+  note (dev never pretends to read screenshots).
+- Endpoint: before/after scores returned (after ≥ before on buzzword case),
+  scores stored as external+internal pair, patched markdown persisted.
+
 ## Slice 5 — Built-in ATS scorer (2026-07-20)
 
 **Built:** `scoring/scorer.py` — deterministic 0-100 with readable per-check

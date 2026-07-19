@@ -41,7 +41,7 @@ def test_model_tiering():
     gw = make_gateway()
     for task in ("extract", "gap_detect", "question_gen"):
         assert gw.model_for(task) == "gemini-flash-lite"
-    for task in ("rewrite", "repair", "jd_enhance"):
+    for task in ("rewrite", "repair", "jd_enhance", "screenshot_extract"):
         assert gw.model_for(task) == "gemini-flash"
 
 

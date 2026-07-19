@@ -28,6 +28,7 @@ MODEL_TIERS: dict[str, str] = {
     "rewrite": "gemini-flash",
     "repair": "gemini-flash",
     "jd_enhance": "gemini-flash",
+    "screenshot_extract": "gemini-flash",  # vision: Resume Worded screenshots
 }
 
 BUDGET_MESSAGE = (
