@@ -37,6 +37,23 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   and backend/.env (both gitignored). Still pending from user: secret key,
   Google provider enablement, DB password + access token for migrations.
 
+## Credential verification (2026-07-19)
+
+- **DB password: VERIFIED.** Connected via session pooler
+  `aws-1-ap-northeast-2.pooler.supabase.com:5432` as
+  `postgres.zngellmrkdblinlqupbe` → `select version()` returned
+  PostgreSQL 17.6. Project region is ap-northeast-2 (Seoul). Direct host
+  `db.<ref>.supabase.co` is IPv6-only and unreachable from the dev network —
+  always use the pooler locally. Migrations can now be applied via direct
+  Postgres connection; the CLI access token is optional.
+- **Google OAuth client: FAILED.** Token endpoint returned
+  `deleted_client` for `220198560971-...c54bgi` — that client was deleted in
+  Google Cloud. Waiting on the user for the currently-existing client's ID +
+  secret.
+- Supabase publishable key: verified earlier (200 on /auth/v1/health).
+- Secret API key: still pending from user (in-app browser clipboard is
+  sandboxed; user will copy from their own browser).
+
 ## Batched questions (answer whenever)
 
 - none yet
