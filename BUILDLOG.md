@@ -21,7 +21,9 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   mock, real mode refuses to start without GEMINI_API_KEY.
 - `frontend`: `npm run build` → Next.js 14.2.35 compiled successfully,
   static routes generated, zero env vars required.
-- CI run on GitHub: (link added after first push)
+- CI run on GitHub: https://github.com/devjainofficial/resumelab/actions/runs/29688435830
+  → conclusion **success**; jobs "Frontend build" and "Backend tests (mock
+  gateway)" both green on Python 3.11 / Node 20.
 
 ## Batched questions (answer whenever)
 
