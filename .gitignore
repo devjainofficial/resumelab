@@ -19,3 +19,5 @@ dist/
 *.log
 .pytest_cache/
 .vercel/
+
+.vercel

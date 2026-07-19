@@ -37,9 +37,12 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <p className="mt-10 text-sm text-slate-400">
-        Sign-in with Google coming online in the next build slice.
-      </p>
+      <a
+        href="/login"
+        className="mt-10 inline-block w-fit rounded-lg bg-slate-900 px-6 py-3 font-medium text-white hover:bg-slate-700"
+      >
+        Sign in with Google to start
+      </a>
     </main>
   );
 }
