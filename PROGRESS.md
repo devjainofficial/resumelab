@@ -27,7 +27,7 @@ resume from this file alone.
 | 5 Scorer | **DONE** | BUILDLOG "Slice 5": 52 tests — high/low separation with stated reasons, draft refusal |
 | 6 Score repair | **DONE** | BUILDLOG "Slice 6": 59 tests — number gap→question proof, one-line patch isolation, vision normalization |
 | 7 JD enhancer | **DONE** | BUILDLOG "Slice 7": 71 tests — zero-new-facts property, full access-chain proof, atomic RPC live |
-| 8 Billing | not started | — |
+| 8 Billing | **DONE** (Razorpay keys + UPI QR arrive at deploy) | BUILDLOG "Slice 8": 77 tests + live-DB exactly-once grant proof |
 | 9 Outcomes + deploy | not started | — |
 
 ## Decisions made

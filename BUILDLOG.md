@@ -2,6 +2,29 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 8 — Billing (2026-07-20)
+
+**Built:** `app/billing.py` — GET /billing/status (credits, allowance, price,
+available rails); POST /billing/order (Razorpay order + pending payments row;
+503 with UPI guidance until keys configured); POST /billing/webhook/razorpay
+(HMAC-SHA256 signature check on the raw body, approval UPDATE scoped to
+status=pending so replays match zero rows); POST /billing/upi (manual
+reference -> pending row; duplicate reference -> 409). Credit grant itself is
+the slice-1 DB trigger; spend is the slice-7 RPC. Razorpay chosen as
+preferred rail per user decision; UPI QR manual kept as fallback.
+
+**Gate evidence:**
+- pytest (77 passed): forged signature -> 400 with zero writes; valid
+  signature approves; replay is a no-op; unconfigured webhook/order -> 503;
+  UPI duplicate -> 409 and single row; flagged-user-free and paywall cases
+  proven in slice 7's suite.
+- LIVE DB (`scripts/gate_slice8.py`): pending->approved grants exactly 2
+  credits; duplicate approval matches 0 rows; raw re-update does not
+  re-grant; duplicate provider_ref rejected by unique constraint; balance
+  explained by exactly 1 approved payments row. Cleanup left zero rows.
+- Still pending from user (deploy-time): Razorpay account/keys, UPI QR
+  image. Endpoints degrade gracefully until then.
+
 ## Slice 7 — JD enhancer (2026-07-20)
 
 **Built:** `enhancer/enhance.py` — truthful moves only: skills reorder (JD
