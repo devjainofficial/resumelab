@@ -2,6 +2,31 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 3 — Intake wizard (2026-07-20)
+
+**Built:** `wizard/gaps.py` deterministic gap detector (contact completeness,
+role-level inference from career span, section emphasis, top-project pick,
+thin summary/skills, unquantified bullets -> numeric questions, undated
+education) with score-impact ordering and HARD_CAP=10; one flash-lite
+`gap_detect` gateway pass that can reorder/reword but structurally cannot
+add questions (unknown ids are dropped); `POST /wizard/start` creates a
+draft version with a recommended structure (S1-S4 mapping in
+`structures/specs.py`); `POST /wizard/answers` stores non-blank answers as
+user-stated facts.
+
+**Gate evidence (pytest, 34 passed):**
+- Sparse fixture: questions ≤10, ids unique, phone+linkedin asked but NOT
+  email (present in resume — no redundancy), unquantified bullet becomes a
+  number question quoting the bullet, skills/target-role asked, ordered by
+  impact desc.
+- Dense fixture: strictly fewer questions, zero contact questions.
+- Pathological 30-role resume: cap holds at 10.
+- Gateway: exactly one flash-lite call per run, tier `gemini-flash-lite`,
+  logged; identical rerun is a cache hit (0 new calls); adversarial gateway
+  returning an invented question id is filtered out.
+- Endpoints: /wizard/start -> draft version + S3 for fresher signals;
+  blank answers never stored.
+
 ## Slice 2 — Upload + parse (2026-07-20)
 
 **Built:** deterministic extraction (`parsing/extract.py`: pypdf + python-docx)
