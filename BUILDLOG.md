@@ -25,6 +25,18 @@ backend pytest on Python 3.11 with LLM_GATEWAY_MODE=mock).
   → conclusion **success**; jobs "Frontend build" and "Backend tests (mock
   gateway)" both green on Python 3.11 / Node 20.
 
+## Phase 2 — CI/CD end-to-end verification (2026-07-19)
+
+- User linked the repo to Vercel; frontend live at https://resumelabai.vercel.app
+- Push-to-redeploy proven: commit `08aca82` (adds a `<meta name="commit">`
+  deploy stamp) appeared on the live site ~30s after `git push` — verified by
+  polling for the exact SHA in the served HTML.
+- GitHub Actions on the same commit: run 29689272667 → **success**.
+- Supabase project live: `https://zngellmrkdblinlqupbe.supabase.co` responds
+  200 on /auth/v1/health with the publishable key. Saved to frontend/.env.local
+  and backend/.env (both gitignored). Still pending from user: secret key,
+  Google provider enablement, DB password + access token for migrations.
+
 ## Batched questions (answer whenever)
 
 - none yet
