@@ -36,6 +36,8 @@ def merge_answers(parsed: dict, answers: list[dict]) -> tuple[dict, dict[str, st
         if not qid or not answer:
             continue
         answered[qid] = answer
+        if answer == "(skipped)":
+            continue  # closes the gap, contributes no fact
 
         if qid == "contact_email":
             merged["contact"]["email"] = answer

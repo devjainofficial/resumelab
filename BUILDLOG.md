@@ -2,6 +2,29 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 5 — Built-in ATS scorer (2026-07-20)
+
+**Built:** `scoring/scorer.py` — deterministic 0-100 with readable per-check
+breakdown: parse-back fidelity 15, one page 10, standard headings 5, contact
+completeness 15, verb-first 10, ≤40-word bullets 5, verb variety 5,
+quantification (2/3 target) 10, content depth 10 (added: bullets count,
+summary substance, skills breadth — the spec's checks alone let a one-bullet
+resume score 92), JD keyword coverage 10, zero placeholders 5.
+`scoring/keywords.py` deterministic extraction+coverage (reused by slice 7).
+`POST /versions/{id}/score` refuses drafts (409), stores result in `scores`
+(source=internal). Zero LLM tokens anywhere in scoring.
+
+**Gate evidence (pytest, 52 passed):**
+- Dense FINAL scores ≥80 (actual 9x); honest sparse FINAL (skipped metrics)
+  scores 10+ points lower with stated reasons: quantified=0 with "0% carry a
+  number", depth low with bullet count named.
+- Determinism: identical input -> identical result object.
+- JD coverage: matching JD outscores mismatched JD; missing keywords listed
+  in the detail string.
+- Placeholder "[COMPANY]" -> 0 points on that check, marker named in detail.
+- Endpoint: draft -> 409 with wizard guidance, nothing stored; final ->
+  scored + stored with source=internal.
+
 ## Slice 4 — Rewrite + render (2026-07-20)
 
 **Built:** `rewrite/facts.py` (fact store with provenance; answers merge

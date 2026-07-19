@@ -176,5 +176,8 @@ def test_answers_stored_as_facts_blank_dropped():
         },
     )
     assert r.status_code == 200
-    assert r.json() == {"stored": 1}
+    assert r.json() == {"stored": 2}
     assert fake.answers[0]["answer"] == "4"
+    # Blank answer = "fact doesn't exist": stored as an explicit skip so the
+    # gap closes without inventing anything.
+    assert fake.answers[1]["answer"] == "(skipped)"

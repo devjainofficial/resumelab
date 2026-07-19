@@ -24,7 +24,7 @@ resume from this file alone.
 | 2 Upload + parse | **DONE** | BUILDLOG "Slice 2": 27 tests incl. fidelity on 3 fixtures, dedup zero-cost proof |
 | 3 Wizard | **DONE** | BUILDLOG "Slice 3": 34 tests, cap/redundancy/impact-order proofs, LLM cannot inject questions |
 | 4 Rewrite + render | **DONE** | BUILDLOG "Slice 4": 44 tests — 1 page, ≥95% parse-back, zero unsourced facts, lying-LLM rejection |
-| 5 Scorer | not started | — |
+| 5 Scorer | **DONE** | BUILDLOG "Slice 5": 52 tests — high/low separation with stated reasons, draft refusal |
 | 6 Score repair | not started | — |
 | 7 JD enhancer | not started | — |
 | 8 Billing | not started | — |
