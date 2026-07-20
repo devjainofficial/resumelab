@@ -65,8 +65,9 @@ class UsageRecord:
 
 @dataclass
 class Gateway:
-    """Cache -> budget -> model -> log. Stores are in-memory here; the
-    Supabase-backed stores plug in behind the same interface in slice 1+."""
+    """Cache -> budget -> model -> log. Cache/budget stores are in-memory;
+    usage_sink (when set) persists every model call to the llm_usage table —
+    cache hits never reach the sink because they never reach the model."""
 
     per_user_daily_cap: int = field(
         default_factory=lambda: int(os.environ.get("DAILY_TOKEN_CAP_USER", "150000"))
@@ -74,6 +75,7 @@ class Gateway:
     global_daily_cap: int = field(
         default_factory=lambda: int(os.environ.get("DAILY_TOKEN_CAP_GLOBAL", "2000000"))
     )
+    usage_sink: object | None = None  # callable(UsageRecord) -> None
     _cache: dict[tuple[str, str], str] = field(default_factory=dict)
     _usage: list[UsageRecord] = field(default_factory=list)
 
@@ -103,16 +105,20 @@ class Gateway:
 
         result, tokens_in, tokens_out = self._invoke_model(model, task, content)
 
-        self._usage.append(
-            UsageRecord(
-                user_id=user_id,
-                task=task,
-                model=model,
-                tokens_in=tokens_in,
-                tokens_out=tokens_out,
-                day=today,
-            )
+        record = UsageRecord(
+            user_id=user_id,
+            task=task,
+            model=model,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            day=today,
         )
+        self._usage.append(record)
+        if self.usage_sink is not None:
+            try:
+                self.usage_sink(record)  # type: ignore[operator]
+            except Exception:
+                pass  # usage persistence must never break the product path
         self._cache[key] = result
         return result
 

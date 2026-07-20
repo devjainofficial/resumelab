@@ -1,0 +1,31 @@
+# Render blueprint: connect the repo at render.com -> New -> Blueprint.
+# Free tier: sleeps after ~15 min idle, cold start ~30-60s. Set the env vars
+# marked sync:false in the Render dashboard (values live in backend/.env).
+services:
+  - type: web
+    name: resumelab-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LLM_GATEWAY_MODE
+        value: mock  # flip to "real" only after the one-time spend approval
+      - key: DAILY_TOKEN_CAP_USER
+        value: "150000"
+      - key: DAILY_TOKEN_CAP_GLOBAL
+        value: "2000000"
+      - key: FREE_JD_RUNS
+        value: "2"
+      - key: JD_CREDIT_PRICE_INR
+        value: "49"
+      - key: CORS_ORIGINS
+        value: "https://resumelabai.vercel.app,http://localhost:3000"

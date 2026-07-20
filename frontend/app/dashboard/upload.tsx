@@ -11,10 +11,12 @@ type ParsedResume = {
   stats: { bullet_count: number };
 };
 
+type UploadResult = { resume_id: string; parsed: ParsedResume; deduped: boolean };
+
 export function UploadZone() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ parsed: ParsedResume; deduped: boolean } | null>(null);
+  const [result, setResult] = useState<UploadResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function onFile(file: File) {
@@ -82,7 +84,12 @@ export function UploadZone() {
             sections: {result.parsed.flags.sections_found.join(", ") || "none"} ·
             {" "}{result.parsed.stats.bullet_count} bullets
           </p>
-          <p className="mt-2 text-slate-500">Next: the intake wizard (coming in the next slice).</p>
+          <a
+            href={`/resume/${result.resume_id}`}
+            className="mt-3 inline-block rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
+          >
+            Continue to the wizard →
+          </a>
         </div>
       )}
     </div>

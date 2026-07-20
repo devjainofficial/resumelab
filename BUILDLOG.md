@@ -2,6 +2,35 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice 9 — Outcomes, flow UI, deploy prep (2026-07-20)
+
+**Built:** outcomes endpoints (`POST /outcomes`, `PATCH /outcomes/{id}`,
+`GET /outcomes` with version context + latest internal score per version);
+gateway usage sink — every model call now persists to `llm_usage` (cache
+hits never reach the sink, so cached = zero rows, exactly the cost rule);
+full flow UI at `/resume/[id]` (wizard questions -> answers -> compose with
+DRAFT/FINAL badge -> score breakdown -> PDF/DOCX downloads -> score repair
+with before/after -> JD enhancer with paywall rendering -> outcome logging),
+dashboard upload zone links into it; `backend/Dockerfile` (python:3.11-slim,
+multi-arch for Render x86 today and Oracle ARM later, WeasyPrint deps
+included); `render.yaml` blueprint with all env vars declared.
+
+**Gate evidence:**
+- `scripts/gate_e2e.py` — REAL uvicorn + REAL Supabase + mock gateway,
+  throwaway user: **14/14 PASS** — upload; re-upload dedups at zero cost;
+  wizard ≤10 questions; answers stored; compose -> FINAL; score 96 stored;
+  repair before/after; enhance via free_flag lane with coverage report;
+  outcome logged and dashboard row carries the score; PDF magic bytes and
+  DOCX size verified; llm_usage rows: gap_detect/rewrite/jd_enhance (all
+  gemini-flash* tiers) + jd_enhance_run ledger row. Cleanup complete.
+- pytest 77 passed; frontend `next build` green including /resume/[id];
+  local serve verified: / renders all four modes, /dashboard -> 307
+  /login?next=%2Fdashboard, /login renders the Google button.
+
+**Remaining for the finish state (needs user):** Render account + blueprint
+connect, Supabase auth URL config, two-account Google sign-in audit,
+Razorpay keys + UPI QR (billing rails), one-time real-Gemini approval.
+
 ## Slice 8 — Billing (2026-07-20)
 
 **Built:** `app/billing.py` — GET /billing/status (credits, allowance, price,

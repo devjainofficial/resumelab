@@ -28,7 +28,7 @@ resume from this file alone.
 | 6 Score repair | **DONE** | BUILDLOG "Slice 6": 59 tests — number gap→question proof, one-line patch isolation, vision normalization |
 | 7 JD enhancer | **DONE** | BUILDLOG "Slice 7": 71 tests — zero-new-facts property, full access-chain proof, atomic RPC live |
 | 8 Billing | **DONE** (Razorpay keys + UPI QR arrive at deploy) | BUILDLOG "Slice 8": 77 tests + live-DB exactly-once grant proof |
-| 9 Outcomes + deploy | not started | — |
+| 9 Outcomes + deploy | code **DONE**, E2E 14/14 on real DB; deploy blocked on user (Render account, auth URLs, sign-in audit, Razorpay/UPI, real-Gemini approval) | BUILDLOG "Slice 9" |
 
 ## Decisions made
 
