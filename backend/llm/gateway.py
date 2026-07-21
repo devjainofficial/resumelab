@@ -17,7 +17,8 @@ once at startup and caches it; a restart or env override picks up changes.
 
 Supported providers (via LiteLLM):
 - gemini: GEMINI_API_KEY
-- azure: AZURE_API_KEY, AZURE_API_BASE, AZURE_API_VERSION, AZURE_DEPLOYMENT_NAME
+- azure: AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT,
+         AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_NAME
 """
 
 from __future__ import annotations
@@ -105,7 +106,9 @@ class Gateway:
             raise ValueError(f"unknown provider: {self.provider}")
         model_id = models[tier]
         if self.provider == "azure":
-            deployment = os.environ.get("AZURE_DEPLOYMENT_NAME", "gpt-4o-mini")
+            deployment = os.environ.get(
+                "AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-4o-mini"
+            )
             model_id = model_id.replace("{deployment}", deployment)
         return model_id
 
@@ -180,11 +183,20 @@ class LiteLLMGateway(Gateway):
 
         litellm.drop_params = True
 
-        response = litellm.completion(
-            model=model,
-            messages=[{"role": "user", "content": content}],
-            temperature=0.3,
-        )
+        kwargs: dict = {
+            "model": model,
+            "messages": [{"role": "user", "content": content}],
+            "temperature": 0.3,
+        }
+
+        if self.provider == "azure":
+            kwargs["api_key"] = os.environ.get("AZURE_OPENAI_API_KEY", "")
+            kwargs["api_base"] = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+            kwargs["api_version"] = os.environ.get(
+                "AZURE_OPENAI_API_VERSION", "2024-10-21"
+            )
+
+        response = litellm.completion(**kwargs)
 
         result = response.choices[0].message.content or ""
         usage = response.usage
@@ -225,7 +237,7 @@ def get_gateway() -> Gateway:
             raise RuntimeError("provider=gemini requires GEMINI_API_KEY")
         if provider == "azure":
             missing = [
-                k for k in ("AZURE_API_KEY", "AZURE_API_BASE")
+                k for k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT")
                 if not os.environ.get(k)
             ]
             if missing:

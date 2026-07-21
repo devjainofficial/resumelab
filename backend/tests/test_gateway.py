@@ -111,8 +111,8 @@ def test_real_mode_requires_api_key(monkeypatch):
 def test_real_mode_azure_requires_keys(monkeypatch):
     monkeypatch.setenv("LLM_GATEWAY_MODE", "real")
     monkeypatch.setenv("LLM_PROVIDER", "azure")
-    monkeypatch.delenv("AZURE_API_KEY", raising=False)
-    monkeypatch.delenv("AZURE_API_BASE", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
     monkeypatch.delenv("SUPABASE_URL", raising=False)
-    with pytest.raises(RuntimeError, match="AZURE_API_KEY"):
+    with pytest.raises(RuntimeError, match="AZURE_OPENAI_API_KEY"):
         get_gateway()
