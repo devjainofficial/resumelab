@@ -130,7 +130,7 @@ def test_verb_repetition_rewrite_is_truth_checked():
         parsed, answers, gw, "u1", TODAY,
     )
     assert "- Cut infrastructure cost 23% by right-sizing Kubernetes workloads" in out["markdown"]
-    assert gw.calls == [("gemini-flash", "repair")]
+    assert gw.calls == [("gemini/gemini-2.0-flash", "repair")]
 
 
 # ------------------------------------------------------------ screenshot
@@ -151,7 +151,7 @@ def test_screenshot_extraction_normalizes_to_structured_findings():
     assert note is None
     assert [f["category"] for f in findings] == ["quantify", "buzzwords"]
     assert findings[0]["count"] == 6
-    assert gw.calls == [("gemini-flash", "screenshot_extract")]
+    assert gw.calls == [("gemini/gemini-2.0-flash", "screenshot_extract")]
     # Unknown categories from the model are dropped, never acted on.
 
 

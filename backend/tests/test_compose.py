@@ -129,7 +129,7 @@ def test_polish_accepts_truthful_rephrase():
     gw = HonestGateway()
     out = polish_bullets(gw, "u1", md, parsed, [], TODAY)
     assert "- Built Python REST APIs serving 40k requests per minute" in out
-    assert gw.calls == [("gemini-flash", "rewrite")]  # flash tier for rewrites
+    assert gw.calls == [("gemini/gemini-2.0-flash", "rewrite")]  # flash tier for rewrites
 
 
 def test_mock_gateway_leaves_markdown_unchanged():

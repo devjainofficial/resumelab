@@ -40,9 +40,9 @@ def test_cache_is_keyed_by_task_and_content():
 def test_model_tiering():
     gw = make_gateway()
     for task in ("extract", "gap_detect", "question_gen"):
-        assert gw.model_for(task) == "gemini-flash-lite"
+        assert gw.model_for(task) == "gemini/gemini-2.0-flash-lite"
     for task in ("rewrite", "repair", "jd_enhance", "screenshot_extract"):
-        assert gw.model_for(task) == "gemini-flash"
+        assert gw.model_for(task) == "gemini/gemini-2.0-flash"
 
 
 def test_unknown_task_rejected():
@@ -89,7 +89,7 @@ def test_every_model_call_is_logged():
     (rec,) = gw.usage_log
     assert rec.user_id == "u1"
     assert rec.task == "rewrite"
-    assert rec.model == "gemini-flash"
+    assert rec.model == "gemini/gemini-2.0-flash"
     assert rec.tokens_in > 0
 
 
@@ -101,5 +101,18 @@ def test_default_factory_is_mock(monkeypatch):
 def test_real_mode_requires_api_key(monkeypatch):
     monkeypatch.setenv("LLM_GATEWAY_MODE", "real")
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
     with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
+        get_gateway()
+
+
+def test_real_mode_azure_requires_keys(monkeypatch):
+    monkeypatch.setenv("LLM_GATEWAY_MODE", "real")
+    monkeypatch.setenv("LLM_PROVIDER", "azure")
+    monkeypatch.delenv("AZURE_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_API_BASE", raising=False)
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    with pytest.raises(RuntimeError, match="AZURE_API_KEY"):
         get_gateway()

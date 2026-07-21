@@ -84,7 +84,7 @@ def test_refine_goes_through_gateway_and_mock_is_safe():
     refined = refine_questions(gw, "u1", p, qs, TODAY)
 
     assert refined == qs  # mock returns non-JSON -> deterministic set stands
-    assert gw.calls == [("gemini-flash-lite", "gap_detect")]  # tiering respected
+    assert gw.calls == [("gemini/gemini-2.0-flash-lite", "gap_detect")]  # tiering respected
     assert len(gw.usage_log) == 1
 
     # Second run with identical input: cache hit, no new model call.
