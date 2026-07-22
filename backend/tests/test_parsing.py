@@ -131,3 +131,18 @@ def test_parser_never_invents_content():
     for s in all_strings({"contact": p["contact"], "sections": p["sections"]}):
         for piece in s.split():
             assert piece in text, f"invented token: {piece!r}"
+
+
+def test_contact_information_heading_not_in_name():
+    """'Contact Information' should be recognized as a section heading and
+    not bleed into the parsed name."""
+    text = "Dev Jain\nContact Information\ndev@example.com | +91 1234567890"
+    p = parse_resume(text)
+    assert p["contact"]["name"] == "Dev Jain"
+    assert "Contact" not in (p["contact"]["name"] or "")
+
+
+def test_contact_details_heading_not_in_name():
+    text = "Jane Doe\nContact Details\njane@example.com"
+    p = parse_resume(text)
+    assert p["contact"]["name"] == "Jane Doe"

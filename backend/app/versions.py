@@ -10,14 +10,21 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
+from pydantic import BaseModel
+
 from app.auth import get_current_user
 from app.gateway_dep import get_app_gateway
 from app.supa import Supa, get_supa
 from llm.gateway import BudgetExceeded, Gateway
 from rewrite.composer import compose_markdown, polish_bullets
 from rewrite.renderer import render_docx, render_pdf
+from structures.specs import STRUCTURES
 
 router = APIRouter(prefix="/versions", tags=["versions"])
+
+
+class StructureUpdate(BaseModel):
+    structure_id: str
 
 
 async def _owned_version(supa: Supa, user_id: str, version_id: str) -> tuple[dict, dict]:
@@ -35,6 +42,53 @@ async def _owned_version(supa: Supa, user_id: str, version_id: str) -> tuple[dic
     if not resumes:
         raise HTTPException(404, "Version not found")
     return version, resumes[0]
+
+
+@router.get("/structures")
+async def list_structures() -> list[dict]:
+    return [
+        {"id": sid, "name": s["name"], "audience": s["audience"],
+         "section_order": s["section_order"]}
+        for sid, s in STRUCTURES.items()
+    ]
+
+
+@router.patch("/{version_id}/structure")
+async def update_structure(
+    version_id: str,
+    body: StructureUpdate,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    if body.structure_id not in STRUCTURES:
+        raise HTTPException(422, f"Unknown structure: {body.structure_id}")
+    await _owned_version(supa, user["id"], version_id)
+    await supa.update(
+        "versions", {"id": f"eq.{version_id}"},
+        {"structure_id": body.structure_id},
+    )
+    return {"structure_id": body.structure_id}
+
+
+@router.get("/by-resume/{resume_id}")
+async def get_versions_for_resume(
+    resume_id: str,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> list[dict]:
+    resumes = await supa.select(
+        "resumes",
+        {"id": f"eq.{resume_id}", "user_id": f"eq.{user['id']}", "select": "id"},
+    )
+    if not resumes:
+        raise HTTPException(404, "Resume not found")
+    versions = await supa.select(
+        "versions",
+        {"resume_id": f"eq.{resume_id}",
+         "select": "id,structure_id,status,markdown,created_at",
+         "order": "created_at.desc"},
+    )
+    return versions
 
 
 @router.post("/{version_id}/compose")

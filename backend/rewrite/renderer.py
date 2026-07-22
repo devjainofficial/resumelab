@@ -120,12 +120,18 @@ li {
 """
 
 
+def _strip_watermark(markdown: str) -> str:
+    return "\n".join(
+        l for l in markdown.splitlines() if not l.startswith("> DRAFT")
+    )
+
+
 def _markdown_to_html(markdown: str) -> str:
     body: list[str] = []
     in_list = False
     prev_was_h1 = False
 
-    for raw in markdown.splitlines():
+    for raw in _strip_watermark(markdown).splitlines():
         line = raw.rstrip()
 
         if line.startswith("- "):
@@ -206,16 +212,11 @@ def _render_pdf_fpdf(markdown: str) -> bytes:
         pdf.multi_cell(0, height, text, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     prev_was_name = False
-    for raw in markdown.splitlines():
+    for raw in _strip_watermark(markdown).splitlines():
         line = raw.rstrip()
         if not line:
             continue
-        if line.startswith("> "):
-            pdf.set_font("Helvetica", "B", 9)
-            pdf.set_text_color(180, 83, 9)
-            block(safe(_strip_md(line[2:])), 4.5)
-            pdf.set_text_color(26, 26, 26)
-        elif line.startswith("# "):
+        if line.startswith("# "):
             pdf.set_font("Helvetica", "B", 18)
             pdf.set_text_color(10, 10, 10)
             block(safe(line[2:]), 8)
@@ -290,17 +291,11 @@ def render_docx(markdown: str) -> bytes:
     style.paragraph_format.space_before = Pt(0)
 
     prev_was_name = False
-    for raw in markdown.splitlines():
+    for raw in _strip_watermark(markdown).splitlines():
         line = raw.rstrip()
         if not line:
             continue
-        if line.startswith("> "):
-            p = doc.add_paragraph()
-            run = p.add_run(_strip_md(line[2:]))
-            run.bold = True
-            run.font.size = Pt(9)
-            run.font.color.rgb = RGBColor(0xB4, 0x53, 0x09)
-        elif line.startswith("# "):
+        if line.startswith("# "):
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             run = p.add_run(line[2:])

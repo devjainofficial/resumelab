@@ -17,6 +17,12 @@ type Check = {
   max_points: number;
   detail: string;
 };
+type Structure = {
+  id: string;
+  name: string;
+  audience: string;
+  section_order: string[];
+};
 
 const RESUME_FACTS = [
   "Recruiters spend an average of 7.4 seconds on a resume.",
@@ -40,6 +46,18 @@ const NUMBER_HINTS: Record<string, string> = {
   request: "e.g. 10K/day, 1M/month",
   uptime: "e.g. 99.9%",
   deploy: "e.g. 50+ per month",
+};
+
+const SECTION_LABELS: Record<string, string> = {
+  contact: "Contact",
+  summary: "Summary",
+  skills: "Skills",
+  experience: "Experience",
+  projects: "Projects",
+  education: "Education",
+  certifications: "Certifications",
+  core_skills_expanded: "Core Skills",
+  projects_and_internships: "Projects & Internships",
 };
 
 function getHint(question: string): string | null {
@@ -129,7 +147,6 @@ function TypeformWizard({
 
   return (
     <div className="flex min-h-[80vh] flex-col">
-      {/* Progress bar */}
       <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
         <span>
           {current + 1} of {questions.length}
@@ -148,7 +165,6 @@ function TypeformWizard({
         />
       </div>
 
-      {/* Question */}
       <div className="flex flex-1 flex-col items-center justify-center">
         <div className="w-full max-w-lg">
           <p className="mb-1 text-sm font-medium text-slate-400">
@@ -220,7 +236,11 @@ function TypeformWizard({
             </div>
           )}
           <p className="mt-4 text-xs text-slate-400">
-            Press <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium">Enter</kbd> to continue
+            Press{" "}
+            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium">
+              Enter
+            </kbd>{" "}
+            to continue
           </p>
         </div>
       </div>
@@ -228,83 +248,271 @@ function TypeformWizard({
   );
 }
 
-function ResumePreview({ markdown }: { markdown: string }) {
-  const lines = markdown.split("\n");
+function TemplateSelector({
+  structures,
+  selected,
+  onSelect,
+  onContinue,
+}: {
+  structures: Structure[];
+  selected: string;
+  onSelect: (id: string) => void;
+  onContinue: () => void;
+}) {
   return (
-    <div className="resume-preview mx-auto max-w-[680px] rounded-lg border border-slate-200 bg-white px-10 py-8 shadow-md">
-      {lines.map((raw, i) => {
-        const line = raw.trimEnd();
-        if (!line) return null;
-        if (line.startsWith("> "))
+    <div className="flex min-h-[70vh] flex-col items-center justify-center">
+      <div className="w-full max-w-2xl">
+        <h2 className="text-2xl font-bold text-slate-900">
+          Choose a resume template
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          Each template uses the same clean, ATS-friendly format. They differ in
+          section order and emphasis.
+        </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {structures.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onSelect(s.id)}
+              className={`rounded-xl border-2 p-5 text-left transition ${
+                selected === s.id
+                  ? "border-slate-900 bg-slate-50 ring-1 ring-slate-900"
+                  : "border-slate-200 bg-white hover:border-slate-400"
+              }`}
+            >
+              <p className="font-semibold text-slate-900">{s.name}</p>
+              <p className="mt-1 text-xs text-slate-500">{s.audience}</p>
+              <div className="mt-3 flex flex-wrap gap-1">
+                {s.section_order
+                  .filter((sec) => sec !== "contact")
+                  .map((sec) => (
+                    <span
+                      key={sec}
+                      className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600"
+                    >
+                      {SECTION_LABELS[sec] || sec}
+                    </span>
+                  ))}
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={onContinue}
+            className="rounded-xl bg-slate-900 px-8 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700"
+          >
+            Build with this template
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResumePreview({
+  markdown,
+  showDraft,
+}: {
+  markdown: string;
+  showDraft?: boolean;
+}) {
+  const lines = markdown.split("\n");
+  let prevWasH1 = false;
+
+  return (
+    <div className="resume-preview mx-auto max-w-[680px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
+      <div className="px-10 py-8">
+        {lines.map((raw, i) => {
+          const line = raw.trimEnd();
+          if (!line) {
+            prevWasH1 = false;
+            return null;
+          }
+
+          if (line.startsWith("> ")) {
+            prevWasH1 = false;
+            if (!showDraft) return null;
+            return (
+              <p
+                key={i}
+                className="mb-4 border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700"
+              >
+                {line.slice(2).replace(/\*\*/g, "")}
+              </p>
+            );
+          }
+
+          if (line.startsWith("# ")) {
+            prevWasH1 = true;
+            return (
+              <h1
+                key={i}
+                className="text-[18px] font-bold leading-tight tracking-wide text-slate-900"
+              >
+                {line.slice(2)}
+              </h1>
+            );
+          }
+
+          if (prevWasH1 && line.includes("|")) {
+            prevWasH1 = false;
+            return (
+              <div key={i} className="mb-1 border-b-2 border-slate-800 pb-2">
+                <p className="text-[9px] leading-relaxed text-slate-500">
+                  {line.replace(/\*\*/g, "")}
+                </p>
+              </div>
+            );
+          }
+
+          prevWasH1 = false;
+
+          if (line.startsWith("## ")) {
+            return (
+              <h2
+                key={i}
+                className="mb-1 mt-5 border-b border-slate-300 pb-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-700"
+              >
+                {line.slice(3)}
+              </h2>
+            );
+          }
+
+          if (line.startsWith("- ")) {
+            const bullet = line
+              .slice(2)
+              .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+            return (
+              <li
+                key={i}
+                className="ml-4 list-disc text-[10px] leading-[1.6] text-slate-700"
+                dangerouslySetInnerHTML={{ __html: bullet }}
+              />
+            );
+          }
+
+          if (line.startsWith("**")) {
+            const text = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+            return (
+              <p
+                key={i}
+                className="mt-2 text-[10px] leading-snug text-slate-800"
+                dangerouslySetInnerHTML={{ __html: text }}
+              />
+            );
+          }
+
+          const text = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
           return (
             <p
               key={i}
-              className="mb-3 border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700"
-            >
-              {line.slice(2).replace(/\*\*/g, "")}
-            </p>
-          );
-        if (line.startsWith("# "))
-          return (
-            <h1 key={i} className="mb-0.5 text-xl font-bold text-slate-900">
-              {line.slice(2)}
-            </h1>
-          );
-        if (line.startsWith("## "))
-          return (
-            <h2
-              key={i}
-              className="mb-1.5 mt-4 border-b border-slate-300 pb-0.5 text-xs font-bold uppercase tracking-widest text-slate-700"
-            >
-              {line.slice(3)}
-            </h2>
-          );
-        if (line.startsWith("- ")) {
-          const bullet = line
-            .slice(2)
-            .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-          return (
-            <li
-              key={i}
-              className="ml-4 list-disc text-[11px] leading-relaxed text-slate-800"
-              dangerouslySetInnerHTML={{ __html: bullet }}
-            />
-          );
-        }
-        const text = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-        if (line.includes("|")) {
-          return (
-            <p
-              key={i}
-              className="text-[10px] text-slate-600"
+              className="text-[10px] leading-[1.5] text-slate-700"
               dangerouslySetInnerHTML={{ __html: text }}
             />
           );
-        }
-        return (
-          <p
-            key={i}
-            className="text-[11px] leading-relaxed text-slate-800"
-            dangerouslySetInnerHTML={{ __html: text }}
-          />
-        );
-      })}
+        })}
+      </div>
+    </div>
+  );
+}
+
+function OriginalResumeView({ parsed }: { parsed: any }) {
+  if (!parsed) return null;
+  const { contact, sections } = parsed;
+
+  return (
+    <div className="mx-auto max-w-[680px] rounded-lg border border-slate-200 bg-slate-50 px-8 py-6">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        Your uploaded resume
+      </p>
+      {contact?.name && (
+        <p className="text-lg font-bold text-slate-900">{contact.name}</p>
+      )}
+      <p className="text-xs text-slate-500">
+        {[contact?.email, contact?.phone, contact?.linkedin]
+          .filter(Boolean)
+          .join(" | ")}
+      </p>
+
+      {sections?.summary && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Summary
+          </p>
+          <p className="text-xs text-slate-700">{sections.summary}</p>
+        </div>
+      )}
+
+      {sections?.skills?.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Skills
+          </p>
+          <p className="text-xs text-slate-700">
+            {sections.skills.join(", ")}
+          </p>
+        </div>
+      )}
+
+      {sections?.experience?.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Experience
+          </p>
+          {sections.experience.map((e: any, i: number) => (
+            <div key={i} className="mt-1">
+              <p className="text-xs font-semibold text-slate-800">
+                {e.header?.join(" | ")}
+              </p>
+              {e.bullets?.map((b: string, j: number) => (
+                <p key={j} className="ml-3 text-xs text-slate-600">
+                  - {b}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {sections?.education?.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Education
+          </p>
+          {sections.education.map((e: any, i: number) => (
+            <p key={i} className="text-xs text-slate-700">
+              {e.header?.join(" | ")}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export function Flow({ resumeId }: { resumeId: string }) {
   const [step, setStep] = useState<
-    "start" | "loading" | "wizard" | "composing" | "version"
-  >("start");
+    | "init"
+    | "start"
+    | "loading"
+    | "wizard"
+    | "template"
+    | "composing"
+    | "version"
+  >("init");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingMsg, setLoadingMsg] = useState("Analyzing your resume...");
 
   const [versionId, setVersionId] = useState<string | null>(null);
+  const [structureId, setStructureId] = useState<string>("S1");
+  const [structures, setStructures] = useState<Structure[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [status, setStatus] = useState<string>("draft");
   const [markdown, setMarkdown] = useState<string>("");
+  const [parsedResume, setParsedResume] = useState<any>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
   const [score, setScore] = useState<{
     value: number;
     checks: Check[];
@@ -316,6 +524,46 @@ export function Flow({ resumeId }: { resumeId: string }) {
   const [paywall, setPaywall] = useState<any>(null);
   const [outcomeSentTo, setOutcomeSentTo] = useState("");
   const [outcomeLogged, setOutcomeLogged] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function init() {
+      try {
+        const [existingVersions, structs] = await Promise.all([
+          api(`/versions/by-resume/${resumeId}`),
+          api("/versions/structures"),
+        ]);
+        if (cancelled) return;
+        setStructures(structs);
+
+        const latest = existingVersions?.[0];
+        if (latest?.markdown) {
+          setVersionId(latest.id);
+          setStructureId(latest.structure_id);
+          setStatus(latest.status);
+          setMarkdown(latest.markdown);
+          setStep("version");
+        } else if (latest) {
+          setVersionId(latest.id);
+          setStructureId(latest.structure_id);
+          setStep("start");
+        } else {
+          setStep("start");
+        }
+
+        const resumes = await api(`/resumes/${resumeId}`).catch(() => null);
+        if (resumes?.parsed_json) {
+          setParsedResume(resumes.parsed_json);
+        }
+      } catch {
+        if (!cancelled) setStep("start");
+      }
+    }
+    init();
+    return () => {
+      cancelled = true;
+    };
+  }, [resumeId]);
 
   async function run(label: string, fn: () => Promise<void>) {
     setBusy(label);
@@ -350,36 +598,42 @@ export function Flow({ resumeId }: { resumeId: string }) {
         body: JSON.stringify({ resume_id: resumeId }),
       });
       setVersionId(r.version_id);
+      setStructureId(r.structure_id);
       setQuestions(r.questions);
       if (r.questions.length) {
         setStep("wizard");
       } else {
-        setStep("composing");
-        setLoadingMsg("Building your resume...");
-        await compose(r.version_id);
+        setStep("template");
       }
     });
 
   const handleWizardComplete = (answers: Record<string, string>) => {
     run("answers", async () => {
-      setStep("composing");
-      setLoadingMsg("Crafting your resume with your answers...");
-      const filtered = questions
-        .filter((q) => answers[q.id]?.trim())
-        .map((q) => ({
-          id: q.id,
-          question: q.question,
-          answer: answers[q.id],
-        }));
-      if (filtered.length) {
-        await api("/wizard/answers", {
-          method: "POST",
-          body: JSON.stringify({ version_id: versionId, answers: filtered }),
-        });
-      }
-      await compose(versionId!);
+      setStep("loading");
+      setLoadingMsg("Saving your answers...");
+      const allAnswers = questions.map((q) => ({
+        id: q.id,
+        question: q.question,
+        answer: answers[q.id]?.trim() || "",
+      }));
+      await api("/wizard/answers", {
+        method: "POST",
+        body: JSON.stringify({ version_id: versionId, answers: allAnswers }),
+      });
+      setStep("template");
     });
   };
+
+  const handleTemplateSelect = () =>
+    run("template", async () => {
+      setStep("composing");
+      setLoadingMsg("Building your resume...");
+      await api(`/versions/${versionId}/structure`, {
+        method: "PATCH",
+        body: JSON.stringify({ structure_id: structureId }),
+      });
+      await compose(versionId!);
+    });
 
   async function compose(vid: string) {
     const r = await api(`/versions/${vid}/compose`, { method: "POST" });
@@ -389,6 +643,13 @@ export function Flow({ resumeId }: { resumeId: string }) {
     setStep("version");
     setScore(null);
   }
+
+  const recompose = () =>
+    run("recompose", async () => {
+      setStep("composing");
+      setLoadingMsg("Rebuilding with new template...");
+      await compose(versionId!);
+    });
 
   const getScore = () =>
     run("score", async () => {
@@ -459,7 +720,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <div className="flex items-center justify-between py-4">
         <h1 className="text-lg font-bold text-slate-900">Resume Lab</h1>
         <Link
@@ -476,7 +736,10 @@ export function Flow({ resumeId }: { resumeId: string }) {
         </p>
       )}
 
-      {/* Step: Start */}
+      {/* Init: loading state */}
+      {step === "init" && <LoadingScreen message="Loading your resume..." />}
+
+      {/* Start */}
       {step === "start" && (
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <div className="max-w-md">
@@ -484,8 +747,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
               Let&apos;s build your resume
             </h2>
             <p className="mt-3 text-slate-500">
-              We&apos;ll ask a few quick questions to fill in the gaps. Nothing
-              is ever invented — every fact comes from you.
+              We&apos;ll ask a few quick questions to fill in the gaps, then you
+              pick a template. Nothing is ever invented — every fact comes from
+              you.
             </p>
             <button
               onClick={startWizard}
@@ -498,12 +762,12 @@ export function Flow({ resumeId }: { resumeId: string }) {
         </div>
       )}
 
-      {/* Step: Loading */}
+      {/* Loading / Composing */}
       {(step === "loading" || step === "composing") && (
         <LoadingScreen message={loadingMsg} />
       )}
 
-      {/* Step: Wizard (Typeform style) */}
+      {/* Wizard */}
       {step === "wizard" && (
         <TypeformWizard
           questions={questions}
@@ -511,7 +775,17 @@ export function Flow({ resumeId }: { resumeId: string }) {
         />
       )}
 
-      {/* Step: Version (resume result) */}
+      {/* Template selection */}
+      {step === "template" && (
+        <TemplateSelector
+          structures={structures}
+          selected={structureId}
+          onSelect={setStructureId}
+          onContinue={handleTemplateSelect}
+        />
+      )}
+
+      {/* Version result */}
       {step === "version" && (
         <div className="space-y-6 pb-16">
           {/* Action bar */}
@@ -531,16 +805,40 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 disabled={!!busy}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
               >
-                {busy === "pdf" ? "..." : "Download PDF"}
+                {busy === "pdf" ? "..." : "PDF"}
               </button>
               <button
                 onClick={() => download("docx")}
                 disabled={!!busy}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
               >
-                {busy === "docx" ? "..." : "Download DOCX"}
+                {busy === "docx" ? "..." : "DOCX"}
               </button>
             </div>
+
+            {/* Template switcher */}
+            <select
+              value={structureId}
+              onChange={async (e) => {
+                const newId = e.target.value;
+                setStructureId(newId);
+                await run("template-switch", async () => {
+                  await api(`/versions/${versionId}/structure`, {
+                    method: "PATCH",
+                    body: JSON.stringify({ structure_id: newId }),
+                  });
+                });
+                recompose();
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            >
+              {structures.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+
             <button
               onClick={getScore}
               disabled={status !== "final" || !!busy}
@@ -551,8 +849,24 @@ export function Flow({ resumeId }: { resumeId: string }) {
             </button>
           </div>
 
+          {/* Original resume toggle */}
+          {parsedResume && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowOriginal(!showOriginal)}
+                className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700"
+              >
+                {showOriginal
+                  ? "Hide original resume"
+                  : "Show original uploaded resume"}
+              </button>
+            </div>
+          )}
+
+          {showOriginal && <OriginalResumeView parsed={parsedResume} />}
+
           {/* Resume preview */}
-          <ResumePreview markdown={markdown} />
+          <ResumePreview markdown={markdown} showDraft={status === "draft"} />
 
           {/* ATS Score */}
           {score && (
@@ -614,12 +928,11 @@ export function Flow({ resumeId }: { resumeId: string }) {
           {/* Score Repair + JD Enhance + Outcomes */}
           {status === "final" && (
             <div className="mx-auto max-w-[680px] space-y-6">
-              {/* Score repair */}
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-base font-semibold">Score Repair</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Paste findings from an external checker. Fixes are targeted
-                  — never a blind rewrite. Missing numbers become questions.
+                  Paste findings from an external checker. Fixes are targeted —
+                  never a blind rewrite. Missing numbers become questions.
                 </p>
                 <textarea
                   className="mt-3 w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
@@ -649,7 +962,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 )}
               </div>
 
-              {/* JD Enhance */}
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-base font-semibold">
                   Tailor to a Job Description
@@ -666,7 +978,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   disabled={jdText.trim().length < 30 || !!busy}
                   className="mt-2 rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40"
                 >
-                  {busy === "enhance" ? "Tailoring..." : "Create Tailored Variant"}
+                  {busy === "enhance"
+                    ? "Tailoring..."
+                    : "Create Tailored Variant"}
                 </button>
                 {paywall && (
                   <div className="mt-3 rounded-lg bg-amber-50 p-4 text-sm">
@@ -696,7 +1010,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 )}
               </div>
 
-              {/* Outcome tracking */}
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-base font-semibold">
                   Track Where This Went

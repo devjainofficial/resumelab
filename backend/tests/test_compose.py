@@ -164,9 +164,11 @@ def test_docx_renders_and_contains_content():
     assert "FinEdge Payments" in text or "Senior Software Engineer" in text
 
 
-def test_draft_pdf_carries_visible_watermark():
+def test_draft_pdf_omits_watermark():
+    """DRAFT watermark is shown in the web preview only, never in PDF/DOCX."""
     parsed = parsed_fixture("resume_sparse.txt")
     md, status, _ = compose_markdown(parsed, [], "S3")
     assert status == "draft"
+    assert "> DRAFT" in md
     extracted = extract_text_from_pdf(render_pdf(md))
-    assert "DRAFT" in extracted
+    assert "DRAFT" not in extracted

@@ -84,6 +84,22 @@ async def upload_resume(
     return {"resume_id": row["id"], "parsed": parsed, "deduped": False}
 
 
+@router.get("/{resume_id}")
+async def get_resume(
+    resume_id: str,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    rows = await supa.select(
+        "resumes",
+        {"id": f"eq.{resume_id}", "user_id": f"eq.{user['id']}",
+         "select": "id,filename,parsed_json,created_at"},
+    )
+    if not rows:
+        raise HTTPException(404, "Resume not found")
+    return rows[0]
+
+
 @router.get("")
 async def list_resumes(
     user: dict = Depends(get_current_user),

@@ -19,6 +19,7 @@ SECTION_ALIASES: dict[str, list[str]] = {
     "education": ["education", "academics", "academic background", "qualifications"],
     "projects": ["projects", "personal projects", "side projects", "projects and internships", "academic projects"],
     "certifications": ["certifications", "certificates", "licenses", "licenses and certifications", "achievements"],
+    "_contact": ["contact information", "contact details", "personal information", "personal details"],
 }
 
 _ALIAS_TO_SECTION = {
