@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./signout-button";
 import { UploadZone } from "./upload";
+import { ResumeHistory } from "./history";
 
 export default async function Dashboard() {
   const supabase = createClient();
@@ -55,6 +56,7 @@ export default async function Dashboard() {
       </div>
 
       <UploadZone />
+      <ResumeHistory />
     </main>
   );
 }
