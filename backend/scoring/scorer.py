@@ -68,11 +68,13 @@ def _verb_first(bullet: str) -> bool:
     return first in ACTION_VERB_HINTS or first.endswith("ed")
 
 
-def score_resume(markdown: str, jd_text: str | None = None) -> dict:
+def score_resume(
+    markdown: str, jd_text: str | None = None, structure_id: str = "S1"
+) -> dict:
     """Score a FINAL markdown. Returns {value, checks: [...]}. Deterministic:
     same input -> same score, zero LLM tokens."""
     checks: list[Check] = []
-    pdf = render_pdf(markdown)
+    pdf = render_pdf(markdown, structure_id)
     pdf_text = extract_text_from_pdf(pdf)
 
     # 1. Parse-back fidelity (15)

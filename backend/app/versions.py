@@ -17,7 +17,7 @@ from app.gateway_dep import get_app_gateway
 from app.supa import Supa, get_supa
 from llm.gateway import BudgetExceeded, Gateway
 from rewrite.composer import compose_markdown, polish_bullets
-from rewrite.renderer import render_docx, render_pdf
+from rewrite.renderer import render_docx, render_pdf, render_preview_html
 from structures.specs import STRUCTURES
 
 router = APIRouter(prefix="/versions", tags=["versions"])
@@ -48,6 +48,7 @@ async def _owned_version(supa: Supa, user_id: str, version_id: str) -> tuple[dic
 async def list_structures() -> list[dict]:
     return [
         {"id": sid, "name": s["name"], "audience": s["audience"],
+         "template": s.get("template", "classic"),
          "section_order": s["section_order"]}
         for sid, s in STRUCTURES.items()
     ]
@@ -124,6 +125,22 @@ async def compose_version(
     }
 
 
+@router.get("/{version_id}/preview")
+async def preview_version(
+    version_id: str,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> Response:
+    """Full HTML page for the browser iframe. Same HTML that produces the PDF,
+    so the preview is pixel-identical to the download (minus the watermark
+    which the download strips)."""
+    version, _ = await _owned_version(supa, user["id"], version_id)
+    if not version["markdown"]:
+        raise HTTPException(409, "Compose this version first")
+    html_doc = render_preview_html(version["markdown"], version["structure_id"])
+    return Response(html_doc, media_type="text/html; charset=utf-8")
+
+
 @router.get("/{version_id}/download/{fmt}")
 async def download_version(
     version_id: str,
@@ -137,7 +154,7 @@ async def download_version(
 
     if fmt == "pdf":
         return Response(
-            render_pdf(version["markdown"]),
+            render_pdf(version["markdown"], version["structure_id"]),
             media_type="application/pdf",
             headers={"Content-Disposition": 'attachment; filename="resume.pdf"'},
         )

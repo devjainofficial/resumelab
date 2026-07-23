@@ -1,14 +1,15 @@
-"""Render markdown -> PDF + DOCX. Professional single-column layout using the
-reference structure templates: standard headings, 10-12pt font, one page,
-text-selectable, no tables/graphics/icons.
+"""Render composed markdown to preview HTML, PDF, and DOCX.
 
-PDF engine: WeasyPrint when its native libraries are available (CI, Docker,
-production); otherwise a deterministic fpdf2 fallback.
+Per-template renderers live in `rewrite.templates`. Each template produces
+a complete HTML+CSS document; WeasyPrint converts that same HTML to PDF so
+the download is pixel-identical to the browser preview.
+
+fpdf2 remains as a bare-bones fallback when WeasyPrint's native libraries
+are unavailable (Windows dev without GTK). It emits a legible plain PDF.
 """
 
 from __future__ import annotations
 
-import html
 import io
 import re
 
@@ -20,8 +21,11 @@ except Exception:  # pragma: no cover
     WEASYPRINT_AVAILABLE = False
 
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Inches, Pt, RGBColor
+
+from rewrite.templates import render_html
+from structures.specs import STRUCTURES
 
 BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 
@@ -30,173 +34,41 @@ def _strip_md(line: str) -> str:
     return BOLD_RE.sub(r"\1", line)
 
 
-# ------------------------------------------------------------------- PDF
-
-_CSS = """
-@page {
-  size: A4;
-  margin: 12mm 14mm 12mm 14mm;
-}
-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 10pt;
-  line-height: 1.3;
-  color: #1a1a1a;
-  margin: 0;
-  padding: 0;
-}
-h1 {
-  font-size: 18pt;
-  font-weight: 700;
-  margin: 0 0 1pt 0;
-  color: #0a0a0a;
-  letter-spacing: 0.02em;
-}
-.contact {
-  font-size: 9pt;
-  color: #555;
-  margin: 0 0 6pt 0;
-  padding-bottom: 6pt;
-  border-bottom: 1.5pt solid #222;
-}
-h2 {
-  font-size: 10pt;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #222;
-  margin: 8pt 0 3pt 0;
-  padding-bottom: 1.5pt;
-  border-bottom: 0.5pt solid #ccc;
-}
-.entry-header {
-  font-size: 10pt;
-  margin: 4pt 0 1pt 0;
-  line-height: 1.25;
-}
-.entry-header b {
-  font-weight: 700;
-}
-.entry-header .right {
-  float: right;
-  font-weight: 400;
-  font-size: 9pt;
-  color: #555;
-}
-p {
-  margin: 0 0 2pt 0;
-  font-size: 10pt;
-}
-.summary {
-  font-size: 9.5pt;
-  color: #333;
-  margin: 0 0 2pt 0;
-  line-height: 1.35;
-}
-.skills {
-  font-size: 9.5pt;
-  color: #333;
-  margin: 0 0 2pt 0;
-  line-height: 1.35;
-}
-ul {
-  margin: 0 0 2pt 13pt;
-  padding: 0;
-}
-li {
-  font-size: 9.5pt;
-  margin: 0 0 1pt 0;
-  line-height: 1.3;
-  color: #222;
-}
-.watermark {
-  color: #b45309;
-  font-weight: bold;
-  border: 1pt solid #b45309;
-  padding: 3pt 6pt;
-  margin-bottom: 6pt;
-  font-size: 9pt;
-}
-"""
-
-
 def _strip_watermark(markdown: str) -> str:
     return "\n".join(
         l for l in markdown.splitlines() if not l.startswith("> DRAFT")
     )
 
 
-def _markdown_to_html(markdown: str) -> str:
-    body: list[str] = []
-    in_list = False
-    prev_was_h1 = False
-
-    for raw in _strip_watermark(markdown).splitlines():
-        line = raw.rstrip()
-
-        if line.startswith("- "):
-            if not in_list:
-                body.append("<ul>")
-                in_list = True
-            body.append(f"<li>{_inline(line[2:])}</li>")
-            prev_was_h1 = False
-            continue
-
-        if in_list:
-            body.append("</ul>")
-            in_list = False
-
-        if not line:
-            continue
-
-        if line.startswith("> "):
-            body.append(f'<p class="watermark">{_inline(line[2:])}</p>')
-        elif line.startswith("# "):
-            body.append(f"<h1>{_inline(line[2:])}</h1>")
-            prev_was_h1 = True
-            continue
-        elif line.startswith("## "):
-            section = line[3:].strip()
-            body.append(f"<h2>{html.escape(section)}</h2>")
-        elif prev_was_h1 and "|" in line:
-            body.append(
-                f'<p class="contact">{_inline(line)}</p>'
-            )
-        elif line.startswith("**"):
-            body.append(f'<p class="entry-header">{_inline(line)}</p>')
-        elif any(
-            line.lower().startswith(w)
-            for w in ("summary", "skills", "core")
-        ):
-            body.append(f'<p class="skills">{_inline(line)}</p>')
-        else:
-            is_after_heading = len(body) > 0 and any(
-                body[-1].startswith(t) for t in ("<h2", '<p class="contact"')
-            )
-            cls = "summary" if is_after_heading else ""
-            if cls:
-                body.append(f'<p class="{cls}">{_inline(line)}</p>')
-            else:
-                body.append(f"<p>{_inline(line)}</p>")
-
-        prev_was_h1 = False
-
-    if in_list:
-        body.append("</ul>")
-
-    return f"<html><head><style>{_CSS}</style></head><body>{''.join(body)}</body></html>"
+def _template_key(structure_id: str) -> str:
+    spec = STRUCTURES.get(structure_id, STRUCTURES["S1"])
+    return spec.get("template", "classic")
 
 
-def _inline(text: str) -> str:
-    escaped = html.escape(text)
-    return BOLD_RE.sub(r"<b>\1</b>", escaped)
+# ------------------------------------------------------------------- HTML
 
 
-def _render_pdf_weasyprint(markdown: str) -> bytes:  # pragma: no cover
-    return HTML(string=_markdown_to_html(markdown)).write_pdf()
+def render_preview_html(markdown: str, structure_id: str) -> str:
+    """Full HTML document for the browser iframe preview. Shows the DRAFT
+    watermark if the markdown carries one."""
+    watermark = any(
+        l.startswith("> DRAFT") for l in markdown.splitlines()
+    )
+    return render_html(_template_key(structure_id), markdown, watermark=watermark)
+
+
+# -------------------------------------------------------------------- PDF
+
+
+def _render_pdf_weasyprint(markdown: str, structure_id: str) -> bytes:  # pragma: no cover
+    # Watermark NEVER in downloads — only preview.
+    html_doc = render_html(_template_key(structure_id), markdown, watermark=False)
+    return HTML(string=html_doc).write_pdf()
 
 
 def _render_pdf_fpdf(markdown: str) -> bytes:
+    """Fallback used only when WeasyPrint isn't available (Windows dev).
+    Produces a legible-but-plain PDF regardless of template."""
     from fpdf import FPDF
     from fpdf.enums import XPos, YPos
 
@@ -226,9 +98,7 @@ def _render_pdf_fpdf(markdown: str) -> bytes:
             pdf.ln(2)
             pdf.set_font("Helvetica", "B", 10)
             pdf.set_text_color(34, 34, 34)
-            heading = safe(line[3:].upper())
-            block(heading, 5)
-            # draw underline
+            block(safe(line[3:].upper()), 5)
             y = pdf.get_y()
             pdf.set_draw_color(200, 200, 200)
             pdf.line(14, y, 196, y)
@@ -237,7 +107,6 @@ def _render_pdf_fpdf(markdown: str) -> bytes:
             pdf.set_font("Helvetica", "", 9)
             pdf.set_text_color(85, 85, 85)
             block(safe(_strip_md(line)), 4)
-            # thick divider after contact
             y = pdf.get_y() + 1
             pdf.set_draw_color(34, 34, 34)
             pdf.set_line_width(0.5)
@@ -264,9 +133,9 @@ def _render_pdf_fpdf(markdown: str) -> bytes:
     return bytes(pdf.output())
 
 
-def render_pdf(markdown: str) -> bytes:
+def render_pdf(markdown: str, structure_id: str = "S1") -> bytes:
     if WEASYPRINT_AVAILABLE:  # pragma: no cover
-        return _render_pdf_weasyprint(markdown)
+        return _render_pdf_weasyprint(markdown, structure_id)
     return _render_pdf_fpdf(markdown)
 
 
@@ -274,9 +143,10 @@ def render_pdf(markdown: str) -> bytes:
 
 
 def render_docx(markdown: str) -> bytes:
+    """Structural DOCX — deliberately simpler than the visual templates so
+    ATS parsers reliably extract text. All templates share this DOCX."""
     doc = Document()
 
-    # Set narrow margins
     for section in doc.sections:
         section.top_margin = Inches(0.5)
         section.bottom_margin = Inches(0.5)
@@ -313,7 +183,6 @@ def render_docx(markdown: str) -> bytes:
             run.bold = True
             run.font.size = Pt(10)
             run.font.color.rgb = RGBColor(0x22, 0x22, 0x22)
-            # Add bottom border via paragraph format
             from docx.oxml.ns import qn
             pPr = p._element.get_or_add_pPr()
             pBdr = pPr.makeelement(qn("w:pBdr"), {})

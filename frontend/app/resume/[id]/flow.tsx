@@ -147,18 +147,13 @@ function TypeformWizard({
 
   return (
     <div className="flex min-h-[80vh] flex-col">
-      <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-        <span>
+      <div className="mb-3 flex items-center justify-between text-xs text-slate-500">
+        <span className="font-medium">
           {current + 1} of {questions.length}
         </span>
-        <button
-          onClick={handleSkip}
-          className="rounded px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-        >
-          Skip
-        </button>
+        <span>{Math.round(progress)}% complete</span>
       </div>
-      <div className="mb-12 h-1 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-12 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
           className="h-full rounded-full bg-slate-900 transition-all duration-500"
           style={{ width: `${progress}%` }}
@@ -182,7 +177,6 @@ function TypeformWizard({
                     key={o}
                     onClick={() => {
                       setAnswers({ ...answers, [q.id]: o });
-                      setTimeout(handleNext, 200);
                     }}
                     className={`block w-full rounded-xl border-2 px-5 py-3.5 text-left text-sm font-medium transition ${
                       answers[q.id] === o
@@ -202,8 +196,8 @@ function TypeformWizard({
                   type="text"
                   placeholder={
                     q.kind === "number"
-                      ? "Type a number, or skip if none exists"
-                      : "Type your answer..."
+                      ? "Type a number — or Skip if none exists"
+                      : "Type your answer — or Skip if you'd rather not"
                   }
                   value={answers[q.id] ?? ""}
                   onChange={(e) =>
@@ -217,30 +211,37 @@ function TypeformWizard({
             )}
           </div>
 
-          {q.kind !== "mc" && (
-            <div className="mt-8 flex gap-3">
-              {current > 0 && (
-                <button
-                  onClick={() => setCurrent((c) => c - 1)}
-                  className="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-                >
-                  Back
-                </button>
-              )}
+          {/* Action row: Back | Skip (prominent) | Next/Finish */}
+          <div className="mt-10 flex items-center gap-3">
+            {current > 0 && (
               <button
-                onClick={handleNext}
-                className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700"
+                onClick={() => setCurrent((c) => c - 1)}
+                className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
               >
-                {isLast ? "Finish" : "Next"}
+                ← Back
               </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={handleSkip}
+              className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+            >
+              Skip this question
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={q.kind === "mc" && !answers[q.id]}
+              className="ml-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isLast ? "Finish →" : "Next →"}
+            </button>
+          </div>
+
           <p className="mt-4 text-xs text-slate-400">
             Press{" "}
             <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium">
               Enter
             </kbd>{" "}
-            to continue
+            to continue, or click Skip if you don't have this info.
           </p>
         </div>
       </div>
@@ -311,108 +312,72 @@ function TemplateSelector({
 }
 
 function ResumePreview({
-  markdown,
-  showDraft,
+  versionId,
+  refreshKey,
 }: {
-  markdown: string;
-  showDraft?: boolean;
+  versionId: string;
+  refreshKey: number;
 }) {
-  const lines = markdown.split("\n");
-  let prevWasH1 = false;
+  const [html, setHtml] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const resp = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+          }/versions/${versionId}/preview`,
+          { headers: { Authorization: `Bearer ${session?.access_token}` } }
+        );
+        if (!resp.ok) throw new Error("Preview failed");
+        const text = await resp.text();
+        if (!cancelled) setHtml(text);
+      } catch {
+        if (!cancelled) setHtml("");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [versionId, refreshKey]);
 
   return (
-    <div className="resume-preview mx-auto max-w-[680px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
-      <div className="px-10 py-8">
-        {lines.map((raw, i) => {
-          const line = raw.trimEnd();
-          if (!line) {
-            prevWasH1 = false;
-            return null;
-          }
-
-          if (line.startsWith("> ")) {
-            prevWasH1 = false;
-            if (!showDraft) return null;
-            return (
-              <p
-                key={i}
-                className="mb-4 border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700"
-              >
-                {line.slice(2).replace(/\*\*/g, "")}
-              </p>
-            );
-          }
-
-          if (line.startsWith("# ")) {
-            prevWasH1 = true;
-            return (
-              <h1
-                key={i}
-                className="text-[18px] font-bold leading-tight tracking-wide text-slate-900"
-              >
-                {line.slice(2)}
-              </h1>
-            );
-          }
-
-          if (prevWasH1 && line.includes("|")) {
-            prevWasH1 = false;
-            return (
-              <div key={i} className="mb-1 border-b-2 border-slate-800 pb-2">
-                <p className="text-[9px] leading-relaxed text-slate-500">
-                  {line.replace(/\*\*/g, "")}
-                </p>
-              </div>
-            );
-          }
-
-          prevWasH1 = false;
-
-          if (line.startsWith("## ")) {
-            return (
-              <h2
-                key={i}
-                className="mb-1 mt-5 border-b border-slate-300 pb-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-700"
-              >
-                {line.slice(3)}
-              </h2>
-            );
-          }
-
-          if (line.startsWith("- ")) {
-            const bullet = line
-              .slice(2)
-              .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-            return (
-              <li
-                key={i}
-                className="ml-4 list-disc text-[10px] leading-[1.6] text-slate-700"
-                dangerouslySetInnerHTML={{ __html: bullet }}
-              />
-            );
-          }
-
-          if (line.startsWith("**")) {
-            const text = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-            return (
-              <p
-                key={i}
-                className="mt-2 text-[10px] leading-snug text-slate-800"
-                dangerouslySetInnerHTML={{ __html: text }}
-              />
-            );
-          }
-
-          const text = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-          return (
-            <p
-              key={i}
-              className="text-[10px] leading-[1.5] text-slate-700"
-              dangerouslySetInnerHTML={{ __html: text }}
-            />
-          );
-        })}
+    <div className="mx-auto max-w-[820px]">
+      <div
+        className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+        style={{ aspectRatio: "1 / 1.414" /* A4 */ }}
+      >
+        {loading ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
+          </div>
+        ) : html ? (
+          <iframe
+            srcDoc={html}
+            title="Resume preview"
+            className="h-full w-full"
+            sandbox=""
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+            Preview unavailable
+          </div>
+        )}
       </div>
+      <p className="mt-2 text-center text-xs text-slate-400">
+        This preview matches your downloaded PDF exactly.
+      </p>
     </div>
   );
 }
@@ -511,6 +476,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [status, setStatus] = useState<string>("draft");
   const [markdown, setMarkdown] = useState<string>("");
+  const [previewKey, setPreviewKey] = useState(0);
   const [parsedResume, setParsedResume] = useState<any>(null);
   const [showOriginal, setShowOriginal] = useState(false);
   const [score, setScore] = useState<{
@@ -642,6 +608,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
     setQuestions(r.open_questions ?? []);
     setStep("version");
     setScore(null);
+    setPreviewKey((k) => k + 1);
   }
 
   const recompose = () =>
@@ -668,7 +635,10 @@ export function Flow({ resumeId }: { resumeId: string }) {
         body: JSON.stringify({ findings_text: repairText }),
       });
       setRepairResult(r);
-      if (r.markdown) setMarkdown(r.markdown);
+      if (r.markdown) {
+        setMarkdown(r.markdown);
+        setPreviewKey((k) => k + 1);
+      }
     });
 
   const runEnhance = () =>
@@ -866,7 +836,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
           {showOriginal && <OriginalResumeView parsed={parsedResume} />}
 
           {/* Resume preview */}
-          <ResumePreview markdown={markdown} showDraft={status === "draft"} />
+          {versionId && (
+            <ResumePreview versionId={versionId} refreshKey={previewKey} />
+          )}
 
           {/* ATS Score */}
           {score && (
