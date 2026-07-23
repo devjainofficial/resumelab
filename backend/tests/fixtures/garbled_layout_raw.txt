@@ -1,0 +1,54 @@
+SAMPLE CANDIDATE
+
+sample.candidate@example.com +91 90000 00000 linkedin.com/in/samplecandidate
+
+SUMMARY
+Full-stack developer with 2+ years of experience shipping production web applications with the MERN
+stack (MongoDB, Express.js, React.js, Node.js), Next.js, and TypeScript. Built and maintained 3 client
+platforms spanning e-commerce (100,000+ users), resort booking, and on-demand home services
+across MongoDB and PostgreSQL backends. Works directly with clients in 8-9 person teams to turn
+business requirements into delivered features, using AI-assisted development to ship faster.
+
+EDUCATION
+B.Tech,                                                                                                               Sample
+Computer · Engineering · University · 2020 · -
+2024
+
+PROJECTS AND INTERNSHIPS
+On-Demand Home Services App | Backend Developer
+• · Architected · the · server-side · services · for · an · on-demand · home · services · platform · on ·
+Node.js, · Express.js, · and · PostgreSQL. · • · Designed · 20+ · REST · API · endpoints · covering · user ·
+management, · service · bookings, · scheduling, · and · service · provider · data. · • · Reduced · API ·
+response · times · from · 1s · to · 500ms · by · introducing · database · indexing · and · query ·
+optimization · across · booking · endpoints. · Tools: Node.js, Express.js, PostgreSQL, REST APIs,
+JavaScript E-Commerce Platform · Full-Stack · • · Maintained · and · extended · a · full-stack · e-
+commerce · platform · serving · 100,000+ · active · users · across · products, · orders, · and · customer
+· interactions. · • · Implemented · frontends · with · React.js, · Redux, · Reactstrap, · and · SCSS · used ·
+by · 100,000+ · shoppers · across · devices. · • · Engineered · backend · APIs · across · 4 · core · flows ·
+(product · management, · user · authentication, · cart · handling, · order · processing), · with ·
+MongoDB · schemas · for · products, · users, · and · orders. · Tools: React.js, Redux, Node.js, Express.js,
+MongoDB, Reactstrap, SCSS Resort Booking Platform · Full-Stack · • · Delivered · a · full-stack · resort ·
+booking · application · managing · reservations · and · availability · across · 20+ · rooms. · • · Built · the
+· booking · flow · frontend · with · Next.js, · Shadcn, · and · Context · API. · • · Developed · backend ·
+APIs · for · booking · management, · authentication, · and · reservation · handling, · implementing ·
+booking · workflows · and · availability · tracking · on · MongoDB. · Tools: Next.js, Context API, Node.js,
+Express.js, MongoDB, Shadcn
+Software                                                                                                                    Feb
+Development · Engineer · Zignuts · Technolab · 2024 · - · Jun
+2026
+• · Developed · and · maintained · full-stack · web · applications · on · the · MERN · stack · across · 3 ·
+client · platforms, · including · an · e-commerce · product · serving · 100,000+ · users. · • · Built ·
+frontend · interfaces · with · React.js, · Next.js, · Tailwind · CSS, · and · Bootstrap · across · 3 · client ·
+applications. · • · Designed · and · integrated · 20+ · REST · API · endpoints · in · Node.js · and ·
+Express.js, · owning · backend · functionality · and · MongoDB · and · PostgreSQL · data · layers · end ·
+to · end. · • · Collaborated · in · an · 8-9 · person · team, · gathering · client · requirements · directly, ·
+translating · business · needs · into · technical · solutions, · and · reviewing · teammates' · code · to ·
+uphold · quality. · • · Accelerated · feature · delivery · by · integrating · AI-assisted · development ·
+(Cursor, · Antigravity) · into · the · day-to-day · engineering · workflow.
+
+SKILLS
+JavaScript (ES6+), TypeScript Frontend: React.js (Hooks, Redux, Context API, React Router), Next.js,
+Tailwind CSS, SCSS, Bootstrap, Reactstrap, Shadcn Backend: Node.js, Express.js, REST APIs Databases:
+PostgreSQL, MySQL, MongoDB Testing: Cypress (E2E, UI testing) AI & LLM: AI Agents, RAG, Prompt
+Engineering, LLM Integration AI Tooling: Cursor, Antigravity, AI-assisted development workflows Tools &
+DevOps: Git, GitHub, Docker (basics), CI, CD, Postman, Electron.js

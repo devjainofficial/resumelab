@@ -16,7 +16,7 @@ from app.auth import get_current_user
 from app.gateway_dep import get_app_gateway
 from app.supa import Supa, get_supa
 from llm.gateway import BudgetExceeded, Gateway
-from rewrite.composer import compose_markdown, polish_bullets
+from rewrite.composer import DRAFT_WATERMARK, compose_markdown, polish_bullets
 from rewrite.renderer import render_docx, render_pdf, render_preview_html
 from structures.specs import STRUCTURES
 
@@ -25,6 +25,11 @@ router = APIRouter(prefix="/versions", tags=["versions"])
 
 class StructureUpdate(BaseModel):
     structure_id: str
+
+
+class MarkdownUpdate(BaseModel):
+    markdown: str
+    finalize: bool = False
 
 
 async def _owned_version(supa: Supa, user_id: str, version_id: str) -> tuple[dict, dict]:
@@ -90,6 +95,50 @@ async def get_versions_for_resume(
          "order": "created_at.desc"},
     )
     return versions
+
+
+@router.put("/{version_id}/markdown")
+async def edit_markdown(
+    version_id: str,
+    body: MarkdownUpdate,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    """Save a user-edited resume. This is the escape hatch: parsing is never
+    perfect, so the user can fix anything by hand and finish.
+
+    Honesty contract still holds — finalizing is refused while placeholder
+    markers ([...], TBD, XXX) remain, so a FINAL is never shipped with gaps.
+    """
+    from parsing.parser import PLACEHOLDER_RE
+
+    version, _ = await _owned_version(supa, user["id"], version_id)
+
+    # Never persist the presentation-only DRAFT watermark into stored content.
+    lines = [l for l in body.markdown.splitlines() if not l.startswith("> DRAFT")]
+    clean = "\n".join(lines).strip()
+
+    if len(clean) < 20 or not any(l.startswith("# ") for l in lines):
+        raise HTTPException(422, "Resume needs at least a name (# Name) and some content.")
+
+    placeholders = [p for p in PLACEHOLDER_RE.findall(clean) if p != "(skipped)"]
+
+    if body.finalize:
+        if placeholders:
+            raise HTTPException(
+                422,
+                f"Fill in the placeholders before finalizing: {', '.join(placeholders[:5])}",
+            )
+        status = "final"
+        stored = clean  # no watermark on a final
+    else:
+        status = "draft"
+        stored = f"> {DRAFT_WATERMARK}\n\n{clean}"
+
+    await supa.update(
+        "versions", {"id": f"eq.{version_id}"}, {"markdown": stored, "status": status}
+    )
+    return {"version_id": version_id, "status": status, "markdown": stored}
 
 
 @router.post("/{version_id}/compose")

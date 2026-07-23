@@ -69,6 +69,15 @@ class Supa:
             )
             r.raise_for_status()
 
+    async def download_file(self, bucket: str, path: str) -> bytes:
+        async with httpx.AsyncClient(timeout=60) as c:
+            r = await c.get(
+                f"{self.base}/storage/v1/object/{bucket}/{path}",
+                headers=self._headers(),
+            )
+            r.raise_for_status()
+            return r.content
+
 
 _instance: Supa | None = None
 

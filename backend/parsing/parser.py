@@ -53,17 +53,51 @@ def _clean_bullet(line: str) -> str:
     return BULLET_RE.sub("", line).strip()
 
 
+_TERMINAL_PUNCT = ".!?:;)"
+
+
+def _is_bullet_continuation(prev_bullet: str, line: str) -> bool:
+    """A non-bullet line that continues a wrapped bullet, not a new entry.
+
+    PDF text wrapping splits one logical bullet across lines; the continuation
+    lacks a marker and its predecessor lacks terminal punctuation. Guard against
+    swallowing a real job title: the line must not carry a date and must not
+    look like a titled header ("Role | Company", "Role — Company").
+    """
+    if not prev_bullet:
+        return False
+    if prev_bullet.rstrip()[-1:] in _TERMINAL_PUNCT:
+        return False
+    if DATE_RANGE_RE.search(line):
+        return False
+    if " | " in line or " — " in line:
+        return False
+    return True
+
+
+def _merge_continuation(prev_bullet: str, line: str) -> str:
+    """Join a wrapped bullet with its continuation. A trailing hyphen means a
+    soft word-break ("e-" + "commerce" -> "e-commerce"); otherwise add a space."""
+    prev = prev_bullet.rstrip()
+    if prev.endswith("-"):
+        return prev + line.lstrip()
+    return prev + " " + line.lstrip()
+
+
 def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
     """Group experience/education/project lines into entries. A new entry
     starts at a non-bullet line that follows bullets, or a line with a date
-    range when the current entry already has one."""
+    range when the current entry already has one. Wrapped-bullet continuation
+    lines are merged back into the preceding bullet rather than mis-read as a
+    new entry header."""
     entries: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
 
-    for line in lines:
+    # Work over non-empty lines with lookahead so a continuation can be told
+    # apart from a real next-entry header.
+    items = [ln for ln in lines if ln.strip()]
+    for idx, line in enumerate(items):
         stripped = line.strip()
-        if not stripped:
-            continue
         is_bullet = bool(BULLET_RE.match(line))
         has_date = bool(DATE_RANGE_RE.search(stripped))
 
@@ -71,6 +105,25 @@ def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
             if current is None:
                 current = {"header": [], "dates": None, "bullets": []}
             current["bullets"].append(_clean_bullet(line))
+            continue
+
+        # Wrapped-bullet continuation: fold back into the last bullet instead of
+        # starting a spurious entry (fixes "Framework Core." / "commerce ...").
+        # Only when the NEXT line is itself a bullet — a real entry header is
+        # followed by a company/date line, not by a bullet, so this guard keeps
+        # us from swallowing legitimate job titles.
+        next_is_bullet = (
+            idx + 1 < len(items) and bool(BULLET_RE.match(items[idx + 1]))
+        )
+        if (
+            current is not None
+            and current["bullets"]
+            and next_is_bullet
+            and _is_bullet_continuation(current["bullets"][-1], stripped)
+        ):
+            current["bullets"][-1] = _merge_continuation(
+                current["bullets"][-1], stripped
+            )
             continue
 
         starts_new = (

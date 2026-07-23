@@ -548,6 +548,8 @@ export function Flow({ resumeId }: { resumeId: string }) {
   const [status, setStatus] = useState<string>("draft");
   const [markdown, setMarkdown] = useState<string>("");
   const [previewKey, setPreviewKey] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState("");
   const [parsedResume, setParsedResume] = useState<any>(null);
   const [showOriginal, setShowOriginal] = useState(false);
   const [score, setScore] = useState<{
@@ -703,6 +705,40 @@ export function Flow({ resumeId }: { resumeId: string }) {
     run("recompose", async () => {
       setStep("composing");
       setLoadingMsg("Rebuilding with new template...");
+      await compose(versionId!);
+    });
+
+  const stripWatermark = (md: string) =>
+    md
+      .split("\n")
+      .filter((l) => !l.startsWith("> DRAFT"))
+      .join("\n")
+      .trim();
+
+  const startEditing = () => {
+    setEditText(stripWatermark(markdown));
+    setEditing(true);
+  };
+
+  const saveEdit = (finalize: boolean) =>
+    run(finalize ? "finalize" : "save", async () => {
+      const r = await api(`/versions/${versionId}/markdown`, {
+        method: "PUT",
+        body: JSON.stringify({ markdown: editText, finalize }),
+      });
+      setMarkdown(r.markdown);
+      setStatus(r.status);
+      setEditing(false);
+      setScore(null);
+      setPreviewKey((k) => k + 1);
+    });
+
+  const reparseAndRebuild = () =>
+    run("reparse", async () => {
+      setStep("composing");
+      setLoadingMsg("Re-reading your file with the latest engine...");
+      const r = await api(`/resumes/${resumeId}/reparse`, { method: "POST" });
+      setParsedResume(r.parsed);
       await compose(versionId!);
     });
 
@@ -898,35 +934,144 @@ export function Flow({ resumeId }: { resumeId: string }) {
               ))}
             </select>
 
-            <button
-              onClick={getScore}
-              disabled={status !== "final" || !!busy}
-              title={status !== "final" ? "Finalize to score" : ""}
-              className="ml-auto rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-slate-700 disabled:opacity-40"
-            >
-              {busy === "score" ? "Scoring..." : "Get ATS Score"}
-            </button>
+            <div className="ml-auto flex gap-2">
+              <button
+                onClick={startEditing}
+                disabled={!!busy || editing}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
+              >
+                Edit &amp; fix
+              </button>
+              <button
+                onClick={getScore}
+                disabled={status !== "final" || !!busy}
+                title={status !== "final" ? "Finalize to score" : ""}
+                className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-slate-700 disabled:opacity-40"
+              >
+                {busy === "score" ? "Scoring..." : "Get ATS Score"}
+              </button>
+            </div>
           </div>
 
-          {/* Original resume toggle */}
-          {parsedResume && (
-            <div className="flex justify-center">
+          {/* DRAFT explainer + finalize CTA */}
+          {status === "draft" && !editing && (
+            <div className="mx-auto flex max-w-[820px] flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+              <p className="text-sm text-amber-800">
+                This is a <b>DRAFT</b>. Review it, fix anything the parser got
+                wrong, then finalize to download a clean copy and unlock scoring.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={startEditing}
+                  disabled={!!busy}
+                  className="rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-40"
+                >
+                  Edit content
+                </button>
+                <button
+                  onClick={() => {
+                    setEditText(stripWatermark(markdown));
+                    saveEdit(true);
+                  }}
+                  disabled={!!busy}
+                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:opacity-40"
+                >
+                  {busy === "finalize" ? "Finalizing..." : "Looks good — Finalize"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Secondary actions: original toggle + re-parse */}
+          {!editing && (
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {parsedResume && (
+                <button
+                  onClick={() => setShowOriginal(!showOriginal)}
+                  className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700"
+                >
+                  {showOriginal
+                    ? "Hide original resume"
+                    : "Show original uploaded resume"}
+                </button>
+              )}
               <button
-                onClick={() => setShowOriginal(!showOriginal)}
-                className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700"
+                onClick={reparseAndRebuild}
+                disabled={!!busy}
+                className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700 disabled:opacity-40"
+                title="Re-read your uploaded file with the latest parsing engine"
               >
-                {showOriginal
-                  ? "Hide original resume"
-                  : "Show original uploaded resume"}
+                {busy === "reparse"
+                  ? "Re-parsing..."
+                  : "Parsing looks off? Re-parse the original file"}
               </button>
             </div>
           )}
 
-          {showOriginal && <OriginalResumeView parsed={parsedResume} />}
+          {showOriginal && !editing && (
+            <OriginalResumeView parsed={parsedResume} />
+          )}
 
-          {/* Resume preview */}
-          {versionId && (
-            <ResumePreview versionId={versionId} refreshKey={previewKey} />
+          {/* Editor OR preview */}
+          {editing ? (
+            <div className="mx-auto max-w-[820px]">
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    Edit your resume
+                  </h3>
+                  <button
+                    onClick={() => setEditing(false)}
+                    className="text-xs text-slate-400 hover:text-slate-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <p className="mb-3 text-xs text-slate-500">
+                  Fix anything the parser got wrong. Format:{" "}
+                  <code className="rounded bg-slate-100 px-1"># Name</code> for
+                  your name,{" "}
+                  <code className="rounded bg-slate-100 px-1">## Section</code>{" "}
+                  for headings,{" "}
+                  <code className="rounded bg-slate-100 px-1">
+                    **Job Title — Company | Dates**
+                  </code>{" "}
+                  for entries,{" "}
+                  <code className="rounded bg-slate-100 px-1">- bullet</code> for
+                  bullet points.
+                </p>
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  spellCheck
+                  className="h-[520px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-[13px] leading-relaxed text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+                />
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => saveEdit(false)}
+                    disabled={!!busy}
+                    className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    {busy === "save" ? "Saving..." : "Save as draft"}
+                  </button>
+                  <button
+                    onClick={() => saveEdit(true)}
+                    disabled={!!busy}
+                    className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-40"
+                  >
+                    {busy === "finalize" ? "Finalizing..." : "Save & Finalize"}
+                  </button>
+                  <span className="text-xs text-slate-400">
+                    Finalize removes the DRAFT mark and unlocks a clean download +
+                    ATS score.
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            versionId && (
+              <ResumePreview versionId={versionId} refreshKey={previewKey} />
+            )
           )}
 
           {/* ATS Score */}

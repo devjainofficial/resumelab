@@ -100,6 +100,47 @@ async def get_resume(
     return rows[0]
 
 
+@router.post("/{resume_id}/reparse")
+async def reparse_resume(
+    resume_id: str,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    """Re-extract and re-parse the stored file with the current pipeline.
+
+    Existing resumes were parsed by older, worse extraction logic (glued names,
+    lost sections). This refreshes parsed_json in place at zero token cost so a
+    user isn't stuck with a stale, broken parse.
+    """
+    user_id = user["id"]
+    rows = await supa.select(
+        "resumes",
+        {"id": f"eq.{resume_id}", "user_id": f"eq.{user_id}",
+         "select": "id,filename,file_hash"},
+    )
+    if not rows:
+        raise HTTPException(404, "Resume not found")
+    resume = rows[0]
+
+    suffix = ".pdf" if resume["filename"].lower().endswith(".pdf") else ".docx"
+    path = f"{user_id}/{resume['file_hash']}{suffix}"
+    try:
+        data = await supa.download_file("resumes", path)
+    except Exception:
+        raise HTTPException(410, "Original file is no longer available to re-parse. Please re-upload it.")
+
+    try:
+        text = extract_text(resume["filename"], data)
+    except Exception:
+        raise HTTPException(422, "Could not re-read this file.")
+
+    parsed = parse_resume(text)
+    await supa.update(
+        "resumes", {"id": f"eq.{resume_id}"}, {"parsed_json": parsed}
+    )
+    return {"resume_id": resume_id, "parsed": parsed, "reparsed": True}
+
+
 @router.get("")
 async def list_resumes(
     user: dict = Depends(get_current_user),
