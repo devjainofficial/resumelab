@@ -68,6 +68,14 @@ def merge_answers(parsed: dict, answers: list[dict]) -> tuple[dict, dict[str, st
                 merged["sections"]["education"][i]["header"].append(answer)
             except (IndexError, KeyError):
                 pass
+        elif qid == "additional_content":
+            # User-volunteered extra content: appended as a note-line under
+            # summary. Composer decides where to actually render it.
+            merged.setdefault("_extras", {})["additional_content"] = answer
+        elif qid == "target_role_focus":
+            # Sharpen the summary target; composer prefers this over the
+            # (potentially generic) parsed summary.
+            merged.setdefault("_extras", {})["target_role_focus"] = answer
 
     return merged, answered
 

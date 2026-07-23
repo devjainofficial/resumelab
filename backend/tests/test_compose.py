@@ -172,3 +172,40 @@ def test_draft_pdf_omits_watermark():
     assert "> DRAFT" in md
     extracted = extract_text_from_pdf(render_pdf(md))
     assert "DRAFT" not in extracted
+
+
+def test_target_role_focus_fills_empty_summary():
+    """Synthetic wizard question 'target_role_focus' fills a missing summary
+    but never overrides a real one."""
+    parsed = parsed_fixture("resume_sparse.txt")
+    parsed["sections"]["summary"] = None
+    answers = answers_for_all_gaps(parsed) + [
+        {"question": "target_role_focus :: What role?",
+         "answer": "Backend engineer, Python and PostgreSQL"},
+    ]
+    md, status, _ = compose_markdown(parsed, answers, "S1")
+    assert "Backend engineer, Python and PostgreSQL" in md
+
+
+def test_target_role_focus_does_not_override_real_summary():
+    parsed = parsed_fixture("resume_dense.txt")
+    original_summary = parsed["sections"]["summary"]
+    assert original_summary  # sanity
+    answers = answers_for_all_gaps(parsed) + [
+        {"question": "target_role_focus :: What role?",
+         "answer": "Something totally different"},
+    ]
+    md, _, _ = compose_markdown(parsed, answers, "S1")
+    # Real summary is preserved; the sharpener does not overwrite.
+    assert original_summary[:30] in md
+    assert "Something totally different" not in md
+
+
+def test_additional_content_appended_to_summary():
+    parsed = parsed_fixture("resume_dense.txt")
+    answers = answers_for_all_gaps(parsed) + [
+        {"question": "additional_content :: Anything else?",
+         "answer": "Recently started learning Rust and WebAssembly"},
+    ]
+    md, _, _ = compose_markdown(parsed, answers, "S1")
+    assert "Recently started learning Rust and WebAssembly" in md

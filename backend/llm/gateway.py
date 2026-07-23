@@ -45,6 +45,7 @@ TASK_TIERS: dict[str, str] = {
     "extract": "lite",
     "gap_detect": "lite",
     "question_gen": "lite",
+    "wizard_suggest": "lite",
     "rewrite": "full",
     "repair": "full",
     "jd_enhance": "full",

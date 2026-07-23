@@ -62,6 +62,23 @@ def compose_markdown(
 
     contact = merged["contact"]
     sections = merged["sections"]
+    extras = merged.get("_extras", {})
+
+    # If the user gave a sharper target role, use it to fill in the summary
+    # when the parsed summary is missing or thin. NEVER overwrites a real
+    # summary — only fills a gap. And only uses the words the user typed.
+    if extras.get("target_role_focus") and not sections.get("summary"):
+        sections["summary"] = extras["target_role_focus"]
+
+    # User-volunteered "anything to add" text: append to summary as a second
+    # sentence. This keeps the guarantee that all content comes from the user.
+    if extras.get("additional_content"):
+        add = extras["additional_content"].strip().rstrip(".")
+        if add:
+            sections["summary"] = (
+                (sections.get("summary") or "").rstrip(".") + ". " + add + "."
+            ).strip(". ") + "."
+
     out: list[str] = []
 
     if status == "draft":

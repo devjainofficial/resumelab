@@ -104,13 +104,17 @@ function LoadingScreen({ message }: { message: string }) {
 
 function TypeformWizard({
   questions,
+  resumeId,
   onComplete,
 }: {
   questions: Question[];
+  resumeId: string;
   onComplete: (answers: Record<string, string>) => void;
 }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestNote, setSuggestNote] = useState<string | null>(null);
   const q = questions[current];
   const isLast = current === questions.length - 1;
   const progress = ((current + 1) / questions.length) * 100;
@@ -142,8 +146,46 @@ function TypeformWizard({
     return () => window.removeEventListener("keydown", onKey);
   }, [handleNext]);
 
+  useEffect(() => {
+    setSuggestNote(null);
+  }, [current]);
+
+  const suggestForCurrent = async () => {
+    if (!q || suggesting) return;
+    setSuggesting(true);
+    setSuggestNote(null);
+    try {
+      const r = await api("/wizard/suggest", {
+        method: "POST",
+        body: JSON.stringify({
+          resume_id: resumeId,
+          question: q.question,
+          question_id: q.id,
+        }),
+      });
+      const suggestion = (r?.suggestion ?? "").trim();
+      if (suggestion) {
+        setAnswers((a) => ({ ...a, [q.id]: suggestion }));
+        setSuggestNote(
+          r?.confidence === "high"
+            ? "AI suggested this based on your resume — feel free to edit."
+            : "Best-guess from your resume. Review before continuing."
+        );
+      } else {
+        setSuggestNote(
+          "No signal in your resume for this — please type your own answer."
+        );
+      }
+    } catch {
+      setSuggestNote("AI suggest unavailable right now.");
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
   if (!q) return null;
   const hint = q.kind === "number" ? getHint(q.question) : null;
+  const isFreeText = q.kind === "number" || q.kind === "text";
 
   return (
     <div className="flex min-h-[80vh] flex-col">
@@ -206,6 +248,35 @@ function TypeformWizard({
                 />
                 {hint && (
                   <p className="mt-2 text-sm text-slate-400">{hint}</p>
+                )}
+                {isFreeText && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      onClick={suggestForCurrent}
+                      disabled={suggesting}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 transition hover:bg-violet-100 disabled:opacity-50"
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 3v3m0 12v3M3 12h3m12 0h3m-4.5-7.5L15 9m3.5 6l-1.5 1.5m-9 0L7 15m0-6L5.5 7.5"
+                        />
+                      </svg>
+                      {suggesting ? "Suggesting..." : "AI suggest an answer"}
+                    </button>
+                    {suggestNote && (
+                      <span className="text-xs text-slate-500">
+                        {suggestNote}
+                      </span>
+                    )}
+                  </div>
                 )}
               </>
             )}
@@ -565,8 +636,25 @@ export function Flow({ resumeId }: { resumeId: string }) {
       });
       setVersionId(r.version_id);
       setStructureId(r.structure_id);
-      setQuestions(r.questions);
-      if (r.questions.length) {
+
+      // Prepend a synthetic "anything else to add?" question so the user can
+      // volunteer content the parser missed (extra experience, side projects,
+      // context). Non-critical; safe to skip.
+      const preface: Question = {
+        id: "additional_content",
+        kind: "text",
+        question:
+          "Anything you'd like to add that isn't already in your resume? (Extra role, project, tools you've picked up recently, or nothing at all.)",
+      };
+      const finalQ: Question = {
+        id: "target_role_focus",
+        kind: "text",
+        question:
+          "In one line: what's the ONE role you're targeting next? (Used only to sharpen your summary — never invented.)",
+      };
+      const augmented: Question[] = [preface, ...r.questions, finalQ];
+      setQuestions(augmented);
+      if (augmented.length) {
         setStep("wizard");
       } else {
         setStep("template");
@@ -741,6 +829,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
       {step === "wizard" && (
         <TypeformWizard
           questions={questions}
+          resumeId={resumeId}
           onComplete={handleWizardComplete}
         />
       )}

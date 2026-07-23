@@ -41,11 +41,15 @@ def sparse_final_without_numbers() -> str:
     return md
 
 
-def test_finished_resume_scores_high_with_breakdown():
+def test_finished_resume_scores_reasonably_with_breakdown():
+    """A finalized dense resume should score well but not perfectly — the
+    calibrated scorer is harsher than the old one to match Resume Worded."""
     result = score_resume(final_markdown("resume_dense.txt", "S1"))
-    assert result["value"] >= 80, result["checks"]
+    assert result["value"] >= 65, result["checks"]
     ids = [c["id"] for c in result["checks"]]
-    for expected in ("parse_back", "one_page", "headings", "contact", "verb_first", "quantified", "placeholders"):
+    for expected in ("parse_back", "one_page", "headings", "contact",
+                     "verb_first", "achievement", "placeholders",
+                     "weak_language", "buzzwords", "start_variety"):
         assert expected in ids
     # Every check is user-readable: label + detail present.
     assert all(c["label"] and c["detail"] for c in result["checks"])
@@ -57,11 +61,23 @@ def test_sparse_resume_scores_low_for_stated_reasons():
 
     assert sparse["value"] < dense["value"] - 10
     by_id = {c["id"]: c for c in sparse["checks"]}
-    # The reasons are stated, not vibes: quantification failed...
-    assert by_id["quantified"]["points"] == 0
-    # ...and the sparse resume has one bullet, so variety is trivially fine —
-    # the gap shows up in quantified + contact/summary-driven checks instead.
-    assert "0%" in by_id["quantified"]["detail"]
+    # The reason is stated: no impact signals in bullets.
+    assert by_id["achievement"]["points"] == 0
+    assert "0%" in by_id["achievement"]["detail"]
+
+
+def test_weak_phrases_and_buzzwords_penalize():
+    """Adding 'responsible for' and 'team player' should measurably drop
+    the score even on an otherwise strong resume."""
+    md = final_markdown("resume_dense.txt", "S1")
+    clean = score_resume(md)
+    dirty_md = md + "\n- Responsible for working on team-player collaboration\n"
+    dirty = score_resume(dirty_md)
+    assert dirty["value"] < clean["value"]
+    weak = next(c for c in dirty["checks"] if c["id"] == "weak_language")
+    buzz = next(c for c in dirty["checks"] if c["id"] == "buzzwords")
+    assert weak["points"] < weak["max_points"]
+    assert buzz["points"] < buzz["max_points"]
 
 
 def test_deterministic_same_input_same_score():
@@ -145,7 +161,7 @@ def test_endpoint_scores_final_and_stores():
     fake = FakeSupa(final_markdown("resume_dense.txt", "S1"), "final")
     r = client_with(fake).post("/versions/v1/score", json={})
     assert r.status_code == 200
-    assert r.json()["value"] >= 80
+    assert r.json()["value"] >= 65
     assert len(fake.scores) == 1
     assert fake.scores[0]["source"] == "internal"
     assert fake.scores[0]["value"] == r.json()["value"]

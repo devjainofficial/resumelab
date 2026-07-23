@@ -36,6 +36,12 @@ class AnswersRequest(BaseModel):
     answers: list[AnswerItem]
 
 
+class SuggestRequest(BaseModel):
+    resume_id: str
+    question: str
+    question_id: str | None = None
+
+
 async def _owned_resume(supa: Supa, user_id: str, resume_id: str) -> dict:
     rows = await supa.select(
         "resumes",
@@ -75,6 +81,48 @@ async def start_wizard(
         "structure_id": structure_id,
         "questions": questions,
     }
+
+
+@router.post("/suggest")
+async def suggest_answer(
+    req: SuggestRequest,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+    gateway: Gateway = Depends(get_app_gateway),
+) -> dict:
+    """AI-suggest a plausible answer, grounded in the user's parsed resume.
+
+    The model is told never to invent numbers or facts — if there's no
+    signal in the resume, it should return an empty suggestion so the user
+    supplies the real value. Uses the cheapest tier (flash-lite).
+    """
+    resume = await _owned_resume(supa, user["id"], req.resume_id)
+    import json as _json
+
+    payload = _json.dumps({
+        "question": req.question,
+        "question_id": req.question_id,
+        "parsed": resume["parsed_json"],
+    }, sort_keys=True)
+
+    try:
+        raw = gateway.call(
+            user_id=user["id"], task="wizard_suggest",
+            content=payload, today=date.today(),
+        )
+    except BudgetExceeded:
+        return {"suggestion": "", "reason": "Daily budget exhausted"}
+
+    # Real gateway returns JSON: {"suggestion": "...", "confidence": "high|med|low"}
+    # Mock gateway returns non-JSON marker: no suggestion available.
+    try:
+        parsed = _json.loads(raw)
+        suggestion = (parsed.get("suggestion") or "").strip()
+        confidence = parsed.get("confidence") or "low"
+    except (_json.JSONDecodeError, AttributeError):
+        return {"suggestion": "", "reason": "No suggestion available"}
+
+    return {"suggestion": suggestion, "confidence": confidence}
 
 
 @router.post("/answers")
