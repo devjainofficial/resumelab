@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
+import { Newsreader } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
+// GeistSans.variable → --font-geist-sans
+// GeistMono.variable → --font-geist-mono
+// We alias both to our design-system tokens (--font-sans / --font-mono) in globals.css.
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+  style: ["normal", "italic"],
+  weight: ["300", "400", "500", "600"],
+});
+
 export const metadata: Metadata = {
-  title: "ResumeLab",
-  description: "A truthful, ATS-strong resume. No invented facts, ever.",
+  title: "ResumeLab — ATS-ready resumes, no fabrication",
+  description:
+    "Build a truthful, ATS-strong resume in minutes. We never invent facts, metrics, or achievements.",
   other: {
-    // Vercel injects the SHA at build time; lets us verify which commit is live.
     commit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
   },
 };
@@ -15,7 +30,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+      <body
+        className={`${newsreader.variable} ${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-paper font-sans text-ink antialiased`}
+      >
         {children}
       </body>
     </html>

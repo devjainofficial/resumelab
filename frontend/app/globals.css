@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Ink & Signal token system ─── */
+:root {
+  --paper: #F7F8F7;
+  --surface: #FFFFFF;
+  --sunken: #EFF1EE;
+  --ink: #161819;
+  --ink-soft: #3F4348;
+  --muted: #71767C;
+  --line: #E4E6E2;
+  --line-strong: #D3D6D1;
+  --brand: #155E52;
+  --brand-strong: #0E463D;
+  --brand-tint: #E3EFEB;
+  --on-brand: #F7F8F7;
+  --caution: #8A5A0B;
+  --caution-tint: #F6EEDD;
+  --critical: #A5382B;
+  --critical-tint: #F7E7E4;
+  --violet: #5B4B8A;
+  --violet-tint: #ECE9F5;
+  --violet-strong: #40356A;
+  --info: #1A56A6;
+  --info-tint: #E3EEFB;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #111312;
+    --surface: #191C1B;
+    --sunken: #202422;
+    --ink: #F1F3F0;
+    --ink-soft: #C3C7C3;
+    --muted: #8B918C;
+    --line: #2A2E2B;
+    --line-strong: #394039;
+    --brand: #49AE9E;
+    --brand-strong: #82D6C8;
+    --brand-tint: #16302B;
+    --on-brand: #0A1312;
+    --caution: #D89A3A;
+    --caution-tint: #2B2414;
+    --critical: #E28173;
+    --critical-tint: #2E1B18;
+    --violet: #A99BD4;
+    --violet-tint: #201B30;
+    --violet-strong: #C7BCEC;
+    --info: #6BA3E0;
+    --info-tint: #12243A;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #111312;
+  --surface: #191C1B;
+  --sunken: #202422;
+  --ink: #F1F3F0;
+  --ink-soft: #C3C7C3;
+  --muted: #8B918C;
+  --line: #2A2E2B;
+  --line-strong: #394039;
+  --brand: #49AE9E;
+  --brand-strong: #82D6C8;
+  --brand-tint: #16302B;
+  --on-brand: #0A1312;
+  --caution: #D89A3A;
+  --caution-tint: #2B2414;
+  --critical: #E28173;
+  --critical-tint: #2E1B18;
+  --violet: #A99BD4;
+  --violet-tint: #201B30;
+  --violet-strong: #C7BCEC;
+  --info: #6BA3E0;
+  --info-tint: #12243A;
+}
+
+:root[data-theme='light'] {
+  --paper: #F7F8F7;
+  --surface: #FFFFFF;
+  --sunken: #EFF1EE;
+  --ink: #161819;
+  --ink-soft: #3F4348;
+  --muted: #71767C;
+  --line: #E4E6E2;
+  --line-strong: #D3D6D1;
+  --brand: #155E52;
+  --brand-strong: #0E463D;
+  --brand-tint: #E3EFEB;
+  --on-brand: #F7F8F7;
+  --caution: #8A5A0B;
+  --caution-tint: #F6EEDD;
+  --critical: #A5382B;
+  --critical-tint: #F7E7E4;
+  --violet: #5B4B8A;
+  --violet-tint: #ECE9F5;
+  --violet-strong: #40356A;
+  --info: #1A56A6;
+  --info-tint: #E3EEFB;
+}
+
+/* ─── Dot grid background utility ─── */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ─── Scroll reveal ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal.d1 { transition-delay: 0.1s; }
+.reveal.d2 { transition-delay: 0.2s; }
+.reveal.d3 { transition-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

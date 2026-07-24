@@ -13,8 +13,7 @@ const FACTS = [
   "Adding a LinkedIn URL increases callback rates by 71%.",
   "Using action verbs increases readability by 33%.",
   "The average job posting receives 250 resumes.",
-  "Customizing your resume for each role boosts response rates by 50%.",
-  "86% of professionals use their phone to search for jobs.",
+  "Customising your resume for each role boosts response rates by 50%.",
   "A typo on your resume can cost you the interview — 58% of hiring managers say so.",
 ];
 
@@ -86,15 +85,15 @@ export function UploadZone() {
     }
   }
 
+  // ── PARSING STATE ──
   if (busy) {
     return (
-      <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 shadow-sm">
-        <div className="mb-6 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
-        <p className="text-lg font-medium text-slate-900">
-          Parsing your resume...
-        </p>
+      <div className="flex flex-col items-center justify-center rounded-xl border border-line bg-surface p-12 shadow-sm">
+        {/* Spinner */}
+        <div className="mb-6 h-10 w-10 animate-spin rounded-full border-4 border-line border-t-brand" />
+        <p className="font-medium text-ink">Parsing your resume…</p>
         <p
-          className={`mt-4 max-w-sm text-center text-sm text-slate-400 transition-opacity duration-300 ${
+          className={`mt-3 max-w-sm text-center text-sm text-muted transition-opacity duration-300 ${
             fade ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -105,97 +104,143 @@ export function UploadZone() {
   }
 
   return (
-    <div className="mt-8">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          const f = e.dataTransfer.files?.[0];
-          if (f) onFile(f);
-        }}
-        onClick={() => inputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed p-12 text-center transition ${
-          dragOver
-            ? "border-slate-900 bg-slate-50"
-            : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
-        }`}
-      >
-        <svg
-          className="mb-4 h-10 w-10 text-slate-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+    <div>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">
+        Start here
+      </p>
+
+      {/* ── ENTRY CARDS ── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+        {/* Upload card */}
+        <div className="flex flex-col rounded-xl border border-brand/30 bg-brand-tint p-5">
+          <p className="mb-1 text-sm font-semibold text-ink">Upload your resume</p>
+          <p className="mb-4 text-xs leading-relaxed text-ink-soft">
+            PDF or DOCX. We extract every fact — no hallucinations.
+          </p>
+
+          {/* Drop zone */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) onFile(f);
+            }}
+            onClick={() => inputRef.current?.click()}
+            className={`flex flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition ${
+              dragOver
+                ? "border-brand bg-brand/10"
+                : "border-brand/40 hover:border-brand hover:bg-brand/5"
+            }`}
+          >
+            <svg
+              className="mb-3 h-8 w-8 text-brand"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
+            </svg>
+            <p className="text-sm font-medium text-ink">
+              Drop here, or <span className="text-brand">click to browse</span>
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted">PDF or DOCX · max 5 MB</p>
+          </div>
+
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,.docx"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(f);
+              e.target.value = "";
+            }}
           />
-        </svg>
-        <p className="text-sm font-medium text-slate-700">
-          Drop your resume here, or click to browse
-        </p>
-        <p className="mt-1 text-xs text-slate-400">PDF or DOCX, max 5 MB</p>
+        </div>
+
+        {/* Build from scratch card */}
+        <div className="flex flex-col rounded-xl border border-violet/30 bg-violet-tint p-5">
+          <div className="mb-1 flex items-center gap-2">
+            <p className="text-sm font-semibold text-ink">Build from scratch</p>
+            <span className="font-mono text-xs text-violet">✦ AI</span>
+          </div>
+          <p className="mb-4 text-xs leading-relaxed text-ink-soft">
+            Answer a short brief per role. AI drafts bullets from your words — nothing invented.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["Role", "Contact", "Company", "Brief → Bullets", "Skills"].map((s) => (
+              <span
+                key={s}
+                className="rounded-full border border-violet/30 bg-violet/10 px-2.5 py-0.5 font-mono text-xs text-violet"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+          <div className="mt-auto pt-5">
+            <button
+              disabled
+              className="w-full cursor-not-allowed rounded-md bg-violet/20 px-4 py-2 text-sm font-medium text-violet/60"
+            >
+              Coming soon
+            </button>
+          </div>
+        </div>
       </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".pdf,.docx"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
-          e.target.value = "";
-        }}
-      />
+
+      {/* ── ERROR ── */}
       {error && (
-        <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+        <div className="mt-4 rounded-lg border border-critical/30 bg-critical-tint p-3 text-sm text-critical">
           {error}
-        </p>
+        </div>
       )}
+
+      {/* ── PARSE RESULT ── */}
       {result && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+        <div className="mt-5 rounded-xl border border-line bg-surface p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-tint">
               <svg
-                className="h-5 w-5 text-green-600"
+                className="h-4 w-4 text-brand"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 stroke="currentColor"
+                aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.5 12.75l6 6 9-13.5"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <div className="flex-1">
-              <p className="font-semibold text-slate-900">
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-ink">
                 {result.deduped
-                  ? "Already uploaded — reused the existing parse (zero cost)"
+                  ? "Already uploaded — reused existing parse (zero cost)"
                   : "Parsed successfully"}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
-                {result.parsed.contact.name ?? "Unnamed"} &middot;{" "}
-                {result.parsed.contact.email ?? "no email"} &middot;{" "}
-                {result.parsed.flags.sections_found.join(", ") || "no sections"}{" "}
-                &middot; {result.parsed.stats.bullet_count} bullets
+              <p className="mt-0.5 text-sm text-muted">
+                {result.parsed.contact.name ?? "Unnamed"} ·{" "}
+                {result.parsed.contact.email ?? "no email"} ·{" "}
+                {result.parsed.flags.sections_found.join(", ") || "no sections"} ·{" "}
+                {result.parsed.stats.bullet_count} bullets
               </p>
             </div>
           </div>
           <a
             href={`/resume/${result.resume_id}`}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow transition hover:bg-slate-700"
+            className="mt-4 flex w-full items-center justify-center rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong"
           >
-            Continue to the wizard &rarr;
+            Continue to wizard →
           </a>
         </div>
       )}

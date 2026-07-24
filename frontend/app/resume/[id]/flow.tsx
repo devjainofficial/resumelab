@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 
 type Question = {
@@ -88,11 +87,11 @@ function LoadingScreen({ message }: { message: string }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <div className="mb-8">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-line border-t-brand" />
       </div>
-      <p className="text-lg font-medium text-slate-900">{message}</p>
+      <p className="text-lg font-medium text-ink">{message}</p>
       <p
-        className={`mt-6 max-w-md text-sm text-slate-500 transition-opacity duration-300 ${
+        className={`mt-6 max-w-md text-sm text-muted transition-opacity duration-300 ${
           fade ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -189,25 +188,26 @@ function TypeformWizard({
 
   return (
     <div className="flex min-h-[80vh] flex-col">
-      <div className="mb-3 flex items-center justify-between text-xs text-slate-500">
+      {/* Progress header */}
+      <div className="mb-3 flex items-center justify-between font-mono text-xs text-muted">
         <span className="font-medium">
           {current + 1} of {questions.length}
         </span>
         <span>{Math.round(progress)}% complete</span>
       </div>
-      <div className="mb-12 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-12 h-1.5 w-full overflow-hidden rounded-full bg-sunken">
         <div
-          className="h-full rounded-full bg-slate-900 transition-all duration-500"
+          className="h-full rounded-full bg-brand transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center">
         <div className="w-full max-w-lg">
-          <p className="mb-1 text-sm font-medium text-slate-400">
+          <p className="mb-1 font-mono text-xs text-muted">
             Question {current + 1}
           </p>
-          <h2 className="text-2xl font-semibold leading-snug text-slate-900">
+          <h2 className="text-2xl font-semibold leading-snug text-ink">
             {q.question}
           </h2>
 
@@ -217,13 +217,11 @@ function TypeformWizard({
                 {q.options.map((o) => (
                   <button
                     key={o}
-                    onClick={() => {
-                      setAnswers({ ...answers, [q.id]: o });
-                    }}
+                    onClick={() => setAnswers({ ...answers, [q.id]: o })}
                     className={`block w-full rounded-xl border-2 px-5 py-3.5 text-left text-sm font-medium transition ${
                       answers[q.id] === o
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
+                        ? "border-brand bg-brand text-brand-on"
+                        : "border-line bg-surface text-ink hover:border-line-strong"
                     }`}
                   >
                     {o}
@@ -234,7 +232,7 @@ function TypeformWizard({
               <>
                 <input
                   autoFocus
-                  className="w-full border-b-2 border-slate-300 bg-transparent pb-2 text-lg outline-none transition focus:border-slate-900"
+                  className="w-full border-b-2 border-line-strong bg-transparent pb-2 text-lg text-ink outline-none transition focus:border-brand"
                   type="text"
                   placeholder={
                     q.kind === "number"
@@ -247,14 +245,14 @@ function TypeformWizard({
                   }
                 />
                 {hint && (
-                  <p className="mt-2 text-sm text-slate-400">{hint}</p>
+                  <p className="mt-2 text-sm text-muted">{hint}</p>
                 )}
                 {isFreeText && (
                   <div className="mt-3 flex items-center gap-2">
                     <button
                       onClick={suggestForCurrent}
                       disabled={suggesting}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 transition hover:bg-violet-100 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-violet/20 bg-violet-tint px-3 py-1.5 text-xs font-medium text-violet transition hover:bg-violet/10 disabled:opacity-50"
                     >
                       <svg
                         className="h-3.5 w-3.5"
@@ -269,12 +267,10 @@ function TypeformWizard({
                           d="M12 3v3m0 12v3M3 12h3m12 0h3m-4.5-7.5L15 9m3.5 6l-1.5 1.5m-9 0L7 15m0-6L5.5 7.5"
                         />
                       </svg>
-                      {suggesting ? "Suggesting..." : "AI suggest an answer"}
+                      {suggesting ? "Suggesting…" : "AI suggest an answer"}
                     </button>
                     {suggestNote && (
-                      <span className="text-xs text-slate-500">
-                        {suggestNote}
-                      </span>
+                      <span className="text-xs text-muted">{suggestNote}</span>
                     )}
                   </div>
                 )}
@@ -282,37 +278,37 @@ function TypeformWizard({
             )}
           </div>
 
-          {/* Action row: Back | Skip (prominent) | Next/Finish */}
+          {/* Action row */}
           <div className="mt-10 flex items-center gap-3">
             {current > 0 && (
               <button
                 onClick={() => setCurrent((c) => c - 1)}
-                className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="rounded-xl border border-line px-5 py-2.5 text-sm font-medium text-ink-soft transition hover:bg-sunken"
               >
                 ← Back
               </button>
             )}
             <button
               onClick={handleSkip}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+              className="rounded-xl border border-line bg-surface px-5 py-2.5 text-sm font-medium text-ink-soft transition hover:bg-sunken"
             >
               Skip this question
             </button>
             <button
               onClick={handleNext}
               disabled={q.kind === "mc" && !answers[q.id]}
-              className="ml-auto rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="ml-auto rounded-xl bg-brand px-6 py-2.5 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isLast ? "Finish →" : "Next →"}
             </button>
           </div>
 
-          <p className="mt-4 text-xs text-slate-400">
+          <p className="mt-4 text-xs text-muted">
             Press{" "}
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium">
+            <kbd className="rounded bg-sunken px-1.5 py-0.5 text-[10px] font-medium text-ink-soft">
               Enter
             </kbd>{" "}
-            to continue, or click Skip if you don't have this info.
+            to continue, or click Skip if you don&apos;t have this info.
           </p>
         </div>
       </div>
@@ -334,10 +330,10 @@ function TemplateSelector({
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center">
       <div className="w-full max-w-2xl">
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="font-serif text-2xl font-medium text-ink">
           Choose a resume template
         </h2>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-muted">
           Each template uses the same clean, ATS-friendly format. They differ in
           section order and emphasis.
         </p>
@@ -348,19 +344,19 @@ function TemplateSelector({
               onClick={() => onSelect(s.id)}
               className={`rounded-xl border-2 p-5 text-left transition ${
                 selected === s.id
-                  ? "border-slate-900 bg-slate-50 ring-1 ring-slate-900"
-                  : "border-slate-200 bg-white hover:border-slate-400"
+                  ? "border-brand bg-brand-tint ring-1 ring-brand"
+                  : "border-line bg-surface hover:border-line-strong"
               }`}
             >
-              <p className="font-semibold text-slate-900">{s.name}</p>
-              <p className="mt-1 text-xs text-slate-500">{s.audience}</p>
+              <p className="font-semibold text-ink">{s.name}</p>
+              <p className="mt-1 text-xs text-muted">{s.audience}</p>
               <div className="mt-3 flex flex-wrap gap-1">
                 {s.section_order
                   .filter((sec) => sec !== "contact")
                   .map((sec) => (
                     <span
                       key={sec}
-                      className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600"
+                      className="rounded bg-sunken px-2 py-0.5 text-[10px] font-medium text-muted"
                     >
                       {SECTION_LABELS[sec] || sec}
                     </span>
@@ -372,7 +368,7 @@ function TemplateSelector({
         <div className="mt-8 flex justify-center">
           <button
             onClick={onContinue}
-            className="rounded-xl bg-slate-900 px-8 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700"
+            className="rounded-xl bg-brand px-8 py-3 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong"
           >
             Build with this template
           </button>
@@ -426,12 +422,12 @@ function ResumePreview({
   return (
     <div className="mx-auto max-w-[820px]">
       <div
-        className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
-        style={{ aspectRatio: "1 / 1.414" /* A4 */ }}
+        className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm"
+        style={{ aspectRatio: "1 / 1.414" }}
       >
         {loading ? (
           <div className="flex h-full items-center justify-center">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-line border-t-brand" />
           </div>
         ) : html ? (
           <iframe
@@ -441,12 +437,12 @@ function ResumePreview({
             sandbox=""
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+          <div className="flex h-full items-center justify-center text-sm text-muted">
             Preview unavailable
           </div>
         )}
       </div>
-      <p className="mt-2 text-center text-xs text-slate-400">
+      <p className="mt-2 text-center font-mono text-xs text-muted">
         This preview matches your downloaded PDF exactly.
       </p>
     </div>
@@ -458,14 +454,14 @@ function OriginalResumeView({ parsed }: { parsed: any }) {
   const { contact, sections } = parsed;
 
   return (
-    <div className="mx-auto max-w-[680px] rounded-lg border border-slate-200 bg-slate-50 px-8 py-6">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+    <div className="mx-auto max-w-[680px] rounded-lg border border-line bg-sunken px-8 py-6">
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted">
         Your uploaded resume
       </p>
       {contact?.name && (
-        <p className="text-lg font-bold text-slate-900">{contact.name}</p>
+        <p className="text-lg font-bold text-ink">{contact.name}</p>
       )}
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted">
         {[contact?.email, contact?.phone, contact?.linkedin]
           .filter(Boolean)
           .join(" | ")}
@@ -473,36 +469,34 @@ function OriginalResumeView({ parsed }: { parsed: any }) {
 
       {sections?.summary && (
         <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
             Summary
           </p>
-          <p className="text-xs text-slate-700">{sections.summary}</p>
+          <p className="text-xs text-ink-soft">{sections.summary}</p>
         </div>
       )}
 
       {sections?.skills?.length > 0 && (
         <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
             Skills
           </p>
-          <p className="text-xs text-slate-700">
-            {sections.skills.join(", ")}
-          </p>
+          <p className="text-xs text-ink-soft">{sections.skills.join(", ")}</p>
         </div>
       )}
 
       {sections?.experience?.length > 0 && (
         <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
             Experience
           </p>
           {sections.experience.map((e: any, i: number) => (
             <div key={i} className="mt-1">
-              <p className="text-xs font-semibold text-slate-800">
+              <p className="text-xs font-semibold text-ink">
                 {e.header?.join(" | ")}
               </p>
               {e.bullets?.map((b: string, j: number) => (
-                <p key={j} className="ml-3 text-xs text-slate-600">
+                <p key={j} className="ml-3 text-xs text-ink-soft">
                   - {b}
                 </p>
               ))}
@@ -513,11 +507,11 @@ function OriginalResumeView({ parsed }: { parsed: any }) {
 
       {sections?.education?.length > 0 && (
         <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
             Education
           </p>
           {sections.education.map((e: any, i: number) => (
-            <p key={i} className="text-xs text-slate-700">
+            <p key={i} className="text-xs text-ink-soft">
               {e.header?.join(" | ")}
             </p>
           ))}
@@ -641,9 +635,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
       setVersionId(r.version_id);
       setStructureId(r.structure_id);
 
-      // Prepend a synthetic "anything else to add?" question so the user can
-      // volunteer content the parser missed (extra experience, side projects,
-      // context). Non-critical; safe to skip.
       const preface: Question = {
         id: "additional_content",
         kind: "text",
@@ -722,8 +713,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
     setEditing(true);
   };
 
-  // `content` is passed explicitly so callers never depend on the async
-  // editText state having flushed (avoids a stale-closure finalize).
   const saveEdit = (finalize: boolean, content?: string) =>
     run(finalize ? "finalize" : "save", async () => {
       const md = (content ?? editText).trim();
@@ -818,34 +807,25 @@ export function Flow({ resumeId }: { resumeId: string }) {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="flex items-center justify-between py-4">
-        <h1 className="text-lg font-bold text-slate-900">Resume Lab</h1>
-        <Link
-          href="/dashboard"
-          className="text-sm text-slate-400 hover:text-slate-600"
-        >
-          Dashboard
-        </Link>
-      </div>
-
+    <div>
+      {/* Error banner */}
       {error && (
-        <p className="mb-6 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <p className="mb-6 rounded-lg border border-critical/30 bg-critical-tint px-4 py-3 text-sm text-critical">
           {error}
         </p>
       )}
 
-      {/* Init: loading state */}
+      {/* Init */}
       {step === "init" && <LoadingScreen message="Loading your resume..." />}
 
       {/* Start */}
       {step === "start" && (
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <div className="max-w-md">
-            <h2 className="text-3xl font-bold text-slate-900">
+            <h2 className="font-serif text-3xl font-medium text-ink">
               Let&apos;s build your resume
             </h2>
-            <p className="mt-3 text-slate-500">
+            <p className="mt-3 text-muted">
               We&apos;ll ask a few quick questions to fill in the gaps, then you
               pick a template. Nothing is ever invented — every fact comes from
               you.
@@ -853,9 +833,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
             <button
               onClick={startWizard}
               disabled={!!busy}
-              className="mt-8 rounded-xl bg-slate-900 px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700 hover:shadow-xl disabled:opacity-60"
+              className="mt-8 rounded-xl bg-brand px-8 py-3.5 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong disabled:opacity-60"
             >
-              {busy ? "Analyzing..." : "Start"}
+              {busy ? "Analyzing…" : "Start"}
             </button>
           </div>
         </div>
@@ -889,30 +869,31 @@ export function Flow({ resumeId }: { resumeId: string }) {
       {step === "version" && (
         <div className="space-y-6 pb-16">
           {/* Action bar */}
-          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 p-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-sunken/60 p-3">
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${
                 status === "final"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-amber-100 text-amber-800"
+                  ? "bg-brand-tint text-brand-strong"
+                  : "bg-caution-tint text-caution"
               }`}
             >
               {status.toUpperCase()}
             </span>
+
             <div className="flex gap-2">
               <button
                 onClick={() => download("pdf")}
                 disabled={!!busy}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
+                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
               >
-                {busy === "pdf" ? "..." : "PDF"}
+                {busy === "pdf" ? "…" : "PDF"}
               </button>
               <button
                 onClick={() => download("docx")}
                 disabled={!!busy}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
+                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
               >
-                {busy === "docx" ? "..." : "DOCX"}
+                {busy === "docx" ? "…" : "DOCX"}
               </button>
             </div>
 
@@ -932,10 +913,10 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 if (ok) {
                   recompose();
                 } else {
-                  setStructureId(prevId); // revert dropdown; server never changed
+                  setStructureId(prevId);
                 }
               }}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-soft"
             >
               {structures.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -948,7 +929,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
               <button
                 onClick={startEditing}
                 disabled={!!busy || editing}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-40"
+                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-sunken disabled:opacity-40"
               >
                 Edit &amp; fix
               </button>
@@ -956,17 +937,17 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 onClick={getScore}
                 disabled={status !== "final" || !!busy}
                 title={status !== "final" ? "Finalize to score" : ""}
-                className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-slate-700 disabled:opacity-40"
+                className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong disabled:opacity-40"
               >
-                {busy === "score" ? "Scoring..." : "Get ATS Score"}
+                {busy === "score" ? "Scoring…" : "Get ATS Score"}
               </button>
             </div>
           </div>
 
           {/* DRAFT explainer + finalize CTA */}
           {status === "draft" && !editing && (
-            <div className="mx-auto flex max-w-[820px] flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-              <p className="text-sm text-amber-800">
+            <div className="mx-auto flex max-w-[820px] flex-wrap items-center justify-between gap-3 rounded-xl border border-caution/20 bg-caution-tint px-5 py-4">
+              <p className="text-sm text-caution">
                 This is a <b>DRAFT</b>. Review it, fix anything the parser got
                 wrong, then finalize to download a clean copy and unlock scoring.
               </p>
@@ -974,28 +955,28 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 <button
                   onClick={startEditing}
                   disabled={!!busy}
-                  className="rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-40"
+                  className="rounded-lg border border-caution/40 bg-surface px-4 py-2 text-sm font-semibold text-caution transition hover:bg-caution-tint disabled:opacity-40"
                 >
                   Edit content
                 </button>
                 <button
                   onClick={() => saveEdit(true, stripWatermark(markdown))}
                   disabled={!!busy}
-                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:opacity-40"
+                  className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
                 >
-                  {busy === "finalize" ? "Finalizing..." : "Looks good — Finalize"}
+                  {busy === "finalize" ? "Finalizing…" : "Looks good — Finalize"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Secondary actions: original toggle + re-parse */}
+          {/* Secondary actions */}
           {!editing && (
             <div className="flex flex-wrap items-center justify-center gap-4">
               {parsedResume && (
                 <button
                   onClick={() => setShowOriginal(!showOriginal)}
-                  className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700"
+                  className="text-xs font-medium text-muted underline transition hover:text-ink"
                 >
                   {showOriginal
                     ? "Hide original resume"
@@ -1005,11 +986,11 @@ export function Flow({ resumeId }: { resumeId: string }) {
               <button
                 onClick={reparseAndRebuild}
                 disabled={!!busy}
-                className="text-xs font-medium text-slate-500 underline transition hover:text-slate-700 disabled:opacity-40"
+                className="text-xs font-medium text-muted underline transition hover:text-ink disabled:opacity-40"
                 title="Re-read your uploaded file with the latest parsing engine"
               >
                 {busy === "reparse"
-                  ? "Re-parsing..."
+                  ? "Re-parsing…"
                   : "Parsing looks off? Re-parse the original file"}
               </button>
             </div>
@@ -1022,53 +1003,51 @@ export function Flow({ resumeId }: { resumeId: string }) {
           {/* Editor OR preview */}
           {editing ? (
             <div className="mx-auto max-w-[820px]">
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-line bg-surface p-5 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-900">
+                  <h3 className="text-sm font-semibold text-ink">
                     Edit your resume
                   </h3>
                   <button
                     onClick={() => setEditing(false)}
-                    className="text-xs text-slate-400 hover:text-slate-600"
+                    className="text-xs text-muted transition hover:text-ink-soft"
                   >
                     Cancel
                   </button>
                 </div>
-                <p className="mb-3 text-xs text-slate-500">
+                <p className="mb-3 text-xs text-muted">
                   Fix anything the parser got wrong. Format:{" "}
-                  <code className="rounded bg-slate-100 px-1"># Name</code> for
-                  your name,{" "}
-                  <code className="rounded bg-slate-100 px-1">## Section</code>{" "}
+                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]"># Name</code>{" "}
+                  for your name,{" "}
+                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">## Section</code>{" "}
                   for headings,{" "}
-                  <code className="rounded bg-slate-100 px-1">
-                    **Job Title — Company | Dates**
-                  </code>{" "}
+                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">**Job Title — Company | Dates**</code>{" "}
                   for entries,{" "}
-                  <code className="rounded bg-slate-100 px-1">- bullet</code> for
-                  bullet points.
+                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">- bullet</code>{" "}
+                  for bullet points.
                 </p>
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   spellCheck
-                  className="h-[520px] w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-[13px] leading-relaxed text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+                  className="h-[520px] w-full resize-y rounded-lg border border-line bg-sunken p-4 font-mono text-[13px] leading-relaxed text-ink outline-none transition focus:border-line-strong focus:bg-surface"
                 />
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => saveEdit(false)}
                     disabled={!!busy}
-                    className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-sunken disabled:opacity-40"
                   >
-                    {busy === "save" ? "Saving..." : "Save as draft"}
+                    {busy === "save" ? "Saving…" : "Save as draft"}
                   </button>
                   <button
                     onClick={() => saveEdit(true)}
                     disabled={!!busy}
-                    className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-40"
+                    className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
                   >
-                    {busy === "finalize" ? "Finalizing..." : "Save & Finalize"}
+                    {busy === "finalize" ? "Finalizing…" : "Save & Finalize"}
                   </button>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted">
                     Finalize removes the DRAFT mark and unlocks a clean download +
                     ATS score.
                   </span>
@@ -1083,22 +1062,24 @@ export function Flow({ resumeId }: { resumeId: string }) {
 
           {/* ATS Score */}
           {score && (
-            <div className="mx-auto max-w-[680px] rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mx-auto max-w-[680px] rounded-xl border border-line bg-surface p-6 shadow-sm">
               <div className="flex items-center gap-4">
                 <div
                   className={`flex h-20 w-20 items-center justify-center rounded-full border-4 ${
                     score.value >= 80
-                      ? "border-green-500"
+                      ? "border-brand"
                       : score.value >= 60
-                      ? "border-amber-500"
-                      : "border-red-500"
+                      ? "border-caution"
+                      : "border-critical"
                   }`}
                 >
-                  <span className="text-2xl font-bold">{score.value}</span>
+                  <span className="text-2xl font-bold tabular-nums text-ink">
+                    {score.value}
+                  </span>
                 </div>
                 <div>
-                  <p className="text-lg font-semibold">ATS Score</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-lg font-semibold text-ink">ATS Score</p>
+                  <p className="text-sm text-muted">
                     {score.value >= 80
                       ? "Strong — ready to send"
                       : score.value >= 60
@@ -1111,25 +1092,25 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 {score.checks.map((c) => (
                   <li
                     key={c.id}
-                    className="flex items-center justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2"
+                    className="flex items-center justify-between gap-4 rounded-lg bg-sunken px-3 py-2"
                   >
-                    <span>
+                    <span className="text-ink-soft">
                       {c.label}{" "}
-                      <span className="text-slate-400">— {c.detail}</span>
+                      <span className="text-muted">— {c.detail}</span>
                     </span>
-                    <span className="shrink-0 font-mono text-xs">
+                    <span className="shrink-0 font-mono text-xs text-ink">
                       {c.points}/{c.max_points}
                     </span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-5 text-sm text-slate-500">
+              <p className="mt-5 text-sm text-muted">
                 Want a second opinion? Try{" "}
                 <a
                   href="https://resumeworded.com"
                   target="_blank"
                   rel="noopener"
-                  className="font-medium text-slate-700 underline"
+                  className="font-medium text-ink underline"
                 >
                   Resume Worded
                 </a>{" "}
@@ -1140,15 +1121,16 @@ export function Flow({ resumeId }: { resumeId: string }) {
 
           {/* Score Repair + JD Enhance + Outcomes */}
           {status === "final" && (
-            <div className="mx-auto max-w-[680px] space-y-6">
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-base font-semibold">Score Repair</h2>
-                <p className="mt-1 text-sm text-slate-500">
+            <div className="mx-auto max-w-[680px] space-y-4">
+              {/* Score Repair */}
+              <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
+                <h2 className="text-base font-semibold text-ink">Score Repair</h2>
+                <p className="mt-1 text-sm text-muted">
                   Paste findings from an external checker. Fixes are targeted —
                   never a blind rewrite. Missing numbers become questions.
                 </p>
                 <textarea
-                  className="mt-3 w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                  className="mt-3 w-full rounded-lg border border-line bg-sunken p-3 text-sm text-ink outline-none transition focus:border-line-strong focus:bg-surface"
                   rows={3}
                   placeholder={"e.g.\nQuantify impact: 6\nBuzzwords: 8"}
                   value={repairText}
@@ -1157,16 +1139,16 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 <button
                   onClick={runRepair}
                   disabled={!repairText.trim() || !!busy}
-                  className="mt-2 rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium transition hover:bg-slate-50 disabled:opacity-40"
+                  className="mt-2 rounded-lg border border-line px-5 py-2 text-sm font-medium text-ink transition hover:bg-sunken disabled:opacity-40"
                 >
-                  {busy === "repair" ? "Repairing..." : "Apply Targeted Fixes"}
+                  {busy === "repair" ? "Repairing…" : "Apply Targeted Fixes"}
                 </button>
                 {repairResult && (
-                  <div className="mt-3 rounded-lg bg-green-50 p-3 text-sm">
-                    <p className="font-semibold text-green-800">
+                  <div className="mt-3 rounded-lg bg-brand-tint p-3 text-sm">
+                    <p className="font-semibold text-brand-strong">
                       {repairResult.before_score} → {repairResult.after_score}
                     </p>
-                    <ul className="mt-1 list-disc pl-5 text-green-700">
+                    <ul className="mt-1 list-disc pl-5 text-brand">
                       {repairResult.actions?.map((a: string) => (
                         <li key={a}>{a}</li>
                       ))}
@@ -1175,12 +1157,13 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 )}
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-base font-semibold">
+              {/* JD Enhancer */}
+              <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
+                <h2 className="text-base font-semibold text-ink">
                   Tailor to a Job Description
                 </h2>
                 <textarea
-                  className="mt-3 w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                  className="mt-3 w-full rounded-lg border border-line bg-sunken p-3 text-sm text-ink outline-none transition focus:border-line-strong focus:bg-surface"
                   rows={4}
                   placeholder="Paste the full job description..."
                   value={jdText}
@@ -1189,29 +1172,27 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 <button
                   onClick={runEnhance}
                   disabled={jdText.trim().length < 30 || !!busy}
-                  className="mt-2 rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40"
+                  className="mt-2 rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
                 >
-                  {busy === "enhance"
-                    ? "Tailoring..."
-                    : "Create Tailored Variant"}
+                  {busy === "enhance" ? "Tailoring…" : "Create Tailored Variant"}
                 </button>
                 {paywall && (
-                  <div className="mt-3 rounded-lg bg-amber-50 p-4 text-sm">
-                    <p className="font-semibold">{paywall.message}</p>
-                    <p className="mt-1 text-slate-600">
+                  <div className="mt-3 rounded-lg border border-caution/20 bg-caution-tint p-4 text-sm">
+                    <p className="font-semibold text-caution">{paywall.message}</p>
+                    <p className="mt-1 text-muted">
                       ₹{paywall.price_inr} per run. Payment options on the
                       dashboard.
                     </p>
                   </div>
                 )}
                 {enhanceResult && (
-                  <div className="mt-3 text-sm">
-                    <ul className="list-disc pl-5 text-slate-600">
+                  <div className="mt-3 text-sm text-ink-soft">
+                    <ul className="list-disc pl-5">
                       {enhanceResult.actions?.map((a: string) => (
                         <li key={a}>{a}</li>
                       ))}
                     </ul>
-                    <p className="mt-2">
+                    <p className="mt-2 text-muted">
                       Coverage: {enhanceResult.coverage.present.length} matched,{" "}
                       {enhanceResult.coverage.missing.length} missing
                       {enhanceResult.coverage.missing.length > 0 &&
@@ -1223,13 +1204,14 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 )}
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-base font-semibold">
+              {/* Outcomes */}
+              <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
+                <h2 className="text-base font-semibold text-ink">
                   Track Where This Went
                 </h2>
                 <div className="mt-3 flex gap-2">
                   <input
-                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                    className="flex-1 rounded-lg border border-line bg-sunken p-2.5 text-sm text-ink outline-none transition focus:border-line-strong focus:bg-surface"
                     placeholder="Company / job board"
                     value={outcomeSentTo}
                     onChange={(e) => setOutcomeSentTo(e.target.value)}
@@ -1237,13 +1219,13 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   <button
                     onClick={logOutcome}
                     disabled={!outcomeSentTo.trim() || !!busy}
-                    className="rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium transition hover:bg-slate-50 disabled:opacity-40"
+                    className="rounded-lg border border-line px-5 py-2 text-sm font-medium text-ink transition hover:bg-sunken disabled:opacity-40"
                   >
                     Log it
                   </button>
                 </div>
                 {outcomeLogged && (
-                  <p className="mt-2 text-sm text-green-700">
+                  <p className="mt-2 text-sm text-brand">
                     Logged. Update the result from the dashboard when you hear
                     back.
                   </p>

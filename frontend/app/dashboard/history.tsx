@@ -18,6 +18,28 @@ type Version = {
 
 type ResumeWithVersion = Resume & { latest_version?: Version };
 
+function StatusBadge({ status }: { status?: "draft" | "final" }) {
+  if (status === "final") {
+    return (
+      <span className="rounded-full bg-brand-tint px-2.5 py-0.5 font-mono text-xs font-semibold text-brand-strong">
+        Final
+      </span>
+    );
+  }
+  if (status === "draft") {
+    return (
+      <span className="rounded-full bg-caution-tint px-2.5 py-0.5 font-mono text-xs font-semibold text-caution">
+        Draft
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-sunken px-2.5 py-0.5 font-mono text-xs font-medium text-muted">
+      Not started
+    </span>
+  );
+}
+
 export function ResumeHistory() {
   const [resumes, setResumes] = useState<ResumeWithVersion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +48,6 @@ export function ResumeHistory() {
     async function load() {
       try {
         const list: Resume[] = await api("/resumes");
-        // For each resume fetch its latest version in parallel (max 5)
         const withVersions = await Promise.all(
           list.slice(0, 20).map(async (r) => {
             try {
@@ -50,15 +71,12 @@ export function ResumeHistory() {
   if (loading) {
     return (
       <div className="mt-10">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-          Your Resumes
-        </h2>
-        <div className="mt-3 space-y-2">
+        <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">
+          Your resumes
+        </p>
+        <div className="space-y-2">
           {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-16 animate-pulse rounded-xl bg-slate-100"
-            />
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-sunken" />
           ))}
         </div>
       </div>
@@ -69,30 +87,32 @@ export function ResumeHistory() {
 
   return (
     <div className="mt-10">
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-        Your Resumes
-      </h2>
-      <ul className="mt-3 space-y-2">
+      <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">
+        Your resumes
+      </p>
+      <ul className="space-y-2">
         {resumes.map((r) => {
           const date = new Date(r.created_at).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "short",
             year: "numeric",
           });
-          const status = r.latest_version?.status;
+
           return (
             <li key={r.id}>
               <Link
                 href={`/resume/${r.id}`}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-slate-400 hover:shadow"
+                className="flex items-center justify-between rounded-xl border border-line bg-surface px-5 py-4 shadow-sm transition hover:border-line-strong hover:shadow"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                {/* Left: icon + filename + date */}
+                <div className="flex min-w-0 items-center gap-3">
                   <svg
-                    className="h-5 w-5 shrink-0 text-slate-400"
+                    className="h-5 w-5 shrink-0 text-muted"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -101,40 +121,23 @@ export function ResumeHistory() {
                     />
                   </svg>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">
-                      {r.filename}
-                    </p>
-                    <p className="text-xs text-slate-400">{date}</p>
+                    <p className="truncate text-sm font-medium text-ink">{r.filename}</p>
+                    <p className="font-mono text-xs text-muted">{date}</p>
                   </div>
                 </div>
-                <div className="ml-4 flex items-center gap-2 shrink-0">
-                  {status ? (
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        status === "final"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      {status === "final" ? "Final" : "Draft"}
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
-                      Not started
-                    </span>
-                  )}
+
+                {/* Right: badge + chevron */}
+                <div className="ml-4 flex shrink-0 items-center gap-3">
+                  <StatusBadge status={r.latest_version?.status} />
                   <svg
-                    className="h-4 w-4 text-slate-400"
+                    className="h-4 w-4 text-muted"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </div>
               </Link>
