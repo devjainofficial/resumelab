@@ -604,11 +604,12 @@ export function Flow({ resumeId }: { resumeId: string }) {
     };
   }, [resumeId]);
 
-  async function run(label: string, fn: () => Promise<void>) {
+  async function run(label: string, fn: () => Promise<void>): Promise<boolean> {
     setBusy(label);
     setError(null);
     try {
       await fn();
+      return true;
     } catch (e) {
       if (
         e instanceof ApiError &&
@@ -623,6 +624,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
       } else {
         setError(e instanceof Error ? e.message : "Something went wrong");
       }
+      return false;
     } finally {
       setBusy(null);
     }
@@ -720,11 +722,14 @@ export function Flow({ resumeId }: { resumeId: string }) {
     setEditing(true);
   };
 
-  const saveEdit = (finalize: boolean) =>
+  // `content` is passed explicitly so callers never depend on the async
+  // editText state having flushed (avoids a stale-closure finalize).
+  const saveEdit = (finalize: boolean, content?: string) =>
     run(finalize ? "finalize" : "save", async () => {
+      const md = (content ?? editText).trim();
       const r = await api(`/versions/${versionId}/markdown`, {
         method: "PUT",
-        body: JSON.stringify({ markdown: editText, finalize }),
+        body: JSON.stringify({ markdown: md, finalize }),
       });
       setMarkdown(r.markdown);
       setStatus(r.status);
@@ -915,15 +920,20 @@ export function Flow({ resumeId }: { resumeId: string }) {
             <select
               value={structureId}
               onChange={async (e) => {
+                const prevId = structureId;
                 const newId = e.target.value;
                 setStructureId(newId);
-                await run("template-switch", async () => {
+                const ok = await run("template-switch", async () => {
                   await api(`/versions/${versionId}/structure`, {
                     method: "PATCH",
                     body: JSON.stringify({ structure_id: newId }),
                   });
                 });
-                recompose();
+                if (ok) {
+                  recompose();
+                } else {
+                  setStructureId(prevId); // revert dropdown; server never changed
+                }
               }}
               className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
             >
@@ -969,10 +979,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   Edit content
                 </button>
                 <button
-                  onClick={() => {
-                    setEditText(stripWatermark(markdown));
-                    saveEdit(true);
-                  }}
+                  onClick={() => saveEdit(true, stripWatermark(markdown))}
                   disabled={!!busy}
                   className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:opacity-40"
                 >

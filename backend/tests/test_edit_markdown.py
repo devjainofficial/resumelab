@@ -79,6 +79,36 @@ def test_finalize_refused_with_placeholders():
     assert fake.updated == {}  # nothing stored
 
 
+def test_finalize_refused_with_long_placeholder():
+    """A bracketed placeholder over 40 chars must still block finalize."""
+    fake = FakeSupa()
+    md = GOOD_MD + "- Replace [with your single most impressive quantified achievement here]\n"
+    r = client_with(fake).put(
+        "/versions/v1/markdown", json={"markdown": md, "finalize": True}
+    )
+    assert r.status_code == 422
+    assert fake.updated == {}
+
+
+def test_finalize_refused_with_blank_name_heading():
+    """'# ' with no name text must not satisfy the name requirement."""
+    fake = FakeSupa()
+    md = "#  \n\n## Summary\nExperienced engineer with a strong delivery record here.\n"
+    r = client_with(fake).put(
+        "/versions/v1/markdown", json={"markdown": md, "finalize": True}
+    )
+    assert r.status_code == 422
+
+
+def test_oversized_markdown_rejected():
+    fake = FakeSupa()
+    md = "# X\n" + ("A" * 200_000)
+    r = client_with(fake).put(
+        "/versions/v1/markdown", json={"markdown": md, "finalize": False}
+    )
+    assert r.status_code == 422  # pydantic max_length
+
+
 def test_reject_empty_or_nameless_markdown():
     fake = FakeSupa()
     r = client_with(fake).put(

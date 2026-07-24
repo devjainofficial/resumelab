@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from app.auth import get_current_user
@@ -126,13 +127,27 @@ async def reparse_resume(
     path = f"{user_id}/{resume['file_hash']}{suffix}"
     try:
         data = await supa.download_file("resumes", path)
-    except Exception:
-        raise HTTPException(410, "Original file is no longer available to re-parse. Please re-upload it.")
+    except httpx.HTTPStatusError as e:
+        # Only a genuine 404 means the file is gone; 5xx/timeouts are transient.
+        if e.response.status_code == 404:
+            raise HTTPException(410, "Original file is no longer available to re-parse. Please re-upload it.")
+        raise HTTPException(503, "Storage is temporarily unavailable. Please try again in a moment.")
+    except (httpx.TimeoutException, httpx.TransportError):
+        raise HTTPException(503, "Storage is temporarily unavailable. Please try again in a moment.")
 
     try:
         text = extract_text(resume["filename"], data)
     except Exception:
         raise HTTPException(422, "Could not re-read this file.")
+
+    # Do not destroy a previously-good parse with an empty re-extraction (e.g.
+    # a PDF layout mode reads worse). Same 50-char floor as upload.
+    if len(text.strip()) < 50:
+        raise HTTPException(
+            422,
+            "Re-parsing produced no usable text, so your existing parse was kept. "
+            "If the original looks wrong, re-upload a text-based file.",
+        )
 
     parsed = parse_resume(text)
     await supa.update(

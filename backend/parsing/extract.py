@@ -29,8 +29,10 @@ def extract_text(filename: str, data: bytes) -> str:
     raise UnsupportedFileType(f"unsupported file type: {filename}")
 
 
-# Bullet-like glyphs that should become list markers.
-_BULLET_GLYPHS = "•●▪‣⁃∙◦∙°■❖♦"
+# Bullet-like glyphs that should become list markers. Deliberately excludes the
+# degree sign (U+00B0) and other chars that appear inside real prose ("360°
+# feedback", "37°C") — converting those would shred legitimate content.
+_BULLET_GLYPHS = "•●▪‣⁃∙◦■❖♦"
 _BULLET_RE = re.compile(rf"\s*[{_BULLET_GLYPHS}]\s*")
 
 
@@ -54,8 +56,11 @@ def normalize_pdf_text(text: str) -> str:
     # 2. Real bullet glyphs -> line-leading markers.
     text = _BULLET_RE.sub("\n- ", text)
 
-    # 3. Collapse alignment padding and trailing whitespace per line.
-    lines = [re.sub(r"[ \t]{2,}", " ", ln).strip() for ln in text.split("\n")]
+    # 3. Trim extreme alignment padding but KEEP a 2-space gap: the skills
+    #    parser uses a "{2,} spaces" delimiter to recover column-laid-out skills
+    #    that have no commas. Collapsing all runs to one space would erase that
+    #    signal. HTML rendering collapses the double space, so output is clean.
+    lines = [re.sub(r"[ \t]{3,}", "  ", ln).strip() for ln in text.split("\n")]
     text = "\n".join(lines)
 
     # 4. Collapse 3+ newlines to a blank-line separator.

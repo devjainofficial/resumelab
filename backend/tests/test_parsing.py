@@ -146,3 +146,79 @@ def test_contact_details_heading_not_in_name():
     text = "Jane Doe\nContact Details\njane@example.com"
     p = parse_resume(text)
     assert p["contact"]["name"] == "Jane Doe"
+
+
+# --- continuation-merge regression guards (from adversarial verification) ---
+
+def test_dateless_header_between_jobs_not_swallowed():
+    """CRITICAL: a capitalised company header between two jobs must start its
+    own entry, never merge into the prior bullet (which loses a whole job)."""
+    text = (
+        "John Doe\nj@e.com\n\nExperience\n"
+        "Acme Corporation\n"
+        "- Built the settlement service that processes millions of\n"
+        "transactions each day across regions\n"
+        "- Reduced latency\n"
+        "Beta Industries\n"
+        "- Fixed critical bugs\n"
+        "- Wrote regression tests\n"
+    )
+    exp = parse_resume(text)["sections"]["experience"]
+    assert len(exp) == 2
+    assert exp[0]["header"][0] == "Acme Corporation"
+    assert exp[1]["header"][0] == "Beta Industries"
+
+
+def test_section_final_wrapped_bullet_no_spurious_entry():
+    """A bullet that wraps on the LAST line of a section must merge, not spawn
+    a bogus entry or truncate the bullet."""
+    text = (
+        "Jane\nj@e.com\n\nExperience\n"
+        "Senior Engineer | FinEdge\nJan 2020 - Present\n"
+        "- Improved throughput significantly\n"
+        "- Migrated the legacy monolith into a set of cleanly separated\n"
+        "microservices running on Kubernetes\n"
+    )
+    exp = parse_resume(text)["sections"]["experience"]
+    assert len(exp) == 1
+    assert "microservices running on Kubernetes" in exp[0]["bullets"][-1]
+
+
+def test_wrapped_continuation_with_year_not_phantom_dated_entry():
+    """A continuation clause mentioning a year must not become a phantom entry
+    carrying a fabricated date."""
+    text = (
+        "Sam\ns@e.com\n\nExperience\n"
+        "Engineer | Acme\n2020 - Present\n"
+        "- Scaled the platform to absorb a large surge in traffic during\n"
+        "the 2021 holiday season without any downtime\n"
+        "- Mentored junior engineers\n"
+    )
+    exp = parse_resume(text)["sections"]["experience"]
+    assert len(exp) == 1
+    assert exp[0]["dates"] == "2020 - Present"
+
+
+def test_spaced_dash_continuation_keeps_space():
+    """'cost -' + 'saved' must not glue into '-saved'; only true soft word
+    breaks ('e-' + 'commerce') join without a space."""
+    text = (
+        "N\nn@e.com\n\nExperience\nRole | Co\n"
+        "- Reduced infrastructure cost -\n"
+        "saved the company big money annually\n"
+        "- Led a team\n"
+    )
+    bullets = parse_resume(text)["sections"]["experience"][0]["bullets"]
+    assert "cost - saved" in bullets[0]
+    assert "-saved" not in bullets[0]
+
+
+def test_degree_sign_not_treated_as_bullet():
+    """normalize_pdf_text must not split '360 degrees' written with a degree
+    sign into two bullets."""
+    from parsing.extract import normalize_pdf_text
+    out = normalize_pdf_text("• Ran 360° feedback cycles across teams")
+    # single bullet line, degree sign preserved, not split
+    bullet_lines = [l for l in out.splitlines() if l.strip().startswith("-")]
+    assert len(bullet_lines) == 1
+    assert "360° feedback" in out

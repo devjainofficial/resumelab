@@ -54,34 +54,44 @@ def _clean_bullet(line: str) -> str:
 
 
 _TERMINAL_PUNCT = ".!?:;)"
+_SOFT_HYPHEN_RE = re.compile(r"\w-$")  # a word broken across lines: "e-" + "commerce"
 
 
 def _is_bullet_continuation(prev_bullet: str, line: str) -> bool:
     """A non-bullet line that continues a wrapped bullet, not a new entry.
 
-    PDF text wrapping splits one logical bullet across lines; the continuation
-    lacks a marker and its predecessor lacks terminal punctuation. Guard against
-    swallowing a real job title: the line must not carry a date and must not
-    look like a titled header ("Role | Company", "Role — Company").
+    Discriminator: a real entry header (job title, company, degree, dated line)
+    begins with a capital letter, digit, or symbol; a wrapped sentence
+    continuation almost always begins lowercase. So we merge on a lowercase
+    start (or an explicit mid-word hyphen break), and only when the previous
+    bullet was left mid-sentence. This deliberately favours NOT merging when
+    ambiguous: a false-merge silently loses a whole job, which is far worse than
+    a stray line the user can fix in the editor.
     """
     if not prev_bullet:
         return False
-    if prev_bullet.rstrip()[-1:] in _TERMINAL_PUNCT:
+    prev = prev_bullet.rstrip()
+    stripped = line.strip()
+    if not stripped:
         return False
-    if DATE_RANGE_RE.search(line):
+    # A word broken across lines is an unambiguous soft wrap ("...e-" "commerce").
+    if _SOFT_HYPHEN_RE.search(prev):
+        return True
+    # Otherwise only a lowercase-leading line that follows a mid-sentence bullet.
+    if prev[-1:] in _TERMINAL_PUNCT:
         return False
-    if " | " in line or " — " in line:
-        return False
-    return True
+    return stripped[:1].islower()
 
 
 def _merge_continuation(prev_bullet: str, line: str) -> str:
-    """Join a wrapped bullet with its continuation. A trailing hyphen means a
-    soft word-break ("e-" + "commerce" -> "e-commerce"); otherwise add a space."""
+    """Join a wrapped bullet with its continuation. A mid-word hyphen break
+    ("e-" + "commerce" -> "e-commerce") joins with no space; a trailing spaced
+    dash ("cost -" + "saved") and every other case keep a separating space."""
     prev = prev_bullet.rstrip()
-    if prev.endswith("-"):
-        return prev + line.lstrip()
-    return prev + " " + line.lstrip()
+    add = line.strip()
+    if _SOFT_HYPHEN_RE.search(prev):
+        return prev + add
+    return prev + " " + add
 
 
 def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
@@ -93,11 +103,10 @@ def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
 
-    # Work over non-empty lines with lookahead so a continuation can be told
-    # apart from a real next-entry header.
-    items = [ln for ln in lines if ln.strip()]
-    for idx, line in enumerate(items):
+    for line in lines:
         stripped = line.strip()
+        if not stripped:
+            continue
         is_bullet = bool(BULLET_RE.match(line))
         has_date = bool(DATE_RANGE_RE.search(stripped))
 
@@ -107,18 +116,14 @@ def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
             current["bullets"].append(_clean_bullet(line))
             continue
 
-        # Wrapped-bullet continuation: fold back into the last bullet instead of
-        # starting a spurious entry (fixes "Framework Core." / "commerce ...").
-        # Only when the NEXT line is itself a bullet — a real entry header is
-        # followed by a company/date line, not by a bullet, so this guard keeps
-        # us from swallowing legitimate job titles.
-        next_is_bullet = (
-            idx + 1 < len(items) and bool(BULLET_RE.match(items[idx + 1]))
-        )
+        # Wrapped-bullet continuation: fold a lowercase-leading (or mid-word
+        # hyphen) line back into the last bullet instead of spawning a fake
+        # entry. Handles 2-line, 3+-line, and section-final wraps uniformly,
+        # while a capitalised next-entry header (job title/company) is left to
+        # start its own entry below.
         if (
             current is not None
             and current["bullets"]
-            and next_is_bullet
             and _is_bullet_continuation(current["bullets"][-1], stripped)
         ):
             current["bullets"][-1] = _merge_continuation(

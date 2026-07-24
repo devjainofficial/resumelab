@@ -10,7 +10,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.auth import get_current_user
 from app.gateway_dep import get_app_gateway
@@ -28,7 +28,10 @@ class StructureUpdate(BaseModel):
 
 
 class MarkdownUpdate(BaseModel):
-    markdown: str
+    # Cap the body so a single request can't allocate hundreds of MB on the
+    # free-tier VM (no LLM budget throttles this deterministic path). A real
+    # one-page resume is a few KB; 100k chars is a generous ceiling.
+    markdown: str = Field(max_length=100_000)
     finalize: bool = False
 
 
@@ -110,6 +113,8 @@ async def edit_markdown(
     Honesty contract still holds — finalizing is refused while placeholder
     markers ([...], TBD, XXX) remain, so a FINAL is never shipped with gaps.
     """
+    import re as _re
+
     from parsing.parser import PLACEHOLDER_RE
 
     version, _ = await _owned_version(supa, user["id"], version_id)
@@ -118,16 +123,22 @@ async def edit_markdown(
     lines = [l for l in body.markdown.splitlines() if not l.startswith("> DRAFT")]
     clean = "\n".join(lines).strip()
 
-    if len(clean) < 20 or not any(l.startswith("# ") for l in lines):
+    # Require a name heading with actual non-whitespace text after "# ".
+    has_name = any(l.startswith("# ") and l[2:].strip() for l in lines)
+    if len(clean) < 20 or not has_name:
         raise HTTPException(422, "Resume needs at least a name (# Name) and some content.")
 
+    # Finalize honesty gate. PLACEHOLDER_RE only catches short [..] markers, so
+    # also reject ANY remaining bracketed placeholder of any length, plus TBD/XXX.
     placeholders = [p for p in PLACEHOLDER_RE.findall(clean) if p != "(skipped)"]
+    long_brackets = _re.findall(r"\[[^\]]{1,200}\]", clean)
+    all_placeholders = placeholders + [b for b in long_brackets if b not in placeholders]
 
     if body.finalize:
-        if placeholders:
+        if all_placeholders:
             raise HTTPException(
                 422,
-                f"Fill in the placeholders before finalizing: {', '.join(placeholders[:5])}",
+                f"Fill in the placeholders before finalizing: {', '.join(all_placeholders[:5])}",
             )
         status = "final"
         stored = clean  # no watermark on a final
