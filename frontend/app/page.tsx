@@ -86,9 +86,6 @@ export default function LandingPage() {
             {/* Before/after resume comparison */}
             <div>
               <ResumeComparison />
-              <p className="mt-2 text-center font-mono text-xs text-muted">
-                Real result · drag the handle to compare before &amp; after
-              </p>
             </div>
           </div>
         </div>
