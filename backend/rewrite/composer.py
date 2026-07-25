@@ -20,6 +20,14 @@ from wizard.gaps import detect_gaps
 
 DRAFT_WATERMARK = "DRAFT — answer the remaining wizard questions to finalize"
 
+# ── One-page bullet budget ────────────────────────────────────────────────────
+# A one-page A4/Letter resume at 10pt fits roughly 14 bullets before running
+# out of space with a typical header, summary, skills, and education block.
+# These caps are the primary enforcement mechanism for the one-page hard rule.
+_MAX_EXP_BULLETS_TOTAL = 12       # across ALL experience entries combined
+_MAX_EXP_BULLETS_PER_ENTRY = 5    # per single role / sub-section
+_MAX_PROJECT_BULLETS_PER_ENTRY = 3
+
 SECTION_TITLES = {
     "summary": "Summary",
     "skills": "Skills",
@@ -32,14 +40,15 @@ SECTION_TITLES = {
 }
 
 
-def _entry_lines(entry: dict) -> list[str]:
+def _entry_lines(entry: dict, max_bullets: int | None = None) -> list[str]:
     lines: list[str] = []
     header = [h for h in entry["header"] if h]
     if header:
         first = header[0]
         rest = " | ".join(header[1:])
         lines.append(f"**{first}**" + (f" — {rest}" if rest else ""))
-    for bullet in entry["bullets"]:
+    bullets = entry["bullets"] if max_bullets is None else entry["bullets"][:max_bullets]
+    for bullet in bullets:
         lines.append(f"- {bullet}")
     return lines
 
@@ -110,21 +119,30 @@ def compose_markdown(
         elif section == "experience":
             if sections["experience"]:
                 out.append("## Experience")
+                exp_budget = _MAX_EXP_BULLETS_TOTAL
                 for entry in sections["experience"]:
-                    out.extend(_entry_lines(entry))
-                    out.append("")
+                    if exp_budget <= 0:
+                        break
+                    cap = min(_MAX_EXP_BULLETS_PER_ENTRY, exp_budget)
+                    lines = _entry_lines(entry, max_bullets=cap)
+                    # Skip header-only entries (sub-section labels with no bullets
+                    # after capping) to avoid orphaned bold lines.
+                    if lines:
+                        out.extend(lines)
+                        out.append("")
+                        exp_budget -= min(len(entry["bullets"]), cap)
         elif section == "projects":
             if sections["projects"]:
                 out.append("## Projects")
                 for entry in sections["projects"]:
-                    out.extend(_entry_lines(entry))
+                    out.extend(_entry_lines(entry, max_bullets=_MAX_PROJECT_BULLETS_PER_ENTRY))
                     out.append("")
         elif section == "projects_and_internships":
             entries = sections["projects"] + sections["experience"]
             if entries:
                 out.append("## Projects and Internships")
                 for entry in entries:
-                    out.extend(_entry_lines(entry))
+                    out.extend(_entry_lines(entry, max_bullets=_MAX_PROJECT_BULLETS_PER_ENTRY))
                     out.append("")
         elif section == "education":
             if sections["education"]:
