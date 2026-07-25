@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { api, ApiError } from "@/lib/api";
 import Link from "next/link";
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 type Check = {
   id: string;
@@ -13,11 +14,9 @@ type Check = {
 };
 
 type Result = {
-  resume_id: string;
   score: number;
   checks: Check[];
   filename: string;
-  cached: boolean;
 };
 
 const R = 52;
@@ -109,10 +108,15 @@ export function QuickScorer() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const data: Result = await api("/resumes/quick-score", { method: "POST", body: fd });
+      const resp = await fetch(`${API}/score`, { method: "POST", body: fd });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => null);
+        throw new Error(body?.detail ?? `Request failed (${resp.status})`);
+      }
+      const data: Result = await resp.json();
       setResult(data);
     } catch (e) {
-      setError(e instanceof ApiError ? String(e.detail) : "Something went wrong. Please try again.");
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -160,10 +164,10 @@ export function QuickScorer() {
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            href={`/resume/${result.resume_id}`}
+            href="/login"
             className="flex-1 rounded-xl bg-brand px-5 py-3 text-center text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
           >
-            Improve with Resume Lab →
+            Fix it with Resume Lab — free →
           </Link>
           <button
             onClick={reset}
@@ -173,11 +177,9 @@ export function QuickScorer() {
           </button>
         </div>
 
-        {result.score < 80 && (
-          <p className="text-center text-xs text-muted">
-            Resume Lab rewrites your resume using only your own facts — no invented metrics.
-          </p>
-        )}
+        <p className="text-center text-xs text-muted">
+          Resume Lab rewrites your resume using only your own facts — no account needed to score, free to improve.
+        </p>
       </div>
     );
   }

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Hard rule: login is required before any upload, wizard, or generation.
 // Everything except the landing page, login, and the auth callback is gated.
-const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/auth/auth-code-error"];
+const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/auth/auth-code-error", "/score"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });

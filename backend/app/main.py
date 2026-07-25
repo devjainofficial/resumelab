@@ -9,11 +9,13 @@ from app.enhance import router as enhance_router
 from app.outcomes import router as outcomes_router
 from app.repair import router as repair_router
 from app.resumes import router as resumes_router
+from app.score_public import router as score_public_router
 from app.scores import router as scores_router
 from app.versions import router as versions_router
 from app.wizard import router as wizard_router
 
 app = FastAPI(title="ResumeLab API", version="0.1.0")
+app.include_router(score_public_router)
 app.include_router(resumes_router)
 app.include_router(wizard_router)
 app.include_router(versions_router)
