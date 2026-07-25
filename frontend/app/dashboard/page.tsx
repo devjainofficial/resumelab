@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { SignOutButton } from "./signout-button";
 import { UploadZone } from "./upload";
 import { ResumeHistory } from "./history";
+import Link from "next/link";
 
 export default async function Dashboard() {
   const supabase = createClient();
@@ -34,6 +35,13 @@ export default async function Dashboard() {
           <div className="flex-1" />
 
           <ThemeToggle />
+
+          <Link
+            href="/score"
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-soft transition hover:bg-sunken"
+          >
+            Quick Score
+          </Link>
 
           {/* JD credits chip */}
           <div className="flex items-center gap-1.5 rounded-full border border-line bg-sunken px-3 py-1 font-mono text-xs">

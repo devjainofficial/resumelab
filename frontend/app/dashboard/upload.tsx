@@ -129,15 +129,14 @@ export function UploadZone() {
               const f = e.dataTransfer.files?.[0];
               if (f) onFile(f);
             }}
-            onClick={() => inputRef.current?.click()}
-            className={`flex flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition ${
+            className={`flex flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition ${
               dragOver
                 ? "border-brand bg-brand/10"
-                : "border-brand/40 hover:border-brand hover:bg-brand/5"
+                : "border-brand/40"
             }`}
           >
             <svg
-              className="mb-3 h-8 w-8 text-brand"
+              className="mb-2 h-7 w-7 text-brand/60"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
@@ -150,10 +149,17 @@ export function UploadZone() {
                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
               />
             </svg>
-            <p className="text-sm font-medium text-ink">
-              Drop here, or <span className="text-brand">click to browse</span>
+            <p className="mb-3 text-xs text-muted">
+              {dragOver ? "Drop to upload" : "Drag & drop here, or"}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted">PDF or DOCX · max 5 MB</p>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+            >
+              Browse files
+            </button>
+            <p className="mt-2 font-mono text-xs text-muted">PDF or DOCX · max 5 MB</p>
           </div>
 
           <input
