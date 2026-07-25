@@ -102,7 +102,7 @@ function LoadingScreen({ message }: { message: string }) {
 }
 
 function TypeformWizard({
-  questions,
+  questions: initialQuestions,
   resumeId,
   onComplete,
 }: {
@@ -110,6 +110,7 @@ function TypeformWizard({
   resumeId: string;
   onComplete: (answers: Record<string, string>) => void;
 }) {
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [suggesting, setSuggesting] = useState(false);
@@ -121,10 +122,34 @@ function TypeformWizard({
   const handleNext = useCallback(() => {
     if (isLast) {
       onComplete(answers);
-    } else {
-      setCurrent((c) => c + 1);
+      return;
     }
-  }, [isLast, answers, onComplete, current]);
+    // After the preface question (additional_content), fetch follow-up questions
+    if (q?.id === "additional_content") {
+      const extra = answers["additional_content"]?.trim() ?? "";
+      if (extra.length > 30) {
+        api("/wizard/additional-questions", {
+          method: "POST",
+          body: JSON.stringify({ resume_id: resumeId, additional_content: extra }),
+        })
+          .then((r) => {
+            const followUps: Question[] = (r?.questions ?? []).map((fq: Question) => ({
+              ...fq,
+              kind: fq.kind ?? "text",
+            }));
+            if (followUps.length > 0) {
+              setQuestions((prev) => [
+                ...prev.slice(0, current + 1),
+                ...followUps,
+                ...prev.slice(current + 1),
+              ]);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+    setCurrent((c) => c + 1);
+  }, [isLast, answers, onComplete, q, current, resumeId]);
 
   const handleSkip = useCallback(() => {
     if (isLast) {
@@ -316,6 +341,85 @@ function TypeformWizard({
   );
 }
 
+const TEMPLATE_ACCENT: Record<string, string> = {
+  S1: "#1a1a1a", S2: "#0f172a", S3: "#1e40af", S4: "#1a1a1a",
+};
+
+function TemplateMiniSvg({ structureId, sections }: { structureId: string; sections: string[] }) {
+  const accent = TEMPLATE_ACCENT[structureId] ?? "#1a1a1a";
+  const isJake = structureId === "S1";
+  const isModern = structureId === "S3";
+  const accentSection = isModern ? accent : "#1a1a1a";
+
+  const secRows = sections.filter((s) => s !== "contact").slice(0, 5);
+  const getSecHeight = (sec: string) => {
+    if (sec === "experience" || sec === "projects_and_internships") return 54;
+    if (sec === "skills" || sec === "core_skills_expanded") return 20;
+    return 30;
+  };
+
+  let y = isJake ? 48 : 50;
+  const elements: string[] = [];
+
+  for (const sec of secRows) {
+    const h = getSecHeight(sec);
+    const label = (SECTION_LABELS[sec] || sec).toUpperCase();
+    elements.push(
+      `<text x="8" y="${y}" font-size="5" font-weight="700" fill="${accentSection}" letter-spacing="0.8">${label}</text>`,
+      `<line x1="8" y1="${y + 2}" x2="86" y2="${y + 2}" stroke="${accentSection}" stroke-width="0.5" opacity="0.5"/>`,
+    );
+    if (sec === "experience" || sec === "projects_and_internships") {
+      elements.push(
+        `<rect x="8" y="${y + 5}" width="48" height="3.5" rx="1" fill="#374151" opacity="0.6"/>`,
+        `<rect x="62" y="${y + 5}" width="24" height="3.5" rx="1" fill="#9ca3af" opacity="0.5"/>`,
+        `<rect x="10" y="${y + 12}" width="72" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="10" y="${y + 17}" width="66" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="10" y="${y + 22}" width="58" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="8" y="${y + 30}" width="44" height="3" rx="1" fill="#374151" opacity="0.5"/>`,
+        `<rect x="58" y="${y + 30}" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>`,
+        `<rect x="10" y="${y + 37}" width="70" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="10" y="${y + 42}" width="55" height="2.5" rx="1" fill="#d1d5db"/>`,
+      );
+    } else if (sec === "skills" || sec === "core_skills_expanded") {
+      elements.push(
+        `<rect x="8" y="${y + 6}" width="78" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="8" y="${y + 12}" width="55" height="2.5" rx="1" fill="#d1d5db"/>`,
+      );
+    } else if (sec === "education") {
+      elements.push(
+        `<rect x="8" y="${y + 5}" width="44" height="3" rx="1" fill="#374151" opacity="0.6"/>`,
+        `<rect x="60" y="${y + 5}" width="26" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>`,
+        `<rect x="8" y="${y + 12}" width="60" height="2.5" rx="1" fill="#d1d5db"/>`,
+      );
+    } else {
+      elements.push(
+        `<rect x="8" y="${y + 5}" width="78" height="2.5" rx="1" fill="#d1d5db"/>`,
+        `<rect x="8" y="${y + 11}" width="64" height="2.5" rx="1" fill="#d1d5db"/>`,
+      );
+    }
+    y += h + 4;
+  }
+
+  const nameBlock = isJake
+    ? `<text x="47" y="16" font-size="8" font-weight="700" text-anchor="middle" fill="#0a0a0a">FULL NAME</text>
+       <text x="47" y="22" font-size="4.5" text-anchor="middle" fill="#555">email · phone · linkedin · github</text>
+       <line x1="8" y1="26" x2="86" y2="26" stroke="#000" stroke-width="0.6"/>`
+    : isModern
+    ? `<text x="8" y="16" font-size="8" font-weight="700" fill="#0f172a">Full Name</text>
+       <line x1="8" y1="20" x2="86" y2="20" stroke="${accent}" stroke-width="1.5"/>
+       <text x="8" y="27" font-size="4.5" fill="#64748b">email · phone · linkedin</text>`
+    : `<text x="8" y="16" font-size="8" font-weight="700" fill="#0a0a0a">Full Name</text>
+       <text x="8" y="23" font-size="4.5" fill="#555">email | phone | linkedin | github</text>
+       <line x1="8" y1="26" x2="86" y2="26" stroke="#222" stroke-width="1"/>`;
+
+  return (
+    <svg viewBox="0 0 94 130" xmlns="http://www.w3.org/2000/svg" className="w-full">
+      <rect width="94" height="130" fill="white"/>
+      <g dangerouslySetInnerHTML={{ __html: nameBlock + elements.join("") }} />
+    </svg>
+  );
+}
+
 function TemplateSelector({
   structures,
   selected,
@@ -327,53 +431,106 @@ function TemplateSelector({
   onSelect: (id: string) => void;
   onContinue: () => void;
 }) {
+  const [zoom, setZoom] = useState<string | null>(null);
+  const zoomed = zoom ? structures.find((s) => s.id === zoom) : null;
+
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-3xl">
         <h2 className="font-serif text-2xl font-medium text-ink">
-          Choose a resume template
+          Choose a resume layout
         </h2>
         <p className="mt-2 text-sm text-muted">
-          Each template uses the same clean, ATS-friendly format. They differ in
-          section order and emphasis.
+          All layouts are ATS-safe: single column, standard headings, text-selectable. Click any card to zoom.
         </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {structures.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onSelect(s.id)}
-              className={`rounded-xl border-2 p-5 text-left transition ${
-                selected === s.id
-                  ? "border-brand bg-brand-tint ring-1 ring-brand"
-                  : "border-line bg-surface hover:border-line-strong"
-              }`}
-            >
-              <p className="font-semibold text-ink">{s.name}</p>
-              <p className="mt-1 text-xs text-muted">{s.audience}</p>
-              <div className="mt-3 flex flex-wrap gap-1">
-                {s.section_order
-                  .filter((sec) => sec !== "contact")
-                  .map((sec) => (
-                    <span
-                      key={sec}
-                      className="rounded bg-sunken px-2 py-0.5 text-[10px] font-medium text-muted"
-                    >
-                      {SECTION_LABELS[sec] || sec}
-                    </span>
-                  ))}
-              </div>
-            </button>
+            <div key={s.id} className="group flex flex-col">
+              <button
+                onClick={() => setZoom(s.id)}
+                className={`relative overflow-hidden rounded-lg border-2 transition ${
+                  selected === s.id
+                    ? "border-brand ring-1 ring-brand"
+                    : "border-line hover:border-line-strong"
+                }`}
+              >
+                <div className="bg-surface p-1.5 shadow-sm">
+                  <TemplateMiniSvg structureId={s.id} sections={s.section_order} />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-ink/0 opacity-0 transition group-hover:bg-ink/10 group-hover:opacity-100">
+                  <span className="rounded-full bg-ink/80 px-2 py-1 text-[10px] font-medium text-paper">
+                    Zoom in
+                  </span>
+                </div>
+              </button>
+              <button
+                onClick={() => onSelect(s.id)}
+                className={`mt-2 rounded-lg border px-3 py-2 text-left text-xs transition ${
+                  selected === s.id
+                    ? "border-brand bg-brand-tint text-brand-strong"
+                    : "border-line bg-surface text-ink hover:border-line-strong hover:bg-sunken"
+                }`}
+              >
+                <span className="block font-semibold">{s.name}</span>
+                <span className="mt-0.5 block text-muted">{s.audience}</span>
+              </button>
+            </div>
           ))}
         </div>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <p className="text-xs text-muted">
+            Selected: <span className="font-medium text-ink">{structures.find((s) => s.id === selected)?.name ?? selected}</span>
+          </p>
           <button
             onClick={onContinue}
             className="rounded-xl bg-brand px-8 py-3 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong"
           >
-            Build with this template
+            Build with this layout →
           </button>
         </div>
       </div>
+
+      {/* Zoom modal */}
+      {zoomed && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-6 backdrop-blur-sm"
+          onClick={() => setZoom(null)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <div>
+                <p className="font-semibold text-ink">{zoomed.name}</p>
+                <p className="text-xs text-muted">{zoomed.audience}</p>
+              </div>
+              <button onClick={() => setZoom(null)} className="text-muted transition hover:text-ink">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <TemplateMiniSvg structureId={zoomed.id} sections={zoomed.section_order} />
+            </div>
+            <div className="flex gap-2 border-t border-line px-4 py-3">
+              <button
+                onClick={() => { onSelect(zoomed.id); setZoom(null); }}
+                className="flex-1 rounded-lg bg-brand py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong"
+              >
+                Use this layout
+              </button>
+              <button
+                onClick={() => setZoom(null)}
+                className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink-soft transition hover:bg-sunken"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -420,30 +577,26 @@ function ResumePreview({
   }, [versionId, refreshKey]);
 
   return (
-    <div className="mx-auto max-w-[820px]">
-      <div
-        className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm"
-        style={{ aspectRatio: "1 / 1.414" }}
-      >
-        {loading ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-line border-t-brand" />
-          </div>
-        ) : html ? (
-          <iframe
-            srcDoc={html}
-            title="Resume preview"
-            className="h-full w-full"
-            sandbox=""
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted">
-            Preview unavailable
-          </div>
-        )}
-      </div>
+    <div className="mx-auto max-w-[860px]">
+      {loading ? (
+        <div className="flex h-64 items-center justify-center rounded-xl border border-line bg-surface">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-line border-t-brand" />
+        </div>
+      ) : html ? (
+        <iframe
+          srcDoc={html}
+          title="Resume preview"
+          className="w-full rounded-lg border border-line shadow-md"
+          style={{ height: "1060px" }}
+          sandbox=""
+        />
+      ) : (
+        <div className="flex h-64 items-center justify-center rounded-xl border border-line bg-surface text-sm text-muted">
+          Preview unavailable
+        </div>
+      )}
       <p className="mt-2 text-center font-mono text-xs text-muted">
-        This preview matches your downloaded PDF exactly.
+        Preview · the downloaded PDF matches exactly.
       </p>
     </div>
   );
@@ -552,6 +705,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
   } | null>(null);
   const [repairText, setRepairText] = useState("");
   const [repairResult, setRepairResult] = useState<any>(null);
+  const [repairFile, setRepairFile] = useState<File | null>(null);
+  const [repairDragOver, setRepairDragOver] = useState(false);
+  const [showReadyBanner, setShowReadyBanner] = useState(false);
   const [jdText, setJdText] = useState("");
   const [enhanceResult, setEnhanceResult] = useState<any>(null);
   const [paywall, setPaywall] = useState<any>(null);
@@ -681,10 +837,10 @@ export function Flow({ resumeId }: { resumeId: string }) {
         method: "PATCH",
         body: JSON.stringify({ structure_id: structureId }),
       });
-      await compose(versionId!);
+      await compose(versionId!, true);
     });
 
-  async function compose(vid: string) {
+  async function compose(vid: string, showBanner = false) {
     const r = await api(`/versions/${vid}/compose`, { method: "POST" });
     setStatus(r.status);
     setMarkdown(r.markdown);
@@ -692,6 +848,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
     setStep("version");
     setScore(null);
     setPreviewKey((k) => k + 1);
+    if (showBanner) setShowReadyBanner(true);
   }
 
   const recompose = () =>
@@ -753,6 +910,31 @@ export function Flow({ resumeId }: { resumeId: string }) {
         body: JSON.stringify({ findings_text: repairText }),
       });
       setRepairResult(r);
+      if (r.markdown) {
+        setMarkdown(r.markdown);
+        setPreviewKey((k) => k + 1);
+      }
+    });
+
+  const runRepairScreenshot = () =>
+    run("repair", async () => {
+      if (!repairFile) return;
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const form = new FormData();
+      form.append("file", repairFile);
+      const resp = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/versions/${versionId}/repair/screenshot`,
+        { method: "POST", headers: { Authorization: `Bearer ${session?.access_token}` }, body: form }
+      );
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.detail ?? `Upload failed (${resp.status})`);
+      }
+      const r = await resp.json();
+      setRepairResult(r);
+      setRepairFile(null);
       if (r.markdown) {
         setMarkdown(r.markdown);
         setPreviewKey((k) => k + 1);
@@ -868,6 +1050,24 @@ export function Flow({ resumeId }: { resumeId: string }) {
       {/* Version result */}
       {step === "version" && (
         <div className="space-y-6 pb-16">
+          {/* Ready banner — shown only once after first compose */}
+          {showReadyBanner && (
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-brand/30 bg-brand-tint px-5 py-4">
+              <div>
+                <p className="font-semibold text-brand-strong">Resume built!</p>
+                <p className="mt-0.5 text-sm text-ink-soft">
+                  Review the preview below. Fix any parsing errors with "Edit &amp; fix", then hit{" "}
+                  <strong>Looks good — Finalize</strong> to unlock your ATS score.
+                </p>
+              </div>
+              <button onClick={() => setShowReadyBanner(false)} className="shrink-0 text-muted hover:text-ink">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          )}
+
           {/* Action bar */}
           <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-sunken/60 p-3">
             <span
@@ -1126,9 +1326,78 @@ export function Flow({ resumeId }: { resumeId: string }) {
               <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
                 <h2 className="text-base font-semibold text-ink">Score Repair</h2>
                 <p className="mt-1 text-sm text-muted">
-                  Paste findings from an external checker. Fixes are targeted —
-                  never a blind rewrite. Missing numbers become questions.
+                  Drop a Resume Worded screenshot or paste findings below. Fixes
+                  are targeted — never a blind rewrite.
                 </p>
+
+                {/* Screenshot drop zone */}
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setRepairDragOver(true); }}
+                  onDragLeave={() => setRepairDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setRepairDragOver(false);
+                    const f = e.dataTransfer.files[0];
+                    if (f && f.type.startsWith("image/")) setRepairFile(f);
+                  }}
+                  className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed py-7 transition ${
+                    repairDragOver
+                      ? "border-brand bg-brand-tint"
+                      : repairFile
+                      ? "border-brand/40 bg-brand-tint/40"
+                      : "border-line hover:border-line-strong"
+                  }`}
+                  onClick={() => document.getElementById("repair-file-input")?.click()}
+                >
+                  <input
+                    id="repair-file-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setRepairFile(f);
+                    }}
+                  />
+                  <svg className="h-8 w-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path strokeLinecap="round" d="M21 15l-5-5L5 21"/>
+                  </svg>
+                  {repairFile ? (
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-brand-strong">{repairFile.name}</p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setRepairFile(null); }}
+                        className="mt-0.5 text-xs text-muted underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-ink">Drop Resume Worded screenshot here</p>
+                      <p className="text-xs text-muted">or click to browse · PNG, JPG accepted</p>
+                    </div>
+                  )}
+                </div>
+
+                {repairFile && (
+                  <button
+                    onClick={runRepairScreenshot}
+                    disabled={!!busy}
+                    className="mt-3 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
+                  >
+                    {busy === "repair" ? "Extracting & repairing…" : "Repair from screenshot →"}
+                  </button>
+                )}
+
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="text-xs text-muted">or paste text findings</span>
+                  <div className="h-px flex-1 bg-line" />
+                </div>
+
                 <textarea
                   className="mt-3 w-full rounded-lg border border-line bg-sunken p-3 text-sm text-ink outline-none transition focus:border-line-strong focus:bg-surface"
                   rows={3}
@@ -1143,16 +1412,25 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 >
                   {busy === "repair" ? "Repairing…" : "Apply Targeted Fixes"}
                 </button>
+
                 {repairResult && (
-                  <div className="mt-3 rounded-lg bg-brand-tint p-3 text-sm">
+                  <div className="mt-4 rounded-xl border border-brand/20 bg-brand-tint p-4 text-sm">
                     <p className="font-semibold text-brand-strong">
-                      {repairResult.before_score} → {repairResult.after_score}
+                      Score: {repairResult.before_score} → {repairResult.after_score}
                     </p>
-                    <ul className="mt-1 list-disc pl-5 text-brand">
+                    <ul className="mt-2 space-y-1 text-brand">
                       {repairResult.actions?.map((a: string) => (
-                        <li key={a}>{a}</li>
+                        <li key={a} className="flex items-start gap-2">
+                          <span className="mt-0.5 shrink-0">✓</span>
+                          <span>{a}</span>
+                        </li>
                       ))}
                     </ul>
+                    {repairResult.new_questions?.length > 0 && (
+                      <p className="mt-3 text-xs text-muted">
+                        {repairResult.new_questions.length} question(s) need your input to complete the repair.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

@@ -42,6 +42,11 @@ class SuggestRequest(BaseModel):
     question_id: str | None = None
 
 
+class AdditionalQuestionsRequest(BaseModel):
+    resume_id: str
+    additional_content: str
+
+
 async def _owned_resume(supa: Supa, user_id: str, resume_id: str) -> dict:
     rows = await supa.select(
         "resumes",
@@ -123,6 +128,49 @@ async def suggest_answer(
         return {"suggestion": "", "reason": "No suggestion available"}
 
     return {"suggestion": suggestion, "confidence": confidence}
+
+
+@router.post("/additional-questions")
+async def additional_questions(
+    req: AdditionalQuestionsRequest,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+    gateway: Gateway = Depends(get_app_gateway),
+) -> dict:
+    """Given new content the user typed in the preface field, generate
+    targeted follow-up questions to fill in any missing key details
+    (dates, company name, metrics). Max 3 questions. Uses flash-lite."""
+    resume = await _owned_resume(supa, user["id"], req.resume_id)
+    import json as _json
+
+    payload = _json.dumps({
+        "additional_content": req.additional_content,
+        "parsed_contact": resume["parsed_json"]["contact"],
+    }, sort_keys=True)
+
+    try:
+        raw = gateway.call(
+            user_id=user["id"], task="additional_questions",
+            content=payload, today=date.today(),
+        )
+    except BudgetExceeded:
+        return {"questions": []}
+
+    try:
+        result = _json.loads(raw)
+        qs = result if isinstance(result, list) else result.get("questions", [])
+        # Validate each question has the minimum fields
+        valid = []
+        for q in qs[:3]:
+            if isinstance(q, dict) and q.get("question") and q.get("kind") in ("text", "number"):
+                valid.append({
+                    "id": q.get("id", f"add_{len(valid)}"),
+                    "kind": q["kind"],
+                    "question": q["question"],
+                })
+        return {"questions": valid}
+    except (Exception,):
+        return {"questions": []}
 
 
 @router.post("/answers")

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BrandMark } from "@/app/_components/brand-mark";
+import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { SignOutButton } from "./signout-button";
 import { UploadZone } from "./upload";
 import { ResumeHistory } from "./history";
@@ -31,6 +32,8 @@ export default async function Dashboard() {
           </div>
 
           <div className="flex-1" />
+
+          <ThemeToggle />
 
           {/* JD credits chip */}
           <div className="flex items-center gap-1.5 rounded-full border border-line bg-sunken px-3 py-1 font-mono text-xs">

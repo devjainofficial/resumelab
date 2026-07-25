@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/app/_components/brand-mark";
+import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { Flow } from "./flow";
 
 export default function ResumePage({ params }: { params: { id: string } }) {
@@ -12,9 +13,10 @@ export default function ResumePage({ params }: { params: { id: string } }) {
             <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
           </div>
           <div className="flex-1" />
+          <ThemeToggle />
           <Link
             href="/dashboard"
-            className="text-sm text-muted transition hover:text-ink"
+            className="ml-3 text-sm text-muted transition hover:text-ink"
           >
             ← Dashboard
           </Link>

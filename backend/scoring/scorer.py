@@ -322,8 +322,8 @@ def score_resume(
     else:
         checks.append(Check(
             "keywords", "Job-description keyword coverage",
-            8, 15,
-            "no JD provided — add one for the full 15 points",
+            3, 15,
+            "no JD provided — paste a job description to score the full 15 points",
         ))
 
     value = round(sum(c.points for c in checks))

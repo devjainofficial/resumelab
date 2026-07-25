@@ -158,4 +158,8 @@ def refine_questions(
     # still applies: the LLM cannot invent questions about facts we never saw.
     by_id = {q["id"]: q for q in questions}
     kept = [by_id[q["id"]] for q in refined if isinstance(q, dict) and q.get("id") in by_id]
-    return (kept or questions)[:HARD_CAP]
+    # Only accept the LLM's reordering if it keeps ALL questions; otherwise
+    # the deterministic set stands (the LLM may reorder but not drop questions).
+    if len(kept) >= len(questions):
+        return kept[:HARD_CAP]
+    return questions[:HARD_CAP]

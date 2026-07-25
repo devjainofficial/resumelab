@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BrandMark } from "./_components/brand-mark";
 import { ResumeComparison } from "./_components/resume-comparison";
 import { BackToTop } from "./_components/back-to-top";
+import { ThemeToggle } from "./_components/theme-toggle";
 
 function GoogleIcon() {
   return (
@@ -32,9 +33,10 @@ export default function LandingPage() {
             <a href="#modes" className="transition hover:text-ink">Features</a>
           </nav>
 
+          <ThemeToggle />
           <Link
             href="/login"
-            className="ml-4 flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-sunken"
+            className="flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-sunken"
           >
             <GoogleIcon />
             Sign in
