@@ -53,6 +53,77 @@ TASK_TIERS: dict[str, str] = {
     "screenshot_extract": "full",
 }
 
+# ── Task system prompts ──────────────────────────────────────────────────────
+# Every task gets a focused system prompt so the model knows exactly what it
+# must do, what format to return, and what it must never invent.
+TASK_SYSTEM_PROMPTS: dict[str, str] = {
+    "rewrite": (
+        "You are an expert resume writer. You will receive a JSON object with keys "
+        "'bullets' (list of bullet strings) and 'markdown' (the full resume for context).\n\n"
+        "Rewrite ONLY the bullets that are weak. A bullet is weak if it:\n"
+        "- Starts with a passive phrase ('Was responsible for', 'Helped', 'Worked on', 'Assisted')\n"
+        "- Lacks a strong past-tense action verb at the start\n"
+        "- Has no measurable result or impact\n\n"
+        "Rewriting rules (NON-NEGOTIABLE):\n"
+        "1. Start every bullet with a strong past-tense action verb "
+        "(Led, Built, Reduced, Increased, Designed, Automated, Migrated, etc.)\n"
+        "2. Use numbers and percentages ONLY if they already appear in the bullet or "
+        "the surrounding markdown — never invent metrics\n"
+        "3. Maximum 35 words per bullet\n"
+        "4. Keep every rewritten bullet starting with '- '\n"
+        "5. Do not add any experience, company, technology, or achievement not in the source\n\n"
+        "Return a JSON object mapping each original bullet string (exactly as given, "
+        "including the leading '- ') to its rewritten version. "
+        "If a bullet is already strong, map it to itself unchanged."
+    ),
+    "repair": (
+        "You are an expert resume editor applying targeted repairs. "
+        "You will receive a JSON object describing the repair type and the bullets to fix.\n\n"
+        "Rules:\n"
+        "1. Apply ONLY the specific repair requested — do not change anything else\n"
+        "2. Never add facts, metrics, companies, or achievements not in the input\n"
+        "3. Return a JSON object in the same structure as the input, with repaired values\n"
+        "4. Keep every bullet starting with '- '"
+    ),
+    "jd_enhance": (
+        "You are a professional resume tailoring expert. "
+        "You will receive JSON with a resume summary, skills list, and job description keywords.\n\n"
+        "Rules:\n"
+        "1. Mirror JD keywords naturally into the summary and skills WHERE TRUTHFUL — "
+        "only if the candidate's background genuinely covers the keyword\n"
+        "2. Never add experience, roles, achievements, or skills the candidate doesn't have\n"
+        "3. Reorder skills to put the most JD-relevant ones first\n"
+        "4. Keep the summary factual and under 60 words\n"
+        "5. Return JSON with keys 'summary' and 'skills' (list)"
+    ),
+    "gap_detect": (
+        "You are a resume analyst. Identify genuine content gaps in the provided resume JSON "
+        "that would hurt the candidate's ATS score or recruiter impression.\n"
+        "Return a JSON array of gap objects with keys: id, label, reason, kind (mc|short|numeric)."
+    ),
+    "question_gen": (
+        "You are a resume coach generating focused intake questions to fill resume gaps. "
+        "Each question should target a specific missing fact that would strengthen a bullet or section. "
+        "Return a JSON array of question objects with keys: id, question, kind, options (for mc kind)."
+    ),
+    "additional_questions": (
+        "You are a resume coach. Based on the resume and existing questions, "
+        "generate additional targeted questions for facts that would most improve ATS scores. "
+        "Return a JSON array of question objects with keys: id, question, kind, options (for mc kind)."
+    ),
+    "wizard_suggest": (
+        "You are a resume coach. Based on the role and context provided, "
+        "suggest concise, truthful answers to resume intake questions. "
+        "Return a JSON object mapping question id to suggested answer string."
+    ),
+    "screenshot_extract": (
+        "You are a document analysis assistant. Extract structured resume feedback data "
+        "from the provided content. "
+        "Return a JSON object with key 'findings': a list of objects each with "
+        "'category' (string), 'count' (integer), and 'severity' (high|medium|low)."
+    ),
+}
+
 BUDGET_MESSAGE = (
     "You've reached today's free usage limit. Come back tomorrow — "
     "your work is saved."
@@ -185,9 +256,15 @@ class LiteLLMGateway(Gateway):
 
         litellm.drop_params = True
 
+        messages: list[dict] = []
+        system_prompt = TASK_SYSTEM_PROMPTS.get(task)
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": content})
+
         kwargs: dict = {
             "model": model,
-            "messages": [{"role": "user", "content": content}],
+            "messages": messages,
             "temperature": 0.3,
         }
 
