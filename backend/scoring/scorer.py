@@ -32,6 +32,13 @@ ACTION_VERB_HINTS = {
     "wrote", "tested", "deployed", "integrated", "analyzed", "won",
     "spearheaded", "orchestrated", "engineered", "pioneered", "transformed",
     "accelerated", "generated", "trained", "coached", "negotiated",
+    # expanded — common strong verbs not in the seed list
+    "revamped", "expanded", "executed", "initiated", "identified",
+    "formulated", "oversaw", "programmed", "resolved", "upgraded",
+    "converted", "consolidated", "simplified", "secured", "released",
+    "rebuilt", "proposed", "restructured", "evaluated", "enforced",
+    "enabled", "debugged", "configured", "audited", "directed",
+    "coordinated", "presented", "published", "defined", "designed",
 }
 
 # Phrases that signal passive / low-agency writing. Resume Worded penalizes
@@ -119,7 +126,7 @@ def _experience_bullets(markdown: str) -> list[str]:
 
 def _verb_first(bullet: str) -> bool:
     first = re.split(r"\W+", bullet.strip(), 1)[0].lower()
-    return first in ACTION_VERB_HINTS or first.endswith("ed")
+    return first in ACTION_VERB_HINTS
 
 
 def _count_weak_phrases(text: str) -> tuple[int, list[str]]:
@@ -208,15 +215,23 @@ def score_resume(
     else:
         checks.append(Check("verb_first", "Bullets start with strong action verbs", 0, 7, "no bullets found"))
 
-    # 6. Bullet length (3)
+    # 6. Bullet length — 8 to 40 words (3)
     if bullets:
-        over = [b for b in bullets if len(b.split()) > 40]
-        checks.append(Check(
-            "bullet_length", "Bullets at most 40 words", 3.0 if not over else 0.0, 3,
-            "all within limit" if not over else f"{len(over)} over 40 words",
-        ))
+        too_long = [b for b in bullets if len(b.split()) > 40]
+        too_short = [b for b in bullets if len(b.split()) < 8]
+        if too_long:
+            bl_pts = 0.0
+            bl_detail = f"{len(too_long)} bullet(s) exceed 40 words"
+        elif too_short:
+            thin_ratio = len(too_short) / len(bullets)
+            bl_pts = max(0.0, 3.0 - thin_ratio * 3.0)
+            bl_detail = f"{len(too_short)} thin bullet(s) under 8 words"
+        else:
+            bl_pts = 3.0
+            bl_detail = "all bullets 8-40 words"
+        checks.append(Check("bullet_length", "Bullets 8-40 words (not thin, not bloated)", bl_pts, 3, bl_detail))
     else:
-        checks.append(Check("bullet_length", "Bullets at most 40 words", 0, 3, "no bullets found"))
+        checks.append(Check("bullet_length", "Bullets 8-40 words (not thin, not bloated)", 0, 3, "no bullets found"))
 
     # 7. Verb variety (5)
     if bullets:
@@ -245,7 +260,7 @@ def score_resume(
     if exp_bullets:
         impact_ratio = sum(_has_impact_signal(b) for b in exp_bullets) / len(exp_bullets)
         # target 80% for full marks
-        pts = 15 * min(1.0, impact_ratio / 0.8)
+        pts = 15 * min(1.0, impact_ratio / 0.9)
         checks.append(Check(
             "achievement", "Bullets show measurable impact (numbers, %, results)",
             pts, 15,
@@ -322,8 +337,8 @@ def score_resume(
     else:
         checks.append(Check(
             "keywords", "Job-description keyword coverage",
-            3, 15,
-            "no JD provided — paste a job description to score the full 15 points",
+            0, 15,
+            "no JD provided — add one to unlock the full 15 points",
         ))
 
     value = round(sum(c.points for c in checks))
