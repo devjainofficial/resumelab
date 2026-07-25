@@ -1,10 +1,5 @@
-<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="32" height="32" rx="7" fill="#155E52"/>
-  <!-- Document outline -->
-  <rect x="5.5" y="6" width="12" height="17" rx="2" stroke="#F7F8F7" stroke-opacity="0.92" stroke-width="1.5"/>
-  <!-- Text lines -->
-  <path d="M8.5 10.5H14.5M8.5 13.5H14.5M8.5 16.5H12.5" stroke="#F7F8F7" stroke-opacity="0.85" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- 4-pointed sparkle -->
-  <path d="M25,6 L26,8 L28,9 L26,10 L25,12 L24,10 L22,9 L24,8 Z" fill="#82D6C8"/>
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="11" fill="#0D1915"/>
+  <polyline points="7,37 15,30 23,33 36,15" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="36" cy="15" r="4.5" fill="#3BFFCC"/>
 </svg>
