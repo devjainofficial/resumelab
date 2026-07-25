@@ -341,81 +341,131 @@ function TypeformWizard({
   );
 }
 
-const TEMPLATE_ACCENT: Record<string, string> = {
-  S1: "#1a1a1a", S2: "#0f172a", S3: "#1e40af", S4: "#1a1a1a",
+const TEMPLATE_SVGS: Record<string, string> = {
+  S1: `
+    <text x="47" y="10" text-anchor="middle" font-size="7.5" font-weight="700" letter-spacing="1" fill="#0a0a0a">FULL NAME</text>
+    <text x="47" y="15.5" text-anchor="middle" font-size="3.5" fill="#555">email · phone · linkedin · github</text>
+    <line x1="6" y1="18.5" x2="88" y2="18.5" stroke="#0a0a0a" stroke-width="0.6"/>
+    <text x="6" y="25" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">EDUCATION</text>
+    <line x1="6" y1="26.5" x2="88" y2="26.5" stroke="#0a0a0a" stroke-width="0.4"/>
+    <rect x="6" y="29" width="44" height="3" rx="1" fill="#374151" opacity="0.65"/>
+    <rect x="64" y="29" width="24" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
+    <rect x="8" y="35" width="55" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="45" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">EXPERIENCE</text>
+    <line x1="6" y1="46.5" x2="88" y2="46.5" stroke="#0a0a0a" stroke-width="0.4"/>
+    <rect x="6" y="49" width="48" height="3" rx="1" fill="#374151" opacity="0.65"/>
+    <rect x="60" y="49" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
+    <rect x="8" y="55" width="72" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="59" width="65" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="63" width="68" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="69" width="40" height="3" rx="1" fill="#374151" opacity="0.55"/>
+    <rect x="64" y="69" width="24" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>
+    <rect x="8" y="75" width="70" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="79" width="58" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="88" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">PROJECTS</text>
+    <line x1="6" y1="89.5" x2="88" y2="89.5" stroke="#0a0a0a" stroke-width="0.4"/>
+    <rect x="6" y="92" width="36" height="3" rx="1" fill="#374151" opacity="0.6"/>
+    <rect x="8" y="98" width="72" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="102" width="60" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="110" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">SKILLS</text>
+    <line x1="6" y1="111.5" x2="88" y2="111.5" stroke="#0a0a0a" stroke-width="0.4"/>
+    <rect x="6" y="114" width="80" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="119" width="58" height="2" rx="1" fill="#d1d5db"/>`,
+
+  S2: `
+    <text x="6" y="11" font-size="8" font-weight="700" fill="#0f172a">Full Name</text>
+    <line x1="6" y1="14.5" x2="88" y2="14.5" stroke="#1e40af" stroke-width="1.5"/>
+    <text x="6" y="20" font-size="3.5" fill="#64748b">email · phone · linkedin · github</text>
+    <rect x="6" y="24" width="80" height="2" rx="1" fill="#cbd5e1"/>
+    <rect x="6" y="28" width="62" height="2" rx="1" fill="#cbd5e1"/>
+    <text x="6" y="37" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">SKILLS</text>
+    <line x1="6" y1="38.5" x2="88" y2="38.5" stroke="#1e40af" stroke-width="0.4"/>
+    <rect x="6" y="41" width="78" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="45" width="55" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="53" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">EXPERIENCE</text>
+    <line x1="6" y1="54.5" x2="88" y2="54.5" stroke="#1e40af" stroke-width="0.4"/>
+    <rect x="6" y="57" width="44" height="3" rx="1" fill="#374151" opacity="0.7"/>
+    <rect x="60" y="57" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
+    <rect x="8" y="63" width="72" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="67" width="65" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="71" width="70" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="80" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">PROJECTS</text>
+    <line x1="6" y1="81.5" x2="88" y2="81.5" stroke="#1e40af" stroke-width="0.4"/>
+    <rect x="6" y="84" width="36" height="3" rx="1" fill="#374151" opacity="0.6"/>
+    <rect x="8" y="90" width="75" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="94" width="60" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="99" width="30" height="3" rx="1" fill="#374151" opacity="0.5"/>
+    <rect x="8" y="105" width="68" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="113" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">EDUCATION</text>
+    <line x1="6" y1="114.5" x2="88" y2="114.5" stroke="#1e40af" stroke-width="0.4"/>
+    <rect x="6" y="117" width="46" height="2.5" rx="1" fill="#374151" opacity="0.6"/>
+    <rect x="60" y="117" width="26" height="2.5" rx="1" fill="#9ca3af" opacity="0.4"/>
+    <rect x="6" y="122" width="54" height="2" rx="1" fill="#d1d5db"/>`,
+
+  S3: `
+    <text x="6" y="11" font-size="7.5" font-weight="700" fill="#0a0a0a">Full Name</text>
+    <text x="6" y="17" font-size="3.5" fill="#555">email · phone · linkedin</text>
+    <line x1="6" y1="20" x2="88" y2="20" stroke="#1e3a8a" stroke-width="1"/>
+    <rect x="6" y="24" width="80" height="2" rx="1" fill="#cbd5e1"/>
+    <rect x="6" y="28" width="62" height="2" rx="1" fill="#cbd5e1"/>
+    <text x="6" y="36" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e3a8a">EDUCATION</text>
+    <line x1="6" y1="37.5" x2="88" y2="37.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <rect x="6" y="40" width="48" height="3" rx="1" fill="#374151" opacity="0.7"/>
+    <rect x="62" y="40" width="26" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
+    <rect x="8" y="46" width="55" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="50" width="44" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="58" font-size="3.8" font-weight="700" letter-spacing="0.7" fill="#1e3a8a">PROJECTS &amp; INTERNSHIPS</text>
+    <line x1="6" y1="59.5" x2="88" y2="59.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <rect x="6" y="62" width="36" height="3" rx="1" fill="#374151" opacity="0.65"/>
+    <rect x="8" y="68" width="74" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="72" width="60" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="77" width="32" height="3" rx="1" fill="#374151" opacity="0.55"/>
+    <rect x="8" y="83" width="68" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="87" width="55" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="95" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e3a8a">SKILLS</text>
+    <line x1="6" y1="96.5" x2="88" y2="96.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <rect x="6" y="99" width="80" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="103" width="58" height="2" rx="1" fill="#d1d5db"/>`,
+
+  S4: `
+    <text x="6" y="11" font-size="7.5" font-weight="700" fill="#0a0a0a">Full Name</text>
+    <text x="6" y="17" font-size="3.5" fill="#555">email · phone · linkedin</text>
+    <line x1="6" y1="20" x2="88" y2="20" stroke="#333" stroke-width="0.8"/>
+    <rect x="6" y="23" width="80" height="2" rx="1" fill="#cbd5e1"/>
+    <rect x="6" y="27" width="65" height="2" rx="1" fill="#cbd5e1"/>
+    <rect x="6" y="31" width="50" height="2" rx="1" fill="#cbd5e1"/>
+    <text x="6" y="39" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">CORE SKILLS</text>
+    <line x1="6" y1="40.5" x2="88" y2="40.5" stroke="#333" stroke-width="0.4"/>
+    <rect x="6" y="43" width="36" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <rect x="6" y="48" width="32" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <rect x="6" y="53" width="38" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <rect x="47" y="43" width="30" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <rect x="47" y="48" width="35" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <rect x="47" y="53" width="28" height="3.5" rx="1.75" fill="#e5e7eb"/>
+    <text x="6" y="64" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">EXPERIENCE</text>
+    <line x1="6" y1="65.5" x2="88" y2="65.5" stroke="#333" stroke-width="0.4"/>
+    <rect x="6" y="68" width="44" height="3" rx="1" fill="#374151" opacity="0.7"/>
+    <rect x="60" y="68" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
+    <rect x="8" y="74" width="72" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="78" width="65" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="82" width="70" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="6" y="88" width="38" height="3" rx="1" fill="#374151" opacity="0.55"/>
+    <rect x="56" y="88" width="32" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>
+    <rect x="8" y="94" width="70" height="2" rx="1" fill="#d1d5db"/>
+    <rect x="8" y="98" width="58" height="2" rx="1" fill="#d1d5db"/>
+    <text x="6" y="106" font-size="4" font-weight="700" letter-spacing="0.9" fill="#0a0a0a">EDUCATION</text>
+    <line x1="6" y1="107.5" x2="88" y2="107.5" stroke="#333" stroke-width="0.4"/>
+    <rect x="6" y="110" width="48" height="2.5" rx="1" fill="#374151" opacity="0.6"/>
+    <rect x="62" y="110" width="26" height="2.5" rx="1" fill="#9ca3af" opacity="0.4"/>
+    <rect x="6" y="115" width="55" height="2" rx="1" fill="#d1d5db"/>`,
 };
 
-function TemplateMiniSvg({ structureId, sections }: { structureId: string; sections: string[] }) {
-  const accent = TEMPLATE_ACCENT[structureId] ?? "#1a1a1a";
-  const isJake = structureId === "S1";
-  const isModern = structureId === "S3";
-  const accentSection = isModern ? accent : "#1a1a1a";
-
-  const secRows = sections.filter((s) => s !== "contact").slice(0, 5);
-  const getSecHeight = (sec: string) => {
-    if (sec === "experience" || sec === "projects_and_internships") return 54;
-    if (sec === "skills" || sec === "core_skills_expanded") return 20;
-    return 30;
-  };
-
-  let y = isJake ? 48 : 50;
-  const elements: string[] = [];
-
-  for (const sec of secRows) {
-    const h = getSecHeight(sec);
-    const label = (SECTION_LABELS[sec] || sec).toUpperCase();
-    elements.push(
-      `<text x="8" y="${y}" font-size="5" font-weight="700" fill="${accentSection}" letter-spacing="0.8">${label}</text>`,
-      `<line x1="8" y1="${y + 2}" x2="86" y2="${y + 2}" stroke="${accentSection}" stroke-width="0.5" opacity="0.5"/>`,
-    );
-    if (sec === "experience" || sec === "projects_and_internships") {
-      elements.push(
-        `<rect x="8" y="${y + 5}" width="48" height="3.5" rx="1" fill="#374151" opacity="0.6"/>`,
-        `<rect x="62" y="${y + 5}" width="24" height="3.5" rx="1" fill="#9ca3af" opacity="0.5"/>`,
-        `<rect x="10" y="${y + 12}" width="72" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="10" y="${y + 17}" width="66" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="10" y="${y + 22}" width="58" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="8" y="${y + 30}" width="44" height="3" rx="1" fill="#374151" opacity="0.5"/>`,
-        `<rect x="58" y="${y + 30}" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>`,
-        `<rect x="10" y="${y + 37}" width="70" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="10" y="${y + 42}" width="55" height="2.5" rx="1" fill="#d1d5db"/>`,
-      );
-    } else if (sec === "skills" || sec === "core_skills_expanded") {
-      elements.push(
-        `<rect x="8" y="${y + 6}" width="78" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="8" y="${y + 12}" width="55" height="2.5" rx="1" fill="#d1d5db"/>`,
-      );
-    } else if (sec === "education") {
-      elements.push(
-        `<rect x="8" y="${y + 5}" width="44" height="3" rx="1" fill="#374151" opacity="0.6"/>`,
-        `<rect x="60" y="${y + 5}" width="26" height="3" rx="1" fill="#9ca3af" opacity="0.4"/>`,
-        `<rect x="8" y="${y + 12}" width="60" height="2.5" rx="1" fill="#d1d5db"/>`,
-      );
-    } else {
-      elements.push(
-        `<rect x="8" y="${y + 5}" width="78" height="2.5" rx="1" fill="#d1d5db"/>`,
-        `<rect x="8" y="${y + 11}" width="64" height="2.5" rx="1" fill="#d1d5db"/>`,
-      );
-    }
-    y += h + 4;
-  }
-
-  const nameBlock = isJake
-    ? `<text x="47" y="16" font-size="8" font-weight="700" text-anchor="middle" fill="#0a0a0a">FULL NAME</text>
-       <text x="47" y="22" font-size="4.5" text-anchor="middle" fill="#555">email · phone · linkedin · github</text>
-       <line x1="8" y1="26" x2="86" y2="26" stroke="#000" stroke-width="0.6"/>`
-    : isModern
-    ? `<text x="8" y="16" font-size="8" font-weight="700" fill="#0f172a">Full Name</text>
-       <line x1="8" y1="20" x2="86" y2="20" stroke="${accent}" stroke-width="1.5"/>
-       <text x="8" y="27" font-size="4.5" fill="#64748b">email · phone · linkedin</text>`
-    : `<text x="8" y="16" font-size="8" font-weight="700" fill="#0a0a0a">Full Name</text>
-       <text x="8" y="23" font-size="4.5" fill="#555">email | phone | linkedin | github</text>
-       <line x1="8" y1="26" x2="86" y2="26" stroke="#222" stroke-width="1"/>`;
-
+function TemplateMiniSvg({ structureId }: { structureId: string; sections?: string[] }) {
+  const inner = TEMPLATE_SVGS[structureId] ?? TEMPLATE_SVGS.S1;
   return (
     <svg viewBox="0 0 94 130" xmlns="http://www.w3.org/2000/svg" className="w-full">
       <rect width="94" height="130" fill="white"/>
-      <g dangerouslySetInnerHTML={{ __html: nameBlock + elements.join("") }} />
+      <g dangerouslySetInnerHTML={{ __html: inner }} />
     </svg>
   );
 }
@@ -454,7 +504,7 @@ function TemplateSelector({
                     : "border-line hover:border-line-strong"
                 }`}
               >
-                <div className="bg-surface p-1.5 shadow-sm">
+                <div className="p-1.5 shadow-sm" style={{ background: "#fff" }}>
                   <TemplateMiniSvg structureId={s.id} sections={s.section_order} />
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-ink/0 opacity-0 transition group-hover:bg-ink/10 group-hover:opacity-100">
@@ -511,7 +561,7 @@ function TemplateSelector({
                 </svg>
               </button>
             </div>
-            <div className="p-4">
+            <div className="p-4" style={{ background: "#fff" }}>
               <TemplateMiniSvg structureId={zoomed.id} sections={zoomed.section_order} />
             </div>
             <div className="flex gap-2 border-t border-line px-4 py-3">
@@ -587,7 +637,7 @@ function ResumePreview({
           srcDoc={html}
           title="Resume preview"
           className="w-full rounded-lg border border-line shadow-md"
-          style={{ height: "1060px" }}
+          style={{ height: "1180px" }}
           sandbox=""
         />
       ) : (
