@@ -12,6 +12,8 @@ from app.auth import get_current_user
 from app.supa import Supa, get_supa
 from parsing.extract import UnsupportedFileType, extract_text
 from parsing.parser import parse_resume
+from rewrite.composer import DRAFT_WATERMARK, compose_markdown
+from scoring.scorer import score_resume
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -156,6 +158,103 @@ async def reparse_resume(
     return {"resume_id": resume_id, "parsed": parsed, "reparsed": True}
 
 
+@router.post("/quick-score")
+async def quick_score_resume(
+    file: UploadFile,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    """Parse and score any resume instantly — no wizard, no rewrite.
+
+    Returns the ATS score with breakdown plus the resume_id so the frontend
+    can offer a direct 'Improve with Resume Lab' link into the full flow.
+    Score is persisted on the resumes row for the vault list.
+    """
+    filename = file.filename or "resume"
+    if not filename.lower().endswith(ALLOWED_SUFFIXES):
+        raise HTTPException(422, "Only PDF and DOCX files are supported")
+
+    data = await file.read()
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "File is larger than 5 MB")
+    if not data:
+        raise HTTPException(422, "Empty file")
+
+    user_id = user["id"]
+    file_hash = hashlib.sha256(data).hexdigest()
+
+    # Dedup: same user + same bytes → re-use the existing parse
+    existing = await supa.select(
+        "resumes",
+        {"user_id": f"eq.{user_id}", "file_hash": f"eq.{file_hash}",
+         "select": "id,parsed_json,filename,quick_score,quick_score_checks"},
+    )
+    if existing:
+        resume_id = existing[0]["id"]
+        parsed = existing[0]["parsed_json"]
+        # Re-use cached quick score if available
+        if existing[0].get("quick_score") is not None:
+            return {
+                "resume_id": resume_id,
+                "score": existing[0]["quick_score"],
+                "checks": existing[0]["quick_score_checks"],
+                "filename": existing[0]["filename"],
+                "cached": True,
+            }
+    else:
+        try:
+            text = extract_text(filename, data)
+        except UnsupportedFileType:
+            raise HTTPException(422, "Only PDF and DOCX files are supported")
+        except Exception:
+            raise HTTPException(422, "Could not read this file. Is it a valid PDF/DOCX?")
+
+        if len(text.strip()) < 50:
+            raise HTTPException(
+                422,
+                "No readable text found. If this is a scanned/image PDF, export a text-based one.",
+            )
+
+        parsed = parse_resume(text)
+
+        suffix = ".pdf" if filename.lower().endswith(".pdf") else ".docx"
+        content_type = (
+            "application/pdf" if suffix == ".pdf"
+            else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+        await supa.upload_file("resumes", f"{user_id}/{file_hash}{suffix}", data, content_type)
+
+        row = await supa.insert(
+            "resumes",
+            {"user_id": user_id, "file_hash": file_hash, "filename": filename, "parsed_json": parsed},
+        )
+        resume_id = row["id"]
+
+    # Compose a plain markdown from the parsed data (no wizard answers, Classic structure).
+    # Strip the DRAFT line — it's not resume content, it would skew parse-back fidelity.
+    markdown, _, _ = compose_markdown(parsed, [], "S1")
+    clean_md = "\n".join(
+        l for l in markdown.splitlines() if not l.startswith(f"> {DRAFT_WATERMARK}")
+    ).strip() + "\n"
+
+    result = score_resume(clean_md)
+
+    # Persist so the vault list can show scores without rescoring every time
+    await supa.update(
+        "resumes",
+        {"id": f"eq.{resume_id}"},
+        {"quick_score": result["value"], "quick_score_checks": result["checks"]},
+    )
+
+    return {
+        "resume_id": resume_id,
+        "score": result["value"],
+        "checks": result["checks"],
+        "filename": filename,
+        "cached": False,
+    }
+
+
 @router.get("")
 async def list_resumes(
     user: dict = Depends(get_current_user),
@@ -165,7 +264,7 @@ async def list_resumes(
         "resumes",
         {
             "user_id": f"eq.{user['id']}",
-            "select": "id,filename,created_at",
+            "select": "id,filename,created_at,quick_score",
             "order": "created_at.desc",
         },
     )

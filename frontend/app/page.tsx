@@ -71,12 +71,12 @@ export default function LandingPage() {
                   <GoogleIcon />
                   Get started free
                 </Link>
-                <a
-                  href="#how-it-works"
+                <Link
+                  href="/score"
                   className="flex items-center gap-2 rounded-md border border-line px-5 py-2.5 text-sm font-medium text-ink-soft transition hover:bg-sunken hover:text-ink"
                 >
-                  See how it works
-                </a>
+                  Check my score free →
+                </Link>
               </div>
               <p className="mt-6 font-mono text-xs text-muted">
                 Free for Resume Lab core &amp; Score Repair · JD Enhancer uses credits

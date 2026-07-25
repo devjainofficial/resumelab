@@ -8,6 +8,7 @@ type Resume = {
   id: string;
   filename: string;
   created_at: string;
+  quick_score?: number | null;
 };
 
 type Version = {
@@ -17,6 +18,19 @@ type Version = {
 };
 
 type ResumeWithVersion = Resume & { latest_version?: Version };
+
+function ScoreChip({ score }: { score?: number | null }) {
+  if (score == null) return null;
+  const color =
+    score >= 80 ? "text-brand bg-brand-tint"
+    : score >= 60 ? "text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/40"
+    : "text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40";
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold tabular-nums ${color}`}>
+      {score}
+    </span>
+  );
+}
 
 function StatusBadge({ status }: { status?: "draft" | "final" }) {
   if (status === "final") {
@@ -126,8 +140,9 @@ export function ResumeHistory() {
                   </div>
                 </div>
 
-                {/* Right: badge + chevron */}
+                {/* Right: score chip + status badge + chevron */}
                 <div className="ml-4 flex shrink-0 items-center gap-3">
+                  <ScoreChip score={r.quick_score} />
                   <StatusBadge status={r.latest_version?.status} />
                   <svg
                     className="h-4 w-4 text-muted"
