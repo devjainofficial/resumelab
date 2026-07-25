@@ -150,19 +150,54 @@ def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
     return entries
 
 
+_YEAR_RE = re.compile(r"\b(19|20)\d{2}\b")
+_LOCATION_PAREN_RE = re.compile(r"\(.*(?:India|USA|UK|Canada|Germany|Australia|LLC|Inc|Ltd|Corp|Pvt).*\)", re.I)
+
+
 def _parse_skills(lines: list[str]) -> list[str]:
     skills: list[str] = []
     for line in lines:
         cleaned = _clean_bullet(line)
         if not cleaned:
             continue
-        # "Category: a, b, c" keeps the category as context per skill line.
+        # "Category: a, b, c" strips the category label before splitting.
         body = cleaned.split(":", 1)[1] if ":" in cleaned and len(cleaned.split(":", 1)[0]) < 30 else cleaned
         for part in re.split(r"[,|/;]| {2,}", body):
-            part = part.strip(" .•")
-            if part and len(part) < 60:
-                skills.append(part)
+            part = part.strip(" .•–-")
+            if not part:
+                continue
+            # Single characters are PDF extraction artifacts (scattered glyphs).
+            if len(part) <= 1:
+                continue
+            # Items of 60+ chars are garbled sentence fragments from experience
+            # section bleeding in when the section heading wasn't detected.
+            if len(part) >= 60:
+                continue
+            # Dates / year numbers mean experience content bled into skills.
+            if _YEAR_RE.search(part):
+                continue
+            # "Company Name (City, Country)" patterns are experience headers.
+            if _LOCATION_PAREN_RE.search(part):
+                continue
+            skills.append(part)
     return skills
+
+
+def _dedupe_summary_prefix(summary: str) -> str:
+    """Remove a leading phrase that immediately repeats itself.
+
+    Some PDFs render a bold label ("Software Engineer") followed by summary
+    text starting with the same words ("Software Engineer with experience…").
+    pypdf / fitz concatenate both into one string, producing the duplication.
+    We detect prefix repetition of 2-7 words and strip the first occurrence.
+    """
+    words = summary.split()
+    if len(words) < 4:
+        return summary
+    for n in range(2, min(8, len(words) // 2 + 1)):
+        if words[:n] == words[n : 2 * n]:
+            return " ".join(words[n:])
+    return summary
 
 
 def parse_resume(text: str) -> dict[str, Any]:
@@ -203,6 +238,7 @@ def parse_resume(text: str) -> dict[str, Any]:
             unclassified.append(line.strip())
 
     summary_lines = [l.strip() for l in sections_raw.get("summary", []) if l.strip()]
+    summary_text = _dedupe_summary_prefix(" ".join(summary_lines)) if summary_lines else None
     bullets_total = sum(1 for l in lines if BULLET_RE.match(l))
 
     parsed: dict[str, Any] = {
@@ -214,7 +250,7 @@ def parse_resume(text: str) -> dict[str, Any]:
             "github": github.group(0) if github else None,
         },
         "sections": {
-            "summary": " ".join(summary_lines) or None,
+            "summary": summary_text,
             "skills": _parse_skills(sections_raw.get("skills", [])),
             "experience": _split_entries(sections_raw.get("experience", [])),
             "education": _split_entries(sections_raw.get("education", [])),
