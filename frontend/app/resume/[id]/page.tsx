@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/app/_components/brand-mark";
 import { Flow } from "./flow";
 
 export default function ResumePage({ params }: { params: { id: string } }) {
@@ -7,9 +8,7 @@ export default function ResumePage({ params }: { params: { id: string } }) {
       <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
           <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand font-serif text-sm font-bold text-brand-on">
-              R
-            </div>
+            <BrandMark size={28} />
             <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
           </div>
           <div className="flex-1" />

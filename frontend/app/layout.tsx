@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "ResumeLab — ATS-ready resumes, no fabrication",
   description:
     "Build a truthful, ATS-strong resume in minutes. We never invent facts, metrics, or achievements.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
   other: {
     commit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
   },

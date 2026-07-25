@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { AnimatedScoreRing } from "./_components/animated-score-ring";
+import { BrandMark } from "./_components/brand-mark";
+import { ResumeComparison } from "./_components/resume-comparison";
+import { BackToTop } from "./_components/back-to-top";
 
 function GoogleIcon() {
   return (
@@ -16,14 +18,12 @@ export default function LandingPage() {
   return (
     <>
       {/* ── NAV ── */}
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur-md">
+      <header id="top" className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-6">
-          <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand font-serif text-sm font-bold text-brand-on">
-              R
-            </div>
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark size={28} />
             <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
-          </div>
+          </Link>
 
           <div className="flex-1" />
 
@@ -43,16 +43,18 @@ export default function LandingPage() {
       </header>
 
       {/* ── HERO ── */}
-      <section className="dot-grid relative overflow-hidden border-b border-line bg-paper py-24">
+      <section className="dot-grid relative overflow-hidden border-b border-line bg-paper py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+
             {/* Text side */}
             <div>
               <p className="mb-4 font-mono text-xs uppercase tracking-widest text-brand">
                 Resume Lab · Score Repair · JD Enhancer
               </p>
               <h1 className="mb-5 font-serif text-5xl font-medium leading-[1.1] tracking-tight text-ink">
-                Your resume,<br />truthfully better.
+                Your resume,<br />
+                <em className="not-italic text-brand">truthfully</em> better.
               </h1>
               <p className="mb-8 max-w-md text-base leading-relaxed text-ink-soft">
                 Upload your resume, answer a few focused questions, and get a
@@ -79,14 +81,12 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Score ring side */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="rounded-xl border border-line bg-surface p-8 shadow-sm">
-                <p className="mb-6 text-center font-mono text-xs uppercase tracking-widest text-muted">
-                  Real result · one session
-                </p>
-                <AnimatedScoreRing />
-              </div>
+            {/* Before/after resume comparison */}
+            <div>
+              <ResumeComparison />
+              <p className="mt-2 text-center font-mono text-xs text-muted">
+                Real result · drag the handle to compare before &amp; after
+              </p>
             </div>
           </div>
         </div>
@@ -224,10 +224,7 @@ export default function LandingPage() {
               "Generate a FINAL resume with open placeholder gaps",
               "Call an LLM when deterministic logic is sufficient — and log every call that does happen",
             ].map((promise) => (
-              <div
-                key={promise}
-                className="flex gap-3 rounded-lg border border-line bg-surface p-4"
-              >
+              <div key={promise} className="flex gap-3 rounded-lg border border-line bg-surface p-4">
                 <span className="mt-0.5 shrink-0 font-mono text-sm text-critical" aria-hidden="true">
                   ✕
                 </span>
@@ -259,10 +256,18 @@ export default function LandingPage() {
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-line bg-paper py-8">
-        <div className="mx-auto max-w-5xl px-6 text-center font-mono text-xs text-muted">
-          ResumeLab · Built on truth · Your data never trains a model
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark size={20} />
+            <span className="font-mono text-xs text-muted">ResumeLab</span>
+          </Link>
+          <p className="font-mono text-xs text-muted">
+            Built on truth · Your data never trains a model
+          </p>
         </div>
       </footer>
+
+      <BackToTop />
     </>
   );
 }

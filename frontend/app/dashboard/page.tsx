@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BrandMark } from "@/app/_components/brand-mark";
 import { SignOutButton } from "./signout-button";
 import { UploadZone } from "./upload";
 import { ResumeHistory } from "./history";
@@ -25,9 +26,7 @@ export default async function Dashboard() {
       <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-4xl items-center gap-3 px-6">
           <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand font-serif text-sm font-bold text-brand-on">
-              R
-            </div>
+            <BrandMark size={28} />
             <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
           </div>
 
