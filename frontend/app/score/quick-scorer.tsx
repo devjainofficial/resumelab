@@ -151,7 +151,7 @@ export function QuickScorer() {
           <div className="flex flex-col items-center gap-1 mb-6">
             <ScoreRing score={result.score} />
             <p className="mt-2 text-xs text-muted truncate max-w-xs text-center" title={result.filename}>
-              {result.filename}{result.cached && " · cached"}
+              {result.filename}
             </p>
           </div>
 
