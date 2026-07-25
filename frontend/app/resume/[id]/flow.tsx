@@ -1119,63 +1119,19 @@ export function Flow({ resumeId }: { resumeId: string }) {
           )}
 
           {/* Action bar */}
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-sunken/60 p-3">
-            <span
-              className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${
-                status === "final"
-                  ? "bg-brand-tint text-brand-strong"
-                  : "bg-caution-tint text-caution"
-              }`}
-            >
-              {status.toUpperCase()}
-            </span>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => download("pdf")}
-                disabled={!!busy}
-                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
+          <div className="rounded-xl border border-line bg-sunken/60 p-3 space-y-2">
+            {/* Row 1: status + primary CTAs */}
+            <div className="flex items-center gap-2">
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 font-mono text-xs font-semibold ${
+                  status === "final"
+                    ? "bg-brand-tint text-brand-strong"
+                    : "bg-caution-tint text-caution"
+                }`}
               >
-                {busy === "pdf" ? "…" : "PDF"}
-              </button>
-              <button
-                onClick={() => download("docx")}
-                disabled={!!busy}
-                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
-              >
-                {busy === "docx" ? "…" : "DOCX"}
-              </button>
-            </div>
-
-            {/* Template switcher */}
-            <select
-              value={structureId}
-              onChange={async (e) => {
-                const prevId = structureId;
-                const newId = e.target.value;
-                setStructureId(newId);
-                const ok = await run("template-switch", async () => {
-                  await api(`/versions/${versionId}/structure`, {
-                    method: "PATCH",
-                    body: JSON.stringify({ structure_id: newId }),
-                  });
-                });
-                if (ok) {
-                  recompose();
-                } else {
-                  setStructureId(prevId);
-                }
-              }}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-soft"
-            >
-              {structures.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="ml-auto flex gap-2">
+                {status.toUpperCase()}
+              </span>
+              <div className="flex-1" />
               <button
                 onClick={startEditing}
                 disabled={!!busy || editing}
@@ -1191,6 +1147,49 @@ export function Flow({ resumeId }: { resumeId: string }) {
               >
                 {busy === "score" ? "Scoring…" : "Get ATS Score"}
               </button>
+            </div>
+            {/* Row 2: downloads + template switcher */}
+            <div className="flex flex-wrap items-center gap-2 border-t border-line/50 pt-2">
+              <button
+                onClick={() => download("pdf")}
+                disabled={!!busy}
+                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
+              >
+                {busy === "pdf" ? "…" : "PDF"}
+              </button>
+              <button
+                onClick={() => download("docx")}
+                disabled={!!busy}
+                className="rounded-lg border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:bg-sunken disabled:opacity-40"
+              >
+                {busy === "docx" ? "…" : "DOCX"}
+              </button>
+              <select
+                value={structureId}
+                onChange={async (e) => {
+                  const prevId = structureId;
+                  const newId = e.target.value;
+                  setStructureId(newId);
+                  const ok = await run("template-switch", async () => {
+                    await api(`/versions/${versionId}/structure`, {
+                      method: "PATCH",
+                      body: JSON.stringify({ structure_id: newId }),
+                    });
+                  });
+                  if (ok) {
+                    recompose();
+                  } else {
+                    setStructureId(prevId);
+                  }
+                }}
+                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-soft"
+              >
+                {structures.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1344,7 +1343,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                     key={c.id}
                     className="flex items-center justify-between gap-4 rounded-lg bg-sunken px-3 py-2"
                   >
-                    <span className="text-ink-soft">
+                    <span className="min-w-0 text-ink-soft">
                       {c.label}{" "}
                       <span className="text-muted">— {c.detail}</span>
                     </span>

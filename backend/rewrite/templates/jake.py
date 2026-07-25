@@ -35,6 +35,8 @@ body {
   line-height: 1.25;
   color: #000;
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .watermark {
   background: #fff7ed;
@@ -86,7 +88,7 @@ body {
   gap: 12pt;
   align-items: baseline;
 }
-.entry-title { font-weight: 700; font-size: 10.5pt; }
+.entry-title { font-weight: 700; font-size: 10.5pt; flex: 1; min-width: 0; }
 .entry-date { font-style: italic; font-size: 10pt; white-space: nowrap; }
 .entry-sub { font-style: italic; font-size: 10pt; }
 .entry-loc { font-style: italic; font-size: 10pt; white-space: nowrap; }

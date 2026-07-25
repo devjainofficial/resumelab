@@ -35,6 +35,8 @@ body {
   line-height: 1.3;
   color: #1a1a1a;
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .watermark {
   background: #fff7ed;
@@ -81,6 +83,8 @@ body {
 .entry-title {
   font-weight: 700;
   font-size: 10pt;
+  flex: 1;
+  min-width: 0;
 }
 .entry-title .sub {
   font-weight: 400;

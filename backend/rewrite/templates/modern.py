@@ -36,6 +36,8 @@ body {{
   line-height: 1.35;
   color: #1f2937;
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }}
 .watermark {{
   background: #fff7ed;
@@ -87,6 +89,8 @@ body {{
   font-weight: 600;
   font-size: 10.5pt;
   color: #0f172a;
+  flex: 1;
+  min-width: 0;
 }}
 .entry-date {{
   font-size: 9.5pt;
