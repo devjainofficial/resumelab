@@ -1,12 +1,11 @@
 """Admin-only endpoints: stats dashboard, payment approval, user management.
 
-Protected by ADMIN_EMAIL env var — only the user whose email matches gets
-access. No separate admin table or role needed.
+Access is controlled by profiles.is_admin — flip it in the Supabase table
+editor. No env var needed; any number of admins can be granted this way.
 """
 
 from __future__ import annotations
 
-import os
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -17,9 +16,14 @@ from app.supa import Supa, get_supa
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-def _require_admin(user: dict = Depends(get_current_user)) -> dict:
-    admin_email = os.environ.get("ADMIN_EMAIL", "")
-    if not admin_email or user.get("email") != admin_email:
+async def _require_admin(
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    rows = await supa.select(
+        "profiles", {"id": f"eq.{user['id']}", "select": "is_admin"}
+    )
+    if not rows or not rows[0].get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin access only")
     return user
 
