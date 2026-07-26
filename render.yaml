@@ -29,6 +29,8 @@ services:
         sync: false
       - key: AZURE_OPENAI_API_VERSION
         sync: false
+      - key: ADMIN_EMAIL
+        sync: false
       - key: DAILY_TOKEN_CAP_USER
         value: "150000"
       - key: DAILY_TOKEN_CAP_GLOBAL
