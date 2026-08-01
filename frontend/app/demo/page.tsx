@@ -43,14 +43,13 @@ function DemoLoginForm() {
         throw new Error(body.detail ?? `Error ${resp.status}`);
       }
 
-      const { token, email } = await resp.json();
+      const { token } = await resp.json();
 
-      // 2. Verify the OTP/magic-link token with Supabase to get a real session
+      // 2. Verify the magic-link token hash — email must NOT be passed here
       const supabase = createClient();
       const { error: oauthError } = await supabase.auth.verifyOtp({
         type: "magiclink",
         token_hash: token,
-        email,
       });
 
       if (oauthError) throw new Error(oauthError.message);
