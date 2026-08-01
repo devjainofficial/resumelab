@@ -1,21 +1,40 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { BrandMark } from "./_components/brand-mark";
-import { ResumeComparison } from "./_components/resume-comparison";
 import { BackToTop } from "./_components/back-to-top";
-import { ThemeToggle } from "./_components/theme-toggle";
-import { QuickScorer } from "./score/quick-scorer";
+import { FeatureTabs } from "./_components/feature-tabs";
 
-const DARK_BG = "#0B0D0B";
-const DARK_BORDER = "rgba(255,255,255,0.07)";
-const DARK_TEXT = "#F1F3F0";
-const DARK_MUTED = "rgba(241,243,240,0.55)";
-const ACCENT = "#49AE9E";
-const ACCENT_ON = "#0B0D0B";
-const DOT_GRID: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(73,174,158,0.13) 1px, transparent 1px)",
-  backgroundSize: "28px 28px",
+// ─── design tokens (hardcoded — marketing page is always light) ───────────────
+// Do NOT use CSS-variable-based Tailwind classes (bg-paper, text-ink, etc.)
+// on this page; those classes respect the user's dark-mode preference but this
+// page is intentionally always-light regardless of OS/app theme setting.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const T = {
+  text:         "#0F172A",   // slate-900
+  soft:         "#475569",   // slate-600
+  muted:        "#94A3B8",   // slate-400
+  bg:           "#FFFFFF",
+  subtle:       "#F8FAFC",   // slate-50
+  border:       "rgba(15,23,42,0.07)",
+  brand:        "#0F766E",   // teal-700
+  brandVivid:   "#14B8A6",   // teal-400
+  green:        "#10B981",   // emerald-500
+  amber:        "#F59E0B",   // amber-500
+  red:          "#EF4444",   // red-500
+  btnGrad:      "linear-gradient(135deg, #0F766E 0%, #2563EB 100%)",
+  btnShadow:    "0 4px 20px rgba(15,118,110,0.28), 0 2px 8px rgba(15,118,110,0.14)",
+} as const;
+
+const HERO_BG: CSSProperties = {
+  background: [
+    "radial-gradient(ellipse 100% 80% at 12% -10%, rgba(20,184,166,0.14) 0%, transparent 55%)",
+    "radial-gradient(ellipse 80% 60% at 88%  -5%, rgba(99,102,241,0.10) 0%, transparent 50%)",
+    "#FFFFFF",
+  ].join(", "),
 };
+
+// ─── shared primitives ────────────────────────────────────────────────────────
 
 function GoogleIcon() {
   return (
@@ -28,513 +47,551 @@ function GoogleIcon() {
   );
 }
 
-function CheckIcon() {
+function ArrowRight({ size = 16 }: { size?: number }) {
   return (
-    <svg className="h-3 w-3 text-brand" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M13.485 1.929L5.5 9.914 2.515 6.929A1 1 0 001.1 8.343l3.693 3.693a1 1 0 001.414 0l8.692-8.693a1 1 0 00-1.414-1.414z" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
   );
 }
 
-/* ── static criterion preview used in feature section ──────────────────────── */
-function CriteriaPreview() {
-  const items = [
-    { label: "Impact",     score: 14, max: 27 },
-    { label: "Language",   score: 18, max: 22 },
-    { label: "Depth",      score: 16, max: 19 },
-    { label: "Structure",  score: 12, max: 17 },
-    { label: "Job match",  score:  0, max: 15 },
-  ];
-  const total = items.reduce((s, i) => s + i.score, 0);
-
-  function barColor(pct: number) {
-    if (pct >= 0.8) return "#22c55e";
-    if (pct >= 0.5) return "#f59e0b";
-    if (pct === 0)  return "rgba(255,255,255,0.12)";
-    return "#ef4444";
-  }
-
+// macOS window chrome (traffic-light dots + monospace title)
+function WindowChrome({ title }: { title: string }) {
   return (
-    <div
-      className="overflow-hidden rounded-2xl shadow-2xl"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="h-2 w-2 rounded-full bg-red-500/60" />
-          <div className="h-2 w-2 rounded-full bg-amber-500/60" />
-          <div className="h-2 w-2 rounded-full bg-green-500/60" />
-        </div>
-        <span className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-          resume_v2.pdf
-        </span>
-        <div className="flex items-baseline gap-1">
-          <span className="font-mono text-2xl font-bold text-amber-400">{total}</span>
-          <span className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>/100</span>
-        </div>
-      </div>
-
-      {/* Criteria bars */}
-      <div className="space-y-3.5 p-5">
-        {items.map((c) => {
-          const pct = c.max > 0 ? c.score / c.max : 0;
-          return (
-            <div key={c.label}>
-              <div className="mb-1.5 flex justify-between text-xs">
-                <span style={{ color: "rgba(255,255,255,0.75)" }} className="font-medium">
-                  {c.label}
-                </span>
-                <span className="font-mono tabular-nums" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  {c.score}/{c.max}
-                </span>
-              </div>
-              <div
-                className="h-1.5 overflow-hidden rounded-full"
-                style={{ background: "rgba(255,255,255,0.08)" }}
-              >
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${pct * 100}%`, background: barColor(pct) }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Tips */}
-      <div
-        className="space-y-2 px-5 pb-5 pt-2"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
-      >
-        <p className="text-xs font-medium text-amber-400">
-          Fix: add team size, %, or latency numbers to 5 bullets → +8 pts
-        </p>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-          Job match: paste a JD above to unlock +15 pts
-        </p>
-      </div>
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "10px 14px",
+      background: "#F3F4F6",
+      borderBottom: `1px solid ${T.border}`,
+    }}>
+      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F57", display: "block", flexShrink: 0 }} />
+      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FEBC2E", display: "block", flexShrink: 0 }} />
+      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28C840", display: "block", flexShrink: 0 }} />
+      <span style={{
+        flex: 1, textAlign: "center",
+        fontSize: 11, color: T.muted,
+        fontFamily: "monospace",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        margin: "0 8px",
+      }}>
+        {title}
+      </span>
     </div>
   );
 }
 
-/* ── static score repair preview ───────────────────────────────────────────── */
-function ScoreRepairPreview() {
-  const findings = [
-    { label: "Quantify impact", count: 6, color: "#ef4444" },
-    { label: "Weak language",   count: 4, color: "#f59e0b" },
-    { label: "Buzzwords",       count: 3, color: "#f59e0b" },
-    { label: "Verb variety",    count: 2, color: "#f59e0b" },
+function barColor(pct: number): string {
+  if (pct >= 0.85) return "#10B981";
+  if (pct >= 0.55) return "#F59E0B";
+  if (pct === 0)   return "rgba(0,0,0,0.1)";
+  return "#EF4444";
+}
+
+// ─── hero floating windows ────────────────────────────────────────────────────
+
+function HeroScoreWindow() {
+  const SCORE = 72;
+  const R = 20;
+  const CIRC = 2 * Math.PI * R;
+  const items = [
+    { label: "Impact",    score: 18, max: 27 },
+    { label: "Language",  score: 20, max: 22 },
+    { label: "Depth",     score: 19, max: 19 },
+    { label: "Structure", score: 11, max: 17 },
+    { label: "Job match", score:  0, max: 15 },
   ];
   return (
-    <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
-        <div className="border-b border-line px-4 py-2.5">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted">
-            Resume Worded findings — extracted from screenshot
+    <div style={{
+      background: "#FFF",
+      borderRadius: 14,
+      border: `1px solid ${T.border}`,
+      boxShadow: "0 24px 72px rgba(0,0,0,0.11), 0 6px 20px rgba(0,0,0,0.07)",
+      overflow: "hidden",
+    }}>
+      <WindowChrome title="ATS Analysis — resume_final.pdf" />
+      <div style={{ padding: "18px 20px" }}>
+        {/* Score ring */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+          <div style={{ position: "relative", width: 54, height: 54, flexShrink: 0 }}>
+            <svg viewBox="0 0 48 48" width="54" height="54">
+              <circle cx="24" cy="24" r={R} fill="none" stroke="#F1F5F9" strokeWidth="5" />
+              <g transform="rotate(-90 24 24)">
+                <circle cx="24" cy="24" r={R} fill="none" stroke={T.amber} strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeDasharray={CIRC}
+                  strokeDashoffset={CIRC * (1 - SCORE / 100)} />
+              </g>
+            </svg>
+            <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: T.text }}>
+              {SCORE}
+            </span>
+          </div>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>ATS Score · {SCORE}/100</p>
+            <p style={{ fontSize: 12, color: T.amber, margin: "3px 0 0" }}>Needs improvement</p>
+          </div>
+        </div>
+
+        {/* Criteria bars */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+          {items.map(c => {
+            const pct = c.max > 0 ? c.score / c.max : 0;
+            return (
+              <div key={c.label}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ fontWeight: 500, color: "#334155" }}>{c.label}</span>
+                  <span style={{ fontFamily: "monospace", color: T.muted }}>{c.score}/{c.max}</span>
+                </div>
+                <div style={{ height: 5, background: "#F1F5F9", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${Math.max(0, pct * 100)}%`, background: barColor(pct), borderRadius: 3 }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Tip */}
+        <div style={{ marginTop: 14, padding: "9px 11px", background: "rgba(245,158,11,0.08)", borderRadius: 8, border: "1px solid rgba(245,158,11,0.18)" }}>
+          <p style={{ fontSize: 11, color: "#B45309", fontWeight: 500, margin: 0 }}>
+            Fix: add team sizes, %, or latency numbers to 4 bullets → +8 pts
           </p>
         </div>
-        <div className="divide-y divide-line/40">
-          {findings.map((f) => (
-            <div key={f.label} className="flex items-center justify-between px-4 py-2.5">
-              <span className="text-sm text-ink">{f.label}</span>
-              <span className="font-mono text-sm font-semibold tabular-nums" style={{ color: f.color }}>
-                {f.count}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="flex items-center justify-center gap-4">
-        <div className="text-center">
-          <p className="font-mono text-3xl font-bold text-red-500 tabular-nums">47</p>
-          <p className="mt-0.5 text-xs text-muted">Before</p>
-        </div>
-        <svg className="h-5 w-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-        </svg>
-        <div className="text-center">
-          <p className="font-mono text-3xl font-bold text-green-600 tabular-nums">83</p>
-          <p className="mt-0.5 text-xs text-muted">After</p>
+        {/* CTA inside window */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          marginTop: 12,
+          padding: "9px 14px",
+          borderRadius: 8,
+          background: T.btnGrad,
+          color: "#FFF",
+          fontSize: 12,
+          fontWeight: 600,
+        }}>
+          Fix this with Resume Lab
+          <ArrowRight size={13} />
         </div>
       </div>
-      <p className="text-center font-mono text-xs text-muted">
-        4 targeted patches · 0 fabrications · no full rewrite
-      </p>
     </div>
   );
 }
 
-/* ── page ───────────────────────────────────────────────────────────────────── */
+function HeroBeforeAfterCard() {
+  return (
+    <div style={{
+      background: "#FFF",
+      borderRadius: 12,
+      border: `1px solid ${T.border}`,
+      boxShadow: "0 12px 40px rgba(0,0,0,0.09), 0 3px 10px rgba(0,0,0,0.05)",
+      overflow: "hidden",
+    }}>
+      <WindowChrome title="Before vs After" />
+      <div style={{ padding: "14px" }}>
+        <div style={{ marginBottom: 10 }}>
+          <p style={{ fontSize: 9, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: T.red, margin: "0 0 5px" }}>Before</p>
+          <div style={{ background: "#FEF2F2", borderRadius: 6, padding: "8px 10px" }}>
+            <p style={{ fontSize: 11, color: "#7F1D1D", lineHeight: 1.5, margin: 0 }}>
+              Was responsible for developing features and fixing bugs in the codebase.
+            </p>
+          </div>
+        </div>
+        <div>
+          <p style={{ fontSize: 9, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: T.green, margin: "0 0 5px" }}>After</p>
+          <div style={{ background: "#F0FDF4", borderRadius: 6, padding: "8px 10px" }}>
+            <p style={{ fontSize: 11, color: "#14532D", lineHeight: 1.5, margin: 0 }}>
+              Led <strong>4 microservices</strong> at <strong>500K req/day</strong>, 99.9% uptime; cut p99 latency <strong>60%</strong>.
+            </p>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${T.border}`, textAlign: "center" }}>
+          <p style={{ fontSize: 10, color: T.muted, margin: 0, fontFamily: "monospace" }}>+39 pts · one session · 0 fabrications</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroRepairBadge() {
+  return (
+    <div style={{
+      background: "#FFF",
+      borderRadius: 12,
+      border: `1px solid ${T.border}`,
+      boxShadow: "0 12px 40px rgba(0,0,0,0.09), 0 3px 10px rgba(0,0,0,0.05)",
+      padding: "18px 16px",
+      textAlign: "center",
+    }}>
+      <p style={{ fontSize: 9, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: T.muted, margin: "0 0 12px" }}>Score Repair</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
+        <span style={{ fontFamily: "monospace", fontSize: 34, fontWeight: 700, color: T.red, lineHeight: 1 }}>47</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+        <span style={{ fontFamily: "monospace", fontSize: 34, fontWeight: 700, color: T.green, lineHeight: 1 }}>83</span>
+      </div>
+      <p style={{ fontSize: 10, color: T.muted, margin: "0 0 10px", lineHeight: 1.5 }}>4 patches · 0 fabrications</p>
+      <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 10 }}>
+        <p style={{ fontSize: 10, color: T.brand, fontWeight: 500, margin: 0 }}>from one screenshot</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── page ─────────────────────────────────────────────────────────────────────
+
 export default function LandingPage() {
   return (
     <>
-      {/* ── NAV ── */}
-      <header
-        className="sticky top-0 z-30 backdrop-blur-md"
-        style={{ background: "rgba(11,13,11,0.92)", borderBottom: `1px solid ${DARK_BORDER}` }}
-      >
+      {/* ── NAV ─────────────────────────────────────────────────────────────── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 30,
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderBottom: `1px solid ${T.border}`,
+      }}>
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
-          <Link href="/" className="flex items-center gap-2">
+          {/* Logo */}
+          <Link href="/" className="flex shrink-0 items-center gap-2" style={{ textDecoration: "none" }}>
             <BrandMark size={26} />
-            <span className="font-semibold tracking-tight" style={{ color: DARK_TEXT }}>
-              ResumeLab
-            </span>
+            <span style={{ fontWeight: 600, fontSize: 15, color: T.text, letterSpacing: "-0.01em" }}>ResumeLab</span>
           </Link>
 
           <div className="flex-1" />
 
-          <nav className="hidden items-center gap-6 text-sm sm:flex" style={{ color: DARK_MUTED }}>
-            <a href="#scorer" className="transition hover:text-white">Score my resume</a>
-            <a href="#features" className="transition hover:text-white">How it works</a>
+          {/* Links — hidden on mobile */}
+          <nav className="hidden items-center gap-6 sm:flex">
+            <a href="#features" style={{ fontSize: 13, color: T.soft, textDecoration: "none" }}
+              className="transition-colors hover:text-slate-900">How it works</a>
+            <a href="/score" style={{ fontSize: 13, color: T.soft, textDecoration: "none" }}
+              className="transition-colors hover:text-slate-900">Score free</a>
           </nav>
 
-          <ThemeToggle />
-
-          <Link
-            href="/login"
-            className="flex items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium transition hover:bg-white/10"
-            style={{
-              background: "rgba(255,255,255,0.07)",
-              color: "rgba(255,255,255,0.8)",
-              border: `1px solid ${DARK_BORDER}`,
-            }}
-          >
-            <GoogleIcon />
+          {/* Auth CTAs */}
+          <Link href="/login" style={{
+            padding: "6px 14px",
+            fontSize: 13, fontWeight: 500,
+            color: T.soft,
+            border: `1px solid ${T.border}`,
+            borderRadius: 8,
+            textDecoration: "none",
+            background: T.subtle,
+          }}
+            className="hidden sm:inline-flex transition-colors hover:text-slate-900">
             Sign in
+          </Link>
+
+          <Link href="/login" style={{
+            padding: "7px 16px",
+            fontSize: 13, fontWeight: 600,
+            color: "#FFF",
+            borderRadius: 8,
+            textDecoration: "none",
+            background: T.btnGrad,
+          }}>
+            Start free →
           </Link>
         </div>
       </header>
 
-      {/* ── HERO ── */}
-      <section
-        className="relative overflow-hidden py-28"
-        style={{ background: DARK_BG, ...DOT_GRID }}
-      >
-        {/* Bottom fade */}
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-32"
-          style={{ background: `linear-gradient(to bottom, transparent, ${DARK_BG})` }}
-        />
-
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
+      {/* ── HERO ────────────────────────────────────────────────────────────── */}
+      <section style={{ ...HERO_BG, paddingTop: 80 }}>
+        <div className="mx-auto max-w-4xl px-6 text-center">
           {/* Badge */}
-          <div
-            className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium"
-            style={{
-              background: "rgba(73,174,158,0.12)",
-              color: ACCENT,
-              border: "1px solid rgba(73,174,158,0.28)",
-            }}
-          >
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#49AE9E]" />
-            Free · No login needed to score
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "5px 14px",
+            borderRadius: 100,
+            fontSize: 12, fontWeight: 500,
+            color: T.brand,
+            background: "rgba(15,118,110,0.08)",
+            border: "1px solid rgba(15,118,110,0.2)",
+            marginBottom: 28,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.brand, flexShrink: 0 }} />
+            Free to start · No credit card needed
           </div>
 
-          <h1
-            className="mb-5 text-balance font-serif text-5xl font-medium leading-[1.1] tracking-tight sm:text-[60px]"
-            style={{ color: DARK_TEXT }}
-          >
-            Know your ATS score<br />
-            <em className="not-italic" style={{ color: ACCENT }}>before you apply.</em>
+          {/* Headline */}
+          <h1 style={{
+            fontFamily: "var(--font-serif), Georgia, serif",
+            fontSize: "clamp(44px, 7.5vw, 76px)",
+            fontWeight: 500,
+            lineHeight: 1.04,
+            letterSpacing: "-0.025em",
+            color: T.text,
+            margin: "0 0 22px",
+          }}>
+            Get shortlisted.
+            <br />
+            <span style={{ color: T.brand }}>Not just scored.</span>
           </h1>
 
-          <p
-            className="mx-auto mb-8 max-w-lg text-base leading-relaxed sm:text-lg"
-            style={{ color: DARK_MUTED }}
-          >
-            Upload any resume. See the 5 dimensions dragging your score down —
-            with a one-line fix for each. Then let us rewrite it.
+          {/* Sub */}
+          <p style={{
+            fontSize: "clamp(15px, 2vw, 18px)",
+            lineHeight: 1.65,
+            color: T.soft,
+            maxWidth: 500,
+            margin: "0 auto 36px",
+          }}>
+            Upload your resume. See your ATS score in 10 seconds. Fix it with our wizard — built only on facts you provide.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/login"
-              className="flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition hover:opacity-90"
-              style={{ background: ACCENT, color: ACCENT_ON }}
-            >
+          {/* CTAs */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", marginBottom: 64 }}>
+            <Link href="/login" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 24px",
+              borderRadius: 10,
+              fontSize: 14, fontWeight: 600,
+              color: "#FFF",
+              background: T.btnGrad,
+              textDecoration: "none",
+              boxShadow: T.btnShadow,
+            }}>
               <GoogleIcon />
-              Get started free
+              Start free with Google
             </Link>
-            <a
-              href="#scorer"
-              className="flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition hover:bg-white/10"
-              style={{
-                background: "rgba(255,255,255,0.07)",
-                color: "rgba(255,255,255,0.7)",
-                border: `1px solid ${DARK_BORDER}`,
-              }}
-            >
-              Check my score first →
-            </a>
+
+            <Link href="/score" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "12px 20px",
+              borderRadius: 10,
+              fontSize: 14, fontWeight: 500,
+              color: T.soft,
+              border: `1px solid ${T.border}`,
+              background: "rgba(255,255,255,0.7)",
+              textDecoration: "none",
+              backdropFilter: "blur(8px)",
+            }}>
+              Score my resume first
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Floating product windows */}
+        <div className="relative mx-auto max-w-5xl px-6">
+          {/* Mobile — single card, centered */}
+          <div className="px-4 pb-10 lg:hidden">
+            <div className="mx-auto max-w-sm">
+              <HeroScoreWindow />
+            </div>
+          </div>
+
+          {/* Desktop — 3-column tilted card grid.
+              `display` must NOT be in the style prop — it would override
+              the hidden / lg:grid Tailwind classes. Only layout props go here. */}
+          <div
+            className="hidden pb-6 lg:grid"
+            style={{
+              gridTemplateColumns: "252px 1fr 200px",
+              gap: 20,
+              alignItems: "start",
+            }}
+          >
+            <div style={{ marginTop: 40, transform: "rotate(-3.5deg)", transformOrigin: "center top" }}>
+              <HeroBeforeAfterCard />
+            </div>
+            <HeroScoreWindow />
+            <div style={{ marginTop: 60, transform: "rotate(2.5deg)", transformOrigin: "center top" }}>
+              <HeroRepairBadge />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── LIVE SCORER (Slice C) ── */}
-      <section id="scorer" className="border-b border-line bg-paper py-16">
-        <div className="mx-auto max-w-2xl px-6">
-          <div className="mb-8 text-center">
-            <p className="mb-2 font-mono text-xs uppercase tracking-widest text-brand">
-              Try it free — no account needed
-            </p>
-            <h2 className="font-serif text-2xl font-medium tracking-tight text-ink">
-              Your ATS score in 10 seconds.
-            </h2>
-            <p className="mt-2 text-sm text-ink-soft">
-              Same scoring logic as top ATS checkers. No LLM — fully deterministic.
-            </p>
-          </div>
-          <QuickScorer />
-        </div>
-      </section>
-
-      {/* ── TRUST STRIP ── */}
-      <section className="border-b border-line bg-sunken py-10">
+      {/* ── STATS STRIP ─────────────────────────────────────────────────────── */}
+      <section style={{
+        background: T.subtle,
+        borderTop: `1px solid ${T.border}`,
+        borderBottom: `1px solid ${T.border}`,
+        padding: "32px 0",
+      }}>
         <div className="mx-auto max-w-5xl px-6">
-          <div className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3 sm:divide-x sm:divide-line">
+          <div className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3">
             {[
-              { stat: "0 LLM calls",  label: "Scoring is fully deterministic — always free" },
-              { stat: "5 criteria",   label: "Impact · Language · Depth · Structure · Job match" },
-              { stat: "100% private", label: "Files are never stored or used to train a model" },
-            ].map(({ stat, label }) => (
-              <div key={stat} className="sm:px-8 first:pl-0 last:pr-0">
-                <p className="font-mono text-xl font-bold text-ink">{stat}</p>
-                <p className="mt-1 text-xs text-ink-soft">{label}</p>
+              { stat: "0 LLM calls",   desc: "Scoring is deterministic — same file, same score, always free" },
+              { stat: "5 criteria",    desc: "Impact · Language · Depth · Structure · Job match" },
+              { stat: "100% private",  desc: "Your files are never stored or used to train a model" },
+            ].map(({ stat, desc }) => (
+              <div key={stat} style={{ padding: "0 16px" }}>
+                <p style={{ fontSize: 20, fontWeight: 700, fontFamily: "monospace", color: T.text, margin: "0 0 4px" }}>{stat}</p>
+                <p style={{ fontSize: 12, color: T.soft, margin: 0 }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <section id="features" className="border-b border-line bg-paper">
-
-        {/* Feature 1 — criterion scoring */}
-        <div className="border-b border-line py-24">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-              <div>
-                <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
-                  Built-in scorer
-                </p>
-                <h2 className="mb-4 font-serif text-3xl font-medium leading-snug tracking-tight text-ink">
-                  Know exactly what&rsquo;s<br />holding you back.
-                </h2>
-                <p className="mb-6 text-base leading-relaxed text-ink-soft">
-                  Most ATS checkers give you a number. We give you 5 criterion groups —
-                  Impact, Language, Depth, Structure, Job match — each with a specific
-                  finding and a one-line fix you can act on today.
-                </p>
-                <ul className="space-y-3">
-                  {[
-                    "Per-check breakdown, not just a total score",
-                    "Contextual page count — 2 pages is fine after 7 years of experience",
-                    "Verb variety, quantification ratio, buzzword detection",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-ink-soft">
-                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand/15">
-                        <CheckIcon />
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div
-                className="rounded-2xl p-6"
-                style={{ background: DARK_BG, ...DOT_GRID }}
-              >
-                <CriteriaPreview />
-              </div>
-            </div>
+      {/* ── FEATURES ────────────────────────────────────────────────────────── */}
+      <section id="features" style={{ background: "#FFF", padding: "80px 0" }}>
+        <div className="mx-auto max-w-6xl px-6">
+          <div style={{ marginBottom: 48 }}>
+            <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: T.brand, margin: "0 0 10px" }}>
+              Five tools, one loop
+            </p>
+            <h2 style={{
+              fontFamily: "var(--font-serif), Georgia, serif",
+              fontSize: "clamp(28px, 4vw, 42px)",
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              color: T.text,
+              margin: 0,
+              lineHeight: 1.2,
+            }}>
+              The full job search loop.
+            </h2>
           </div>
+
+          <FeatureTabs />
         </div>
-
-        {/* Feature 2 — no fabrication */}
-        <div className="border-b border-line py-24">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-              <div
-                className="order-2 rounded-2xl p-6 lg:order-1"
-                style={{ background: DARK_BG }}
-              >
-                <ResumeComparison />
-              </div>
-
-              <div className="order-1 lg:order-2">
-                <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
-                  No-fabrication contract
-                </p>
-                <h2 className="mb-4 font-serif text-3xl font-medium leading-snug tracking-tight text-ink">
-                  Every word from<br />your source material.
-                </h2>
-                <p className="mb-6 text-base leading-relaxed text-ink-soft">
-                  Most AI resume writers invent metrics and exaggerate roles. We do the
-                  opposite: if a number is missing, we ask you. A resume that survives
-                  any interview question because it&rsquo;s built from facts only you know.
-                </p>
-                <div className="space-y-2.5">
-                  {[
-                    "Invent a metric, team size, or revenue figure you didn't provide",
-                    "Add an employer, role, or project not in your source material",
-                    "Generate a FINAL with open placeholder gaps",
-                    "Call an LLM when deterministic logic is sufficient",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3 rounded-lg border border-line bg-surface px-4 py-2.5"
-                    >
-                      <span className="mt-0.5 shrink-0 font-mono text-xs font-bold text-red-500">
-                        ✕
-                      </span>
-                      <p className="text-sm text-ink-soft">
-                        <span className="font-medium text-ink">Never: </span>
-                        {item.toLowerCase()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 3 — score repair */}
-        <div className="py-24">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-              <div>
-                <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
-                  Score Repair
-                </p>
-                <h2 className="mb-4 font-serif text-3xl font-medium leading-snug tracking-tight text-ink">
-                  Already on Resume Worded?<br />Bring your screenshot.
-                </h2>
-                <p className="mb-6 text-base leading-relaxed text-ink-soft">
-                  Drop in a screenshot of your Resume Worded results page. We extract every
-                  finding category and count, then apply targeted patches to your resume.
-                  No full rewrite. No invented numbers. We&rsquo;ve seen scores jump 65→83
-                  from a single screenshot.
-                </p>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1.5 rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-on transition hover:bg-brand-strong"
-                >
-                  Try Score Repair — free →
-                </Link>
-              </div>
-
-              <ScoreRepairPreview />
-            </div>
-          </div>
-        </div>
-
       </section>
 
-      {/* ── JD ENHANCER CALLOUT ── */}
-      <section className="border-b border-line bg-sunken py-16">
+      {/* ── NO-FABRICATION PROMISE ───────────────────────────────────────────── */}
+      <section style={{
+        background: T.subtle,
+        borderTop: `1px solid ${T.border}`,
+        borderBottom: `1px solid ${T.border}`,
+        padding: "80px 0",
+      }}>
         <div className="mx-auto max-w-5xl px-6">
-          <div className="rounded-2xl border border-violet/30 bg-violet-tint p-8 sm:p-10">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div>
-                <p className="mb-2 font-mono text-xs uppercase tracking-widest text-violet">
-                  JD Enhancer · Credits
-                </p>
-                <h3 className="mb-2 font-serif text-xl font-medium text-ink">
-                  Tailoring for a specific role?
-                </h3>
-                <p className="text-sm leading-relaxed text-ink-soft">
-                  Paste a job description. We mirror keywords, reorder skills, and tailor
-                  your summary — only where truthful. Zero new facts introduced.
-                </p>
-              </div>
-              <Link
-                href="/login"
-                className="whitespace-nowrap rounded-md bg-violet px-5 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90"
-              >
-                Try JD Enhancer →
-              </Link>
-            </div>
+          <div style={{ marginBottom: 40 }}>
+            <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: T.red, margin: "0 0 10px" }}>
+              No-fabrication contract
+            </p>
+            <h2 style={{
+              fontFamily: "var(--font-serif), Georgia, serif",
+              fontSize: "clamp(26px, 3.5vw, 38px)",
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              color: T.text,
+              margin: 0,
+            }}>
+              We will never&hellip;
+            </h2>
           </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {[
+              "Invent a metric, team size, or revenue figure you didn't provide",
+              "Add an employer, role, or project not in your source material",
+              "Generate a FINAL resume with any open placeholder gaps",
+              "Call an LLM when deterministic logic is sufficient",
+            ].map(item => (
+              <div key={item} style={{
+                display: "flex",
+                gap: 12,
+                padding: "14px 16px",
+                borderRadius: 12,
+                border: `1px solid ${T.border}`,
+                background: "#FFF",
+              }}>
+                <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: T.red, marginTop: 2, flexShrink: 0 }}>✕</span>
+                <p style={{ fontSize: 14, color: T.soft, margin: 0, lineHeight: 1.55 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 24, fontSize: 13, color: T.muted, maxWidth: 520, lineHeight: 1.65 }}>
+            Every claim in your resume is traced to either your uploaded file or a wizard answer you gave. There is no third source.
+          </p>
         </div>
       </section>
 
-      {/* ── DARK CTA ── */}
-      <section className="py-28" style={{ background: DARK_BG }}>
-        <div className="mx-auto max-w-5xl px-6 text-center" style={DOT_GRID}>
-          <h2
-            className="mb-4 text-balance font-serif text-4xl font-medium tracking-tight sm:text-5xl"
-            style={{ color: DARK_TEXT }}
-          >
-            A resume you can defend<br />in every interview.
+      {/* ── FINAL CTA ───────────────────────────────────────────────────────── */}
+      <section style={{ background: "#FFF", padding: "96px 0" }}>
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 style={{
+            fontFamily: "var(--font-serif), Georgia, serif",
+            fontSize: "clamp(32px, 5vw, 56px)",
+            fontWeight: 500,
+            letterSpacing: "-0.025em",
+            color: T.text,
+            margin: "0 0 18px",
+            lineHeight: 1.08,
+          }}>
+            A resume you can defend
+            <br />in every interview.
           </h2>
-          <p
-            className="mx-auto mb-10 max-w-md text-base leading-relaxed"
-            style={{ color: DARK_MUTED }}
-          >
-            Free to start. No card required. Your data stays private and isolated
-            to your account.
+          <p style={{
+            fontSize: 16,
+            color: T.soft,
+            margin: "0 auto 44px",
+            maxWidth: 420,
+            lineHeight: 1.65,
+          }}>
+            Free to start. No card required. Your data is private and never shared.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/login"
-              className="flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold transition hover:opacity-90"
-              style={{ background: ACCENT, color: ACCENT_ON }}
-            >
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
+            <Link href="/login" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "14px 28px",
+              borderRadius: 11,
+              fontSize: 15, fontWeight: 600,
+              color: "#FFF",
+              background: T.btnGrad,
+              textDecoration: "none",
+              boxShadow: T.btnShadow,
+            }}>
               <GoogleIcon />
               Continue with Google — it&apos;s free
             </Link>
-            <a
-              href="#scorer"
-              className="rounded-md px-5 py-3 text-sm font-medium transition hover:bg-white/10"
-              style={{
-                background: "rgba(255,255,255,0.07)",
-                color: "rgba(255,255,255,0.6)",
-                border: `1px solid ${DARK_BORDER}`,
-              }}
-            >
+
+            <Link href="/score" style={{
+              padding: "14px 24px",
+              borderRadius: 11,
+              fontSize: 15, fontWeight: 500,
+              color: T.soft,
+              border: `1px solid ${T.border}`,
+              background: T.subtle,
+              textDecoration: "none",
+            }}>
               Score my resume first
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer
-        className="py-8"
-        style={{ background: DARK_BG, borderTop: `1px solid ${DARK_BORDER}` }}
-      >
+      {/* ── FOOTER ──────────────────────────────────────────────────────────── */}
+      <footer style={{
+        background: T.subtle,
+        borderTop: `1px solid ${T.border}`,
+        padding: "32px 0",
+      }}>
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <BrandMark size={20} />
-            <span className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-              ResumeLab
-            </span>
+          <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
+            <BrandMark size={18} />
+            <span style={{ fontSize: 12, fontFamily: "monospace", color: T.muted }}>ResumeLab</span>
           </Link>
-          <div className="flex gap-6">
-            <a
-              href="#scorer"
-              className="font-mono text-xs transition hover:text-white"
-              style={{ color: "rgba(255,255,255,0.35)" }}
-            >
-              Score my resume
-            </a>
-            <Link
-              href="/login"
-              className="font-mono text-xs transition hover:text-white"
-              style={{ color: "rgba(255,255,255,0.35)" }}
-            >
-              Sign in
-            </Link>
+
+          <div style={{ display: "flex", gap: 20 }}>
+            {[
+              { label: "Score my resume", href: "/score" },
+              { label: "Sign in",         href: "/login" },
+            ].map(l => (
+              <Link key={l.href} href={l.href} style={{ fontSize: 12, fontFamily: "monospace", color: T.muted, textDecoration: "none" }}>
+                {l.label}
+              </Link>
+            ))}
           </div>
-          <p className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+
+          <p style={{ fontSize: 12, fontFamily: "monospace", color: T.muted, margin: 0 }}>
             Built on truth · Data never trains a model
           </p>
         </div>
