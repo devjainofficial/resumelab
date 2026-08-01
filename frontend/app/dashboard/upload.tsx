@@ -261,12 +261,12 @@ export function UploadZone() {
             ))}
           </div>
           <div className="mt-auto pt-5">
-            <button
-              disabled
-              className="w-full cursor-not-allowed rounded-md bg-violet/20 px-4 py-2 text-sm font-medium text-violet/60"
+            <a
+              href="/scratch"
+              className="block w-full rounded-md bg-violet px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
             >
-              Coming soon
-            </button>
+              Start building →
+            </a>
           </div>
         </div>
       </div>

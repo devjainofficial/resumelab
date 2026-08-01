@@ -4,9 +4,11 @@ file-hash dedup makes re-uploading the same file free by construction."""
 from __future__ import annotations
 
 import hashlib
+from uuid import uuid4
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from pydantic import BaseModel
 
 from app.auth import get_current_user
 from app.supa import Supa, get_supa
@@ -253,6 +255,34 @@ async def quick_score_resume(
         "filename": filename,
         "cached": False,
     }
+
+
+class ScratchRequest(BaseModel):
+    parsed_json: dict
+
+
+@router.post("/scratch")
+async def create_scratch_resume(
+    req: ScratchRequest,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    """Create a resume record from structured data entered directly by the user.
+
+    No file upload needed. The caller supplies a parsed_json payload in the
+    same schema the parser would produce from an uploaded file. A random
+    file_hash is used so dedup logic never collides with uploaded resumes.
+    """
+    row = await supa.insert(
+        "resumes",
+        {
+            "user_id": user["id"],
+            "file_hash": str(uuid4()),
+            "filename": "scratch",
+            "parsed_json": req.parsed_json,
+        },
+    )
+    return {"resume_id": row["id"]}
 
 
 @router.get("")
