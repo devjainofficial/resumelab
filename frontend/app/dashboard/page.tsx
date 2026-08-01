@@ -53,15 +53,23 @@ export default async function Dashboard() {
 
           <SignOutButton />
 
-          {profile?.avatar_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="h-8 w-8 shrink-0 rounded-full ring-1 ring-line"
-              referrerPolicy="no-referrer"
-            />
-          )}
+          <Link href="/profile" title="Your profile">
+            {profile?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatar_url}
+                alt="Your profile"
+                className="h-8 w-8 shrink-0 rounded-full ring-1 ring-line transition hover:ring-brand"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-tint ring-1 ring-brand/30 transition hover:ring-brand">
+                <span className="font-mono text-xs font-bold text-brand">
+                  {(profile?.full_name?.[0] ?? profile?.email?.[0] ?? "?").toUpperCase()}
+                </span>
+              </div>
+            )}
+          </Link>
         </div>
       </header>
 

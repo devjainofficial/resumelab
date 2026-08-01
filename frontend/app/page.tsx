@@ -16,14 +16,17 @@ const T = {
   muted:        "#94A3B8",   // slate-400
   bg:           "#FFFFFF",
   subtle:       "#F8FAFC",   // slate-50
+  blueFade:     "#EEF2FF",   // indigo-50 — attio-style blue tint
   border:       "rgba(15,23,42,0.07)",
   brand:        "#0F766E",   // teal-700
   brandVivid:   "#14B8A6",   // teal-400
+  indigo:       "#3730A3",   // indigo-800
+  indigoMid:    "#4F46E5",   // indigo-600
   green:        "#10B981",   // emerald-500
   amber:        "#F59E0B",   // amber-500
   red:          "#EF4444",   // red-500
-  btnGrad:      "linear-gradient(135deg, #0F766E 0%, #2563EB 100%)",
-  btnShadow:    "0 4px 20px rgba(15,118,110,0.28), 0 2px 8px rgba(15,118,110,0.14)",
+  btn:          "#0F766E",   // single brand color — no gradient
+  btnShadow:    "0 4px 16px rgba(15,118,110,0.24), 0 2px 6px rgba(15,118,110,0.12)",
 } as const;
 
 const HERO_BG: CSSProperties = {
@@ -168,7 +171,7 @@ function HeroScoreWindow() {
           marginTop: 12,
           padding: "9px 14px",
           borderRadius: 8,
-          background: T.btnGrad,
+          background: T.btn,
           color: "#FFF",
           fontSize: 12,
           fontWeight: 600,
@@ -292,7 +295,7 @@ export default function LandingPage() {
             color: "#FFF",
             borderRadius: 8,
             textDecoration: "none",
-            background: T.btnGrad,
+            background: T.btn,
           }}>
             Start free →
           </Link>
@@ -355,7 +358,7 @@ export default function LandingPage() {
               borderRadius: 10,
               fontSize: 14, fontWeight: 600,
               color: "#FFF",
-              background: T.btnGrad,
+              background: T.btn,
               textDecoration: "none",
               boxShadow: T.btnShadow,
             }}>
@@ -415,8 +418,8 @@ export default function LandingPage() {
 
       {/* ── STATS STRIP ─────────────────────────────────────────────────────── */}
       <section style={{
-        background: T.subtle,
-        borderTop: `1px solid ${T.border}`,
+        background: T.blueFade,
+        borderTop: `1px solid rgba(79,70,229,0.12)`,
         borderBottom: `1px solid ${T.border}`,
         padding: "32px 0",
       }}>
@@ -545,7 +548,7 @@ export default function LandingPage() {
               borderRadius: 11,
               fontSize: 15, fontWeight: 600,
               color: "#FFF",
-              background: T.btnGrad,
+              background: T.btn,
               textDecoration: "none",
               boxShadow: T.btnShadow,
             }}>
