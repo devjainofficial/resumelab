@@ -18,7 +18,7 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "ResumeLab — ATS-ready resumes, no fabrication",
+  title: "ResumeLab: ATS-ready resumes, no fabrication",
   description:
     "Build a truthful, ATS-strong resume in minutes. We never invent facts, metrics, or achievements.",
   icons: {

@@ -14,7 +14,7 @@ function ErrorContent() {
       <h1 className="text-2xl font-bold">Sign-in didn&apos;t complete</h1>
       <p className="mt-2 text-slate-600">
         Something interrupted the Google sign-in. No changes were made to your
-        account — please try again.
+        account. Please try again.
       </p>
       {(error || detail) && (
         <div className="mt-4 w-full rounded-lg bg-red-50 p-3 text-left text-sm text-red-700">

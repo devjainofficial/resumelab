@@ -360,13 +360,13 @@ export function QuickScorer() {
             href="/login"
             className="flex-1 rounded-xl bg-brand px-5 py-3 text-center text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
           >
-            Fix it with Resume Lab — free →
+            Fix it with Resume Lab, free →
           </Link>
         </div>
       )}
 
       <p className="text-center text-xs text-muted">
-        Your resumes are never shared. Scores are deterministic — same file, same score, no LLM.
+        Your resumes are never shared. Scores are deterministic: same file, same score, no LLM.
       </p>
     </div>
   );

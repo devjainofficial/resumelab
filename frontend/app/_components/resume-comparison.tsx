@@ -29,7 +29,7 @@ function BeforeCard() {
 
         <Section label="Experience" />
         <p className="font-semibold">Software Developer, TechCorp</p>
-        <p className="text-[9px] text-muted">2021 — Present</p>
+        <p className="text-[9px] text-muted">2021 – Present</p>
         <ul className="mt-1 space-y-0.5">
           {[
             "Was responsible for developing features and attending team meetings",
@@ -101,7 +101,7 @@ function AfterCard({ animated, score }: { animated: boolean; score: number }) {
         </p>
 
         <Section label="Experience" />
-        <p className="font-semibold">Senior Software Engineer — TechCorp</p>
+        <p className="font-semibold">Senior Software Engineer, TechCorp</p>
         <p className="text-[9px] text-muted">2021 – Present</p>
         <ul className="mt-1 space-y-0.5">
           {BULLETS.map((b, i) => (
@@ -125,7 +125,7 @@ function AfterCard({ animated, score }: { animated: boolean; score: number }) {
         <p className="text-ink-soft">Python · Node.js · React · PostgreSQL · Redis · Kubernetes · AWS</p>
 
         <Section label="Education" />
-        <p className="text-ink-soft">B.S. Computer Science — State University | 2021</p>
+        <p className="text-ink-soft">B.S. Computer Science, State University | 2021</p>
         <p className="text-[9px] text-muted">GPA 3.8 · Dean&apos;s List 4 semesters</p>
       </div>
     </div>

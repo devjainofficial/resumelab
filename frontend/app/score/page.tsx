@@ -46,7 +46,7 @@ export default async function ScorePage() {
             How does your resume score?
           </h1>
           <p className="mt-2 text-base text-muted">
-            Upload any resume. Get an instant ATS breakdown — no account needed.
+            Upload any resume. Get an instant ATS breakdown, no account needed.
           </p>
         </div>
         <QuickScorer />

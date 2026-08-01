@@ -359,7 +359,7 @@ export function BuilderStep({
         <h2 className="font-serif text-2xl font-medium text-ink">Review your resume</h2>
         <p className="mt-1.5 text-sm text-muted">
           {totalImprovable > 0
-            ? `${totalImprovable} bullet${totalImprovable > 1 ? "s" : ""} can be strengthened — answer what you can, or skip straight to rewrite.`
+            ? `${totalImprovable} bullet${totalImprovable > 1 ? "s" : ""} can be strengthened. Answer what you can, or skip straight to rewrite.`
             : "Your resume looks solid. Click below to generate the AI rewrite."}
         </p>
       </div>
@@ -536,7 +536,7 @@ export function BuilderStep({
                     ? "All improvements applied."
                     : `${totalImprovable - answeredCount} bullet${
                         totalImprovable - answeredCount > 1 ? "s" : ""
-                      } left — or skip to rewrite`}
+                      } left. Skip to rewrite.`}
                 </p>
               </div>
             )}

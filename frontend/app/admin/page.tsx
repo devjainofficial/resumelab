@@ -83,7 +83,7 @@ export default function AdminPage() {
   async function approvePayment(id: string) {
     try {
       await api(`/admin/payments/${id}/approve`, { method: "POST" });
-      setActionMsg("Payment approved — credits granted.");
+      setActionMsg("Payment approved. Credits granted.");
       fetchStats();
     } catch (e) {
       setActionMsg("Failed to approve.");
@@ -153,7 +153,7 @@ export default function AdminPage() {
                 />
                 <StatTile
                   label="Avg ATS Score"
-                  value={stats.overview.avg_ats_score > 0 ? `${stats.overview.avg_ats_score}` : "—"}
+                  value={stats.overview.avg_ats_score > 0 ? `${stats.overview.avg_ats_score}` : "N/A"}
                 />
                 <StatTile
                   label="Tokens Today"
@@ -177,7 +177,7 @@ export default function AdminPage() {
               <h2 className="mb-3 font-serif text-lg font-medium text-ink">LLM Usage</h2>
               <div className="rounded-xl border border-line bg-surface p-5">
                 {/* 7-day sparkline */}
-                <p className="mb-3 text-xs uppercase tracking-wide text-muted">Tokens — last 7 days</p>
+                <p className="mb-3 text-xs uppercase tracking-wide text-muted">Tokens, last 7 days</p>
                 <div className="flex items-end gap-2 h-16 mb-5">
                   {stats.llm_by_day.map((d) => (
                     <MiniBar
@@ -285,7 +285,7 @@ export default function AdminPage() {
                     {stats.recent_users.map((u) => (
                       <tr key={u.id} className="border-b border-line/50 last:border-0 hover:bg-sunken/40">
                         <td className="px-4 py-3">
-                          <p className="font-medium text-ink">{u.full_name ?? "—"}</p>
+                          <p className="font-medium text-ink">{u.full_name ?? "No name"}</p>
                           <p className="text-xs text-muted">{u.email}</p>
                         </td>
                         <td className="px-4 py-3 text-muted text-xs">{fmtDate(u.created_at)}</td>
@@ -296,7 +296,7 @@ export default function AdminPage() {
                               yes
                             </span>
                           ) : (
-                            <span className="text-muted text-xs">—</span>
+                            <span className="text-muted text-xs">no</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-right">

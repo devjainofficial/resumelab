@@ -39,7 +39,7 @@ const RESUME_FACTS = [
 
 const NUMBER_HINTS: Record<string, string> = {
   team: "e.g. 5, 12, 30+",
-  user: "e.g. 1,000 — 500,000",
+  user: "e.g. 1,000 to 500,000",
   revenue: "e.g. ₹50L, $2M",
   latency: "e.g. 200ms → 50ms",
   cost: "e.g. 30% reduction",
@@ -193,12 +193,12 @@ function TypeformWizard({
         setAnswers((a) => ({ ...a, [q.id]: suggestion }));
         setSuggestNote(
           r?.confidence === "high"
-            ? "AI suggested this based on your resume — feel free to edit."
+            ? "AI suggested this from your resume. Feel free to edit."
             : "Best-guess from your resume. Review before continuing."
         );
       } else {
         setSuggestNote(
-          "No signal in your resume for this — please type your own answer."
+          "No signal in your resume for this. Please type your own answer."
         );
       }
     } catch {
@@ -262,8 +262,8 @@ function TypeformWizard({
                   type="text"
                   placeholder={
                     q.kind === "number"
-                      ? "Type a number — or Skip if none exists"
-                      : "Type your answer — or Skip if you'd rather not"
+                      ? "Type a number, or Skip if none exists"
+                      : "Type your answer, or Skip if you'd rather not"
                   }
                   value={answers[q.id] ?? ""}
                   onChange={(e) =>
@@ -853,7 +853,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
         id: "target_role_focus",
         kind: "text",
         question:
-          "In one line: what's the ONE role you're targeting next? (Used only to sharpen your summary — never invented.)",
+          "In one line: what's the ONE role you're targeting next? (Used only to sharpen your summary. Never invented.)",
       };
       const augmented: Question[] = [preface, ...r.questions, finalQ];
       setQuestions(augmented);
@@ -1090,7 +1090,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
             </h2>
             <p className="mt-3 text-muted">
               We&apos;ll ask a few quick questions to fill in the gaps, then you
-              pick a template. Nothing is ever invented — every fact comes from
+              pick a template. Nothing is ever invented. Every fact comes from
               you.
             </p>
             <button
@@ -1146,7 +1146,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 <p className="font-semibold text-brand-strong">Resume built!</p>
                 <p className="mt-0.5 text-sm text-ink-soft">
                   Review the preview below. Fix any parsing errors with "Edit &amp; fix", then hit{" "}
-                  <strong>Looks good — Finalize</strong> to unlock your ATS score.
+                  <strong>Finalize</strong> to unlock your ATS score.
                 </p>
               </div>
               <button onClick={() => setShowReadyBanner(false)} className="shrink-0 text-muted hover:text-ink">
@@ -1252,7 +1252,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   disabled={!!busy}
                   className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
                 >
-                  {busy === "finalize" ? "Finalizing…" : "Looks good — Finalize"}
+                  {busy === "finalize" ? "Finalizing…" : "Looks good. Finalize"}
                 </button>
               </div>
             </div>
@@ -1309,7 +1309,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   for your name,{" "}
                   <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">## Section</code>{" "}
                   for headings,{" "}
-                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">**Job Title — Company | Dates**</code>{" "}
+                  <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">**Job Title, Company | Dates**</code>{" "}
                   for entries,{" "}
                   <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[11px]">- bullet</code>{" "}
                   for bullet points.
@@ -1369,10 +1369,10 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   <p className="text-lg font-semibold text-ink">ATS Score</p>
                   <p className="text-sm text-muted">
                     {score.value >= 80
-                      ? "Strong — ready to send"
+                      ? "Strong. Ready to send."
                       : score.value >= 60
-                      ? "Good — a few improvements would help"
-                      : "Needs work — see the breakdown below"}
+                      ? "Good. A few improvements would help."
+                      : "Needs work. See the breakdown below."}
                   </p>
                 </div>
               </div>
@@ -1384,7 +1384,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                   >
                     <span className="min-w-0 text-ink-soft">
                       {c.label}{" "}
-                      <span className="text-muted">— {c.detail}</span>
+                      <span className="text-muted">{c.detail ? `: ${c.detail}` : ""}</span>
                     </span>
                     <span className="shrink-0 font-mono text-xs text-ink">
                       {c.points}/{c.max_points}
@@ -1415,7 +1415,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 <h2 className="text-base font-semibold text-ink">Score Repair</h2>
                 <p className="mt-1 text-sm text-muted">
                   Drop a Resume Worded screenshot or paste findings below. Fixes
-                  are targeted — never a blind rewrite.
+                  are targeted. Never a blind rewrite.
                 </p>
 
                 {/* Screenshot drop zone */}

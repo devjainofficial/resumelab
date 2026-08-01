@@ -14,7 +14,7 @@ const FACTS = [
   "Using action verbs increases readability by 33%.",
   "The average job posting receives 250 resumes.",
   "Customising your resume for each role boosts response rates by 50%.",
-  "A typo on your resume can cost you the interview — 58% of hiring managers say so.",
+  "A typo on your resume can cost you the interview. 58% of hiring managers say so.",
 ];
 
 type ParsedResume = {
@@ -191,7 +191,7 @@ export function UploadZone() {
         <div className="flex flex-col rounded-xl border border-brand/30 bg-brand-tint p-5">
           <p className="mb-1 text-sm font-semibold text-ink">Upload your resume</p>
           <p className="mb-4 text-xs leading-relaxed text-ink-soft">
-            PDF or DOCX. We extract every fact — no hallucinations.
+            PDF or DOCX. We extract every fact, no hallucinations.
           </p>
 
           <div
@@ -248,7 +248,7 @@ export function UploadZone() {
             <span className="font-mono text-xs text-violet">✦ AI</span>
           </div>
           <p className="mb-4 text-xs leading-relaxed text-ink-soft">
-            Answer a short brief per role. AI drafts bullets from your words — nothing invented.
+            Answer a short brief per role. AI drafts bullets from your words. Nothing invented.
           </p>
           <div className="flex flex-wrap gap-2">
             {["Role", "Contact", "Company", "Brief → Bullets", "Skills"].map((s) => (
@@ -293,7 +293,7 @@ export function UploadZone() {
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-ink">
                 {result.deduped
-                  ? "Already uploaded — reused existing parse (zero cost)"
+                  ? "Already uploaded. Reused existing parse (zero cost)"
                   : "Parsed successfully"}
               </p>
               <p className="mt-0.5 text-sm text-muted">
@@ -313,7 +313,7 @@ export function UploadZone() {
                   <div className="h-9 w-9 shrink-0 animate-spin rounded-full border-4 border-line border-t-brand" />
                   <div>
                     <p className="text-sm font-medium text-ink">Scoring your resume…</p>
-                    <p className="text-xs text-muted">Deterministic ATS check — no LLM</p>
+                    <p className="text-xs text-muted">Deterministic ATS check, no LLM</p>
                   </div>
                 </>
               ) : scoreResult ? (

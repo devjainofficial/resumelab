@@ -113,7 +113,7 @@ function HeroScoreWindow() {
       boxShadow: "0 24px 72px rgba(0,0,0,0.11), 0 6px 20px rgba(0,0,0,0.07)",
       overflow: "hidden",
     }}>
-      <WindowChrome title="ATS Analysis — resume_final.pdf" />
+      <WindowChrome title="ATS Analysis: resume_final.pdf" />
       <div style={{ padding: "18px 20px" }}>
         {/* Score ring */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>

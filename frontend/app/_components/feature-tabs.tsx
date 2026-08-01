@@ -104,7 +104,7 @@ function RewriteMockup() {
       </div>
 
       <div style={{ background: "rgba(240,253,250,0.8)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(15,118,110,0.18)" }}>
-        <p style={{ fontSize: 11, color: "#94A3B8", margin: "0 0 5px" }}>Preview — will generate</p>
+        <p style={{ fontSize: 11, color: "#94A3B8", margin: "0 0 5px" }}>Preview: will generate</p>
         <p style={{ fontSize: 13, color: "#0F172A", margin: 0, lineHeight: 1.55 }}>
           <span style={{ color: "#0F766E", fontWeight: 600 }}>Led 6-engineer team</span> shipping 3 microservices at 1.2M req/day, 99.9% uptime
         </p>
