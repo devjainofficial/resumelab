@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { api, ApiError } from "@/lib/api";
+import { BuilderStep } from "./builder-step";
 
 type Question = {
   id: string;
@@ -728,6 +729,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
   const [step, setStep] = useState<
     | "init"
     | "start"
+    | "builder"
     | "loading"
     | "wizard"
     | "template"
@@ -785,9 +787,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
         } else if (latest) {
           setVersionId(latest.id);
           setStructureId(latest.structure_id);
-          setStep("start");
+          setStep("builder");
         } else {
-          setStep("start");
+          setStep("builder");
         }
 
         const resumes = await api(`/resumes/${resumeId}`).catch(() => null);
@@ -795,7 +797,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
           setParsedResume(resumes.parsed_json);
         }
       } catch {
-        if (!cancelled) setStep("start");
+        if (!cancelled) setStep("builder");
       }
     }
     init();
@@ -860,6 +862,35 @@ export function Flow({ resumeId }: { resumeId: string }) {
       } else {
         setStep("template");
       }
+    });
+
+  const handleBuilderContinue = (bulletAnswers: Record<string, string>) =>
+    run("builder", async () => {
+      setStep("loading");
+      setLoadingMsg("Preparing your rewrite...");
+      const r = await api("/wizard/start", {
+        method: "POST",
+        body: JSON.stringify({ resume_id: resumeId }),
+      });
+      setVersionId(r.version_id);
+      setStructureId(r.structure_id);
+
+      // Save any improve-popover answers as wizard answers for rewrite context
+      if (Object.keys(bulletAnswers).length > 0) {
+        await api("/wizard/answers", {
+          method: "POST",
+          body: JSON.stringify({
+            version_id: r.version_id,
+            answers: Object.entries(bulletAnswers).map(([id, answer]) => ({
+              id,
+              question: id,
+              answer,
+            })),
+          }),
+        });
+      }
+
+      setStep("template");
     });
 
   const handleWizardComplete = (answers: Record<string, string>) => {
@@ -1050,7 +1081,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
       {/* Init */}
       {step === "init" && <LoadingScreen message="Loading your resume..." />}
 
-      {/* Start */}
+      {/* Start (legacy fallback) */}
       {step === "start" && (
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <div className="max-w-md">
@@ -1071,6 +1102,14 @@ export function Flow({ resumeId }: { resumeId: string }) {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Builder */}
+      {step === "builder" && (
+        <BuilderStep
+          parsedResume={parsedResume}
+          onContinue={handleBuilderContinue}
+        />
       )}
 
       {/* Loading / Composing */}

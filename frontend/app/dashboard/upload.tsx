@@ -29,10 +29,57 @@ type UploadResult = {
   deduped: boolean;
 };
 
+type ScoreResult = {
+  score: number;
+  criteria: { id: string; label: string; score: number; max: number }[];
+};
+
+// ─── mini ring ────────────────────────────────────────────────────────────────
+
+const CIRC = 2 * Math.PI * 20;
+
+function scoreColor(v: number) {
+  if (v >= 80) return "var(--brand)";
+  if (v >= 60) return "#d97706";
+  return "#dc2626";
+}
+
+function scoreLabel(v: number) {
+  if (v >= 80) return { text: "ATS-ready", cls: "text-brand" };
+  if (v >= 60) return { text: "Needs work", cls: "text-amber-600 dark:text-amber-400" };
+  return { text: "High risk", cls: "text-red-600 dark:text-red-400" };
+}
+
+function ScoreRing({ score }: { score: number }) {
+  const pct = score / 100;
+  const offset = CIRC * (1 - pct);
+  const color = scoreColor(score);
+  return (
+    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+      <svg viewBox="0 0 48 48" width="52" height="52">
+        <circle cx="24" cy="24" r="20" fill="none" stroke="var(--line)" strokeWidth="5" />
+        <g transform="rotate(-90 24 24)">
+          <circle
+            cx="24" cy="24" r="20" fill="none"
+            stroke={color} strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={CIRC} strokeDashoffset={offset}
+          />
+        </g>
+      </svg>
+      <span className="absolute font-mono text-sm font-bold tabular-nums text-ink">{score}</span>
+    </div>
+  );
+}
+
+// ─── main component ───────────────────────────────────────────────────────────
+
 export function UploadZone() {
   const [busy, setBusy] = useState(false);
+  const [scoring, setScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<UploadResult | null>(null);
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [factIdx, setFactIdx] = useState(0);
   const [fade, setFade] = useState(true);
@@ -55,6 +102,10 @@ export function UploadZone() {
     setBusy(true);
     setError(null);
     setResult(null);
+    setScoreResult(null);
+
+    let uploadData: UploadResult | null = null;
+
     try {
       const supabase = createClient();
       const {
@@ -73,15 +124,42 @@ export function UploadZone() {
         const detail = await resp.json().catch(() => null);
         throw new Error(detail?.detail ?? `Upload failed (${resp.status})`);
       }
-      setResult(await resp.json());
+      uploadData = await resp.json();
+
+      // Empty resume guard
+      if (
+        uploadData!.parsed.stats.bullet_count === 0 &&
+        uploadData!.parsed.flags.sections_found.length === 0
+      ) {
+        throw new Error(
+          "No resume content found in this file. Please upload a resume that includes work experience, education, or skills."
+        );
+      }
+
+      setResult(uploadData);
     } catch (e) {
       setError(
         e instanceof TypeError
           ? "Could not reach the ResumeLab API. If you are developing locally, start the backend."
           : (e as Error).message
       );
+      uploadData = null;
     } finally {
       setBusy(false);
+    }
+
+    // Score in background — non-blocking, reuses the same file
+    if (!uploadData) return;
+    setScoring(true);
+    try {
+      const scoreForm = new FormData();
+      scoreForm.append("file", file);
+      const sResp = await fetch(`${API}/score`, { method: "POST", body: scoreForm });
+      if (sResp.ok) setScoreResult(await sResp.json());
+    } catch {
+      // Scoring failure is non-fatal — CTA still works
+    } finally {
+      setScoring(false);
     }
   }
 
@@ -89,7 +167,6 @@ export function UploadZone() {
   if (busy) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-line bg-surface p-12 shadow-sm">
-        {/* Spinner */}
         <div className="mb-6 h-10 w-10 animate-spin rounded-full border-4 border-line border-t-brand" />
         <p className="font-medium text-ink">Parsing your resume…</p>
         <p
@@ -105,9 +182,7 @@ export function UploadZone() {
 
   return (
     <div>
-      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">
-        Start here
-      </p>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">Start here</p>
 
       {/* ── ENTRY CARDS ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -119,7 +194,6 @@ export function UploadZone() {
             PDF or DOCX. We extract every fact — no hallucinations.
           </p>
 
-          {/* Drop zone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -130,24 +204,16 @@ export function UploadZone() {
               if (f) onFile(f);
             }}
             className={`flex flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition ${
-              dragOver
-                ? "border-brand bg-brand/10"
-                : "border-brand/40"
+              dragOver ? "border-brand bg-brand/10" : "border-brand/40"
             }`}
           >
             <svg
               className="mb-2 h-7 w-7 text-brand/60"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
+              fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
               aria-hidden="true"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
             <p className="mb-3 text-xs text-muted">
               {dragOver ? "Drop to upload" : "Drag & drop here, or"}
@@ -212,18 +278,14 @@ export function UploadZone() {
         </div>
       )}
 
-      {/* ── PARSE RESULT ── */}
+      {/* ── PARSE RESULT + SCORE ── */}
       {result && (
         <div className="mt-5 rounded-xl border border-line bg-surface p-5 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-tint">
               <svg
-                className="h-4 w-4 text-brand"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                stroke="currentColor"
-                aria-hidden="true"
+                className="h-4 w-4 text-brand" fill="none"
+                viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
@@ -242,11 +304,48 @@ export function UploadZone() {
               </p>
             </div>
           </div>
+
+          {/* Inline score */}
+          {(scoring || scoreResult) && (
+            <div className="mt-4 flex items-center gap-4 rounded-xl border border-line bg-sunken px-4 py-3">
+              {scoring ? (
+                <>
+                  <div className="h-9 w-9 shrink-0 animate-spin rounded-full border-4 border-line border-t-brand" />
+                  <div>
+                    <p className="text-sm font-medium text-ink">Scoring your resume…</p>
+                    <p className="text-xs text-muted">Deterministic ATS check — no LLM</p>
+                  </div>
+                </>
+              ) : scoreResult ? (
+                <>
+                  <ScoreRing score={scoreResult.score} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-ink">
+                      ATS Score: {scoreResult.score}/100
+                    </p>
+                    <p className={`text-xs font-medium ${scoreLabel(scoreResult.score).cls}`}>
+                      {scoreLabel(scoreResult.score).text}
+                    </p>
+                  </div>
+                  {scoreResult.score < 80 && (
+                    <span className="hidden sm:inline rounded-full border border-brand/30 bg-brand-tint px-3 py-1 text-xs font-medium text-brand">
+                      AI can fix this
+                    </span>
+                  )}
+                </>
+              ) : null}
+            </div>
+          )}
+
           <a
             href={`/resume/${result.resume_id}`}
-            className="mt-4 flex w-full items-center justify-center rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-on shadow-sm transition hover:bg-brand-strong"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-strong"
           >
-            Continue to wizard →
+            Optimize this resume
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
       )}
