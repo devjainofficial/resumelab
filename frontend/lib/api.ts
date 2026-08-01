@@ -8,6 +8,8 @@ export class ApiError extends Error {
   }
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export async function api(path: string, init?: RequestInit): Promise<any> {
   const supabase = createClient();
   const {
@@ -15,21 +17,35 @@ export async function api(path: string, init?: RequestInit): Promise<any> {
   } = await supabase.auth.getSession();
   if (!session) throw new ApiError(401, "Please sign in again.");
 
-  const resp = await fetch(`${API}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.headers ?? {}),
-      Authorization: `Bearer ${session.access_token}`,
-      ...(init?.body && typeof init.body === "string"
-        ? { "Content-Type": "application/json" }
-        : {}),
-    },
-  });
-  if (!resp.ok) {
-    const body = await resp.json().catch(() => null);
-    throw new ApiError(resp.status, body?.detail ?? `Request failed (${resp.status})`);
+  const headers: Record<string, string> = {
+    ...(init?.headers as Record<string, string> ?? {}),
+    Authorization: `Bearer ${session.access_token}`,
+    ...(init?.body && typeof init.body === "string"
+      ? { "Content-Type": "application/json" }
+      : {}),
+  };
+
+  // Retry up to 3× on network errors (TypeError = no connection).
+  // Render free tier cold-starts take 15–40 s; three 10 s gaps cover it.
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 10_000;
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const resp = await fetch(`${API}${path}`, { ...init, headers });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => null);
+        throw new ApiError(resp.status, body?.detail ?? `Request failed (${resp.status})`);
+      }
+      return resp.json();
+    } catch (e) {
+      if (e instanceof ApiError) throw e; // HTTP error — don't retry
+      lastErr = e;
+      if (attempt < MAX_RETRIES) await sleep(RETRY_DELAY_MS);
+    }
   }
-  return resp.json();
+  throw lastErr;
 }
 
 export function apiUrl(path: string): string {

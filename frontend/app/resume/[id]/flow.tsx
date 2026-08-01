@@ -91,6 +91,9 @@ function LoadingScreen({ message }: { message: string }) {
         <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-line border-t-brand" />
       </div>
       <p className="text-lg font-medium text-ink">{message}</p>
+      <p className="mt-2 text-sm text-muted">
+        First visit? The backend may take up to 30 seconds to wake up.
+      </p>
       <p
         className={`mt-6 max-w-md text-sm text-muted transition-opacity duration-300 ${
           fade ? "opacity-100" : "opacity-0"
@@ -821,7 +824,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
         setPaywall(e.detail);
       } else if (e instanceof TypeError) {
         setError(
-          "Could not reach the ResumeLab API. Start the backend, or try again shortly."
+          "The backend took too long to respond. It may still be starting up — please refresh the page in 30 seconds."
         );
       } else {
         setError(e instanceof Error ? e.message : "Something went wrong");
