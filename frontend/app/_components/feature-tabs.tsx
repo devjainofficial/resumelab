@@ -243,25 +243,25 @@ const TABS: Tab[] = [
   {
     id: "score",
     label: "Score your resume",
-    desc: "5-dimension ATS analysis. See exactly what's dragging your score down — with a one-line fix for each finding.",
+    desc: "5-dimension ATS analysis. A specific, actionable fix for each finding.",
     content: <ScoreMockup />,
   },
   {
     id: "rewrite",
-    label: "Rewrite truthfully",
-    desc: "Answer 5–10 focused questions. A one-page resume built only from facts you provide — never a made-up metric.",
+    label: "Rewrite from source",
+    desc: "Answer a few focused questions. A one-page resume built from facts you give us. No invented numbers.",
     content: <RewriteMockup />,
   },
   {
     id: "repair",
     label: "Repair from feedback",
-    desc: "Drop in a Resume Worded screenshot. Targeted patches applied — no full rewrites, no invented numbers.",
+    desc: "Drop in a Resume Worded screenshot. Targeted patches only. No full rewrites, no invented numbers.",
     content: <RepairMockup />,
   },
   {
     id: "tailor",
     label: "Target the role",
-    desc: "Paste a job description. Keywords mirrored, skills reordered, summary tailored — only where truthful.",
+    desc: "Paste a job description. Keywords mirrored, skills reordered, summary tailored. Only where it actually fits.",
     content: <TailorMockup />,
   },
   {

@@ -342,7 +342,7 @@ export default function LandingPage() {
             maxWidth: 500,
             margin: "0 auto 36px",
           }}>
-            Upload your resume. See your ATS score in 10 seconds. Fix it with our wizard — built only on facts you provide.
+            Upload your resume. See your ATS score in 10 seconds. Fix it with our wizard, using only what you give us.
           </p>
 
           {/* CTAs */}
@@ -423,7 +423,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3">
             {[
-              { stat: "0 LLM calls",   desc: "Scoring is deterministic — same file, same score, always free" },
+              { stat: "0 LLM calls",   desc: "Scoring is deterministic. Same file, same result, every time." },
               { stat: "5 criteria",    desc: "Impact · Language · Depth · Structure · Job match" },
               { stat: "100% private",  desc: "Your files are never stored or used to train a model" },
             ].map(({ stat, desc }) => (
@@ -441,7 +441,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <div style={{ marginBottom: 48 }}>
             <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: T.brand, margin: "0 0 10px" }}>
-              Five tools, one loop
+              How it works
             </p>
             <h2 style={{
               fontFamily: "var(--font-serif), Georgia, serif",
@@ -452,7 +452,7 @@ export default function LandingPage() {
               margin: 0,
               lineHeight: 1.2,
             }}>
-              The full job search loop.
+              Five features, one product.
             </h2>
           </div>
 
@@ -480,7 +480,7 @@ export default function LandingPage() {
               color: T.text,
               margin: 0,
             }}>
-              We will never&hellip;
+              What we promise
             </h2>
           </div>
 
@@ -550,7 +550,7 @@ export default function LandingPage() {
               boxShadow: T.btnShadow,
             }}>
               <GoogleIcon />
-              Continue with Google — it&apos;s free
+              Continue with Google, free
             </Link>
 
             <Link href="/score" style={{
@@ -592,7 +592,7 @@ export default function LandingPage() {
           </div>
 
           <p style={{ fontSize: 12, fontFamily: "monospace", color: T.muted, margin: 0 }}>
-            Built on truth · Data never trains a model
+            No fabrication. No data training.
           </p>
         </div>
       </footer>
