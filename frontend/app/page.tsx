@@ -11,28 +11,28 @@ import { FeatureTabs } from "./_components/feature-tabs";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const T = {
-  text:         "#0F172A",   // slate-900
-  soft:         "#475569",   // slate-600
-  muted:        "#94A3B8",   // slate-400
+  text:         "#16181F",   // ink
+  soft:         "#3D4159",   // ink-soft
+  muted:        "#6B7080",   // muted
   bg:           "#FFFFFF",
-  subtle:       "#F8FAFC",   // slate-50
-  blueFade:     "#EEF2FF",   // indigo-50 — attio-style blue tint
-  border:       "rgba(15,23,42,0.07)",
-  brand:        "#0F766E",   // teal-700
-  brandVivid:   "#14B8A6",   // teal-400
+  subtle:       "#F8F9FC",   // paper — cool blue cast
+  blueFade:     "#EEF2FF",   // indigo-50 — section tint
+  border:       "rgba(22,24,31,0.08)",
+  brand:        "#4338CA",   // indigo-700
+  brandVivid:   "#6366F1",   // indigo-500
   indigo:       "#3730A3",   // indigo-800
   indigoMid:    "#4F46E5",   // indigo-600
   green:        "#10B981",   // emerald-500
   amber:        "#F59E0B",   // amber-500
   red:          "#EF4444",   // red-500
-  btn:          "#0F766E",   // single brand color — no gradient
-  btnShadow:    "0 4px 16px rgba(15,118,110,0.24), 0 2px 6px rgba(15,118,110,0.12)",
+  btn:          "#4338CA",   // indigo — matches brand
+  btnShadow:    "0 4px 16px rgba(67,56,202,0.28), 0 2px 6px rgba(67,56,202,0.14)",
 } as const;
 
 const HERO_BG: CSSProperties = {
   background: [
-    "radial-gradient(ellipse 100% 80% at 12% -10%, rgba(20,184,166,0.14) 0%, transparent 55%)",
-    "radial-gradient(ellipse 80% 60% at 88%  -5%, rgba(99,102,241,0.10) 0%, transparent 50%)",
+    "radial-gradient(ellipse 100% 80% at 12% -10%, rgba(99,102,241,0.12) 0%, transparent 55%)",
+    "radial-gradient(ellipse 80% 60% at 88%  -5%, rgba(67,56,202,0.08) 0%, transparent 50%)",
     "#FFFFFF",
   ].join(", "),
 };

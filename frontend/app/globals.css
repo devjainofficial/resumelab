@@ -2,110 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Ink & Signal token system ─── */
+/* ─── Ink & Signal token system — blue-indigo palette ─── */
 :root {
-  --paper: #F7F8F7;
-  --surface: #FFFFFF;
-  --sunken: #EFF1EE;
-  --ink: #161819;
-  --ink-soft: #3F4348;
-  --muted: #71767C;
-  --line: #E4E6E2;
-  --line-strong: #D3D6D1;
-  --brand: #155E52;
-  --brand-strong: #0E463D;
-  --brand-tint: #E3EFEB;
-  --on-brand: #F7F8F7;
-  --caution: #8A5A0B;
-  --caution-tint: #F6EEDD;
-  --critical: #A5382B;
+  /* Neutrals: cool blue-cast (Attio-style), not warm greenish */
+  --paper:       #F8F9FC;
+  --surface:     #FFFFFF;
+  --sunken:      #EEF0F8;
+  --ink:         #16181F;
+  --ink-soft:    #3D4159;
+  --muted:       #6B7080;
+  --line:        #E3E7F0;
+  --line-strong: #CDD2E5;
+
+  /* Brand: deep indigo (replaces teal) */
+  --brand:       #4338CA;
+  --brand-strong:#3730A3;
+  --brand-tint:  #EEF2FF;
+  --on-brand:    #FFFFFF;
+
+  /* Semantic — unchanged */
+  --caution:       #8A5A0B;
+  --caution-tint:  #F6EEDD;
+  --critical:      #A5382B;
   --critical-tint: #F7E7E4;
-  --violet: #5B4B8A;
-  --violet-tint: #ECE9F5;
+  --violet:        #5B4B8A;
+  --violet-tint:   #ECE9F5;
   --violet-strong: #40356A;
-  --info: #1A56A6;
-  --info-tint: #E3EEFB;
+  --info:          #1A56A6;
+  --info-tint:     #E3EEFB;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #111312;
-    --surface: #191C1B;
-    --sunken: #202422;
-    --ink: #F1F3F0;
-    --ink-soft: #C3C7C3;
-    --muted: #8B918C;
-    --line: #2A2E2B;
-    --line-strong: #394039;
-    --brand: #49AE9E;
-    --brand-strong: #82D6C8;
-    --brand-tint: #16302B;
-    --on-brand: #0A1312;
-    --caution: #D89A3A;
-    --caution-tint: #2B2414;
-    --critical: #E28173;
+    --paper:       #0F1117;
+    --surface:     #161B28;
+    --sunken:      #1C2135;
+    --ink:         #EEF0F8;
+    --ink-soft:    #BFC5DC;
+    --muted:       #8891A8;
+    --line:        #252B3F;
+    --line-strong: #343B55;
+
+    --brand:       #818CF8;
+    --brand-strong:#A5B4FC;
+    --brand-tint:  #1E2040;
+    --on-brand:    #0F1117;
+
+    --caution:       #D89A3A;
+    --caution-tint:  #2B2414;
+    --critical:      #E28173;
     --critical-tint: #2E1B18;
-    --violet: #A99BD4;
-    --violet-tint: #201B30;
+    --violet:        #A99BD4;
+    --violet-tint:   #201B30;
     --violet-strong: #C7BCEC;
-    --info: #6BA3E0;
-    --info-tint: #12243A;
+    --info:          #6BA3E0;
+    --info-tint:     #12243A;
   }
 }
 
 :root[data-theme='dark'] {
-  --paper: #111312;
-  --surface: #191C1B;
-  --sunken: #202422;
-  --ink: #F1F3F0;
-  --ink-soft: #C3C7C3;
-  --muted: #8B918C;
-  --line: #2A2E2B;
-  --line-strong: #394039;
-  --brand: #49AE9E;
-  --brand-strong: #82D6C8;
-  --brand-tint: #16302B;
-  --on-brand: #0A1312;
-  --caution: #D89A3A;
-  --caution-tint: #2B2414;
-  --critical: #E28173;
+  --paper:       #0F1117;
+  --surface:     #161B28;
+  --sunken:      #1C2135;
+  --ink:         #EEF0F8;
+  --ink-soft:    #BFC5DC;
+  --muted:       #8891A8;
+  --line:        #252B3F;
+  --line-strong: #343B55;
+
+  --brand:       #818CF8;
+  --brand-strong:#A5B4FC;
+  --brand-tint:  #1E2040;
+  --on-brand:    #0F1117;
+
+  --caution:       #D89A3A;
+  --caution-tint:  #2B2414;
+  --critical:      #E28173;
   --critical-tint: #2E1B18;
-  --violet: #A99BD4;
-  --violet-tint: #201B30;
+  --violet:        #A99BD4;
+  --violet-tint:   #201B30;
   --violet-strong: #C7BCEC;
-  --info: #6BA3E0;
-  --info-tint: #12243A;
+  --info:          #6BA3E0;
+  --info-tint:     #12243A;
 }
 
 :root[data-theme='light'] {
-  --paper: #F7F8F7;
-  --surface: #FFFFFF;
-  --sunken: #EFF1EE;
-  --ink: #161819;
-  --ink-soft: #3F4348;
-  --muted: #71767C;
-  --line: #E4E6E2;
-  --line-strong: #D3D6D1;
-  --brand: #155E52;
-  --brand-strong: #0E463D;
-  --brand-tint: #E3EFEB;
-  --on-brand: #F7F8F7;
-  --caution: #8A5A0B;
-  --caution-tint: #F6EEDD;
-  --critical: #A5382B;
+  --paper:       #F8F9FC;
+  --surface:     #FFFFFF;
+  --sunken:      #EEF0F8;
+  --ink:         #16181F;
+  --ink-soft:    #3D4159;
+  --muted:       #6B7080;
+  --line:        #E3E7F0;
+  --line-strong: #CDD2E5;
+
+  --brand:       #4338CA;
+  --brand-strong:#3730A3;
+  --brand-tint:  #EEF2FF;
+  --on-brand:    #FFFFFF;
+
+  --caution:       #8A5A0B;
+  --caution-tint:  #F6EEDD;
+  --critical:      #A5382B;
   --critical-tint: #F7E7E4;
-  --violet: #5B4B8A;
-  --violet-tint: #ECE9F5;
+  --violet:        #5B4B8A;
+  --violet-tint:   #ECE9F5;
   --violet-strong: #40356A;
-  --info: #1A56A6;
-  --info-tint: #E3EEFB;
+  --info:          #1A56A6;
+  --info-tint:     #E3EEFB;
 }
 
 /* ─── Glassmorphism card ─── */
-/* Light: near-opaque white with blur. Dark: near-opaque dark surface with blur.
-   Use only on elements that sit over a blurred or gradient background. */
 .glass-card {
-  background: rgba(247, 248, 247, 0.90);
+  background: rgba(248, 249, 252, 0.90);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.75);
@@ -114,18 +123,18 @@
 
 @media (prefers-color-scheme: dark) {
   .glass-card {
-    background: rgba(25, 28, 27, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.04);
+    background: rgba(22, 27, 40, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
   }
 }
 :root[data-theme='dark'] .glass-card {
-  background: rgba(25, 28, 27, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(22, 27, 40, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 :root[data-theme='light'] .glass-card {
-  background: rgba(247, 248, 247, 0.90);
+  background: rgba(248, 249, 252, 0.90);
   border: 1px solid rgba(255, 255, 255, 0.75);
   box-shadow: 0 20px 60px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
 }
