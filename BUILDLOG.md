@@ -2,6 +2,100 @@
 
 Gate evidence and batched questions. Newest entries at the top.
 
+## Slice B — Criterion scoring (2026-08-01)
+
+**Gate: PASS**
+
+Architectural change: scorer now returns `criteria` (grouped) alongside `checks` (flat, backward-compat).
+Scoring model is criterion-based — section heading names don't break scoring.
+
+**Evidence:**
+
+| Check | Result |
+|---|---|
+| Strong reference resume score | 82/100 — gate passes (>75) |
+| Existing 9/9 scorer tests | All pass, zero regressions |
+| Custom headings: "Professional Experience" | Correctly detected as experience-class; 4 bullets scored |
+| Custom headings: "Work History", "Career History" | Both resolve to experience-class correctly |
+| Legitimate extras: Publications, Languages | Both in ATS_RECOGNIZED_HEADINGS — no penalty |
+| Truly unusual headings ("My Journey") | Flagged as advisory (2/3 pts), not 0 |
+| Page count context-aware | 1 page = 6/6; 2 pages + 7+ yrs = 6/6; 2 pages junior = 1/6 |
+| Criteria UI in browser | 5 criterion rows (Impact/Language/Depth/Structure/Job match), each expandable to findings with section tags |
+| Finding section field | `achievement` shows actual heading name ("Experience") not hardcoded string |
+
+**Changes shipped:**
+- `backend/scoring/scorer.py`: `_detect_sections()`, `_detect_experience_years()`, `ATS_RECOGNIZED_HEADINGS` (expanded), `_experience_bullets()` uses detected sections, page-count logic experience-aware, `Check` dataclass gets `section`/`criterion` fields, `score_resume()` returns `criteria` group
+- `backend/app/score_public.py`: `criteria` added to response
+- `frontend/app/score/quick-scorer.tsx`: criterion bars with expandable findings replacing flat check list
+
+**Criteria output (strong.txt):**
+```
+Impact      24.5/27  ██████████████████░░  achievement=15/15 (Experience), verb_first=4.5/7, verb_variety=5/5
+Language    21.5/22  ███████████████████░  weak_language=10/10, buzzwords=6/6, bullet_length=2.5/3, start_variety=3/3
+Depth       19.0/19  ████████████████████  depth=8/8, parse_back=8/8, placeholders=3/3
+Structure   17.0/17  ████████████████████  one_page=6/6, contact=8/8, headings=3/3
+Job match    0.0/15  ░░░░░░░░░░░░░░░░░░░░  (no JD provided)
+```
+
+---
+
+## Slice A — Scorer bug fixes (2026-08-01)
+
+**Built:** Fixed four categories of scorer bugs in `backend/scoring/scorer.py`.
+No new features, no scoring philosophy changes. Pure bug fixes and missing
+implementations from FIXES.md SCORER ALGORITHM FIXES section.
+
+**Fix 1 — Number detection regex** (achievement check, 15 pts):
+- `IMPACT_SIGNALS` was matching on `\d[\d,]*` (stops at `.`) and a 7-word unit
+  list. "12 engineers", "1.2M users", "50+ clients", "1,00,000 records" all
+  returned False.
+- Replaced with `_N = r"[\d,]+(?:\.\d+)?"` across all numeric patterns;
+  expanded `_UNIT_ALTS` to 40+ professional terms (engineers, developers,
+  clients, records, features, sprints, commits, etc.); added `\+?` between
+  number and unit; added "N adjective unit" variant for "8 junior developers".
+- Tested raw patterns: 12/12 correct (0 false positives on "Helped with
+  website", "Worked on improving the process").
+
+**Fix 2 — LinkedIn detection** (contact check, 8 pts):
+- `"linkedin.com/"` required a trailing slash. Changed to `"linkedin" in head`.
+
+**Fix 3 — Page count** (structural check, 6 pts):
+- Binary 0/6 for any resume > 1 page. Changed to 3/6 for 2-page resumes with
+  detail note "acceptable for 7+ years". Full experience-conditional logic
+  (parse date ranges → adjust threshold) deferred to calibration pass.
+
+**Fix 4 — Phrase repetition** (start_variety check, 3 pts):
+- `start_variety` only checked the first word of each bullet. Added
+  `_count_phrase_repetition()`: scans trigrams across all bullets, flags any
+  that appear 3+ times (excluding tech term exclusions). Penalty: -0.5 pts
+  per repeated trigram, capped at existing variety score.
+
+**Fix 5 — Skills evidenced in bullets** (depth check advisory):
+- Skills section extraction previously read only the first line after `## Skills`.
+  Now reads all lines until next heading. Added advisory detail to `depth` check:
+  lists skill terms that do not appear in any experience bullet. No point change.
+
+**Deferred (documented in FIXES.md with reasoning):**
+- Outcome vs context framing: outcome-verb patterns already in IMPACT_SIGNALS;
+  full 1.5x weighting restructures achievement check — defer until real user
+  data shows calibration is off.
+- Tense consistency: false-positive rate high without POS tagger (-ed verbs are
+  both active past-tense and passive; can't distinguish without context).
+- Duplicate content detection: needs fuzzy matching; `thefuzz` not in deps.
+- Render ATS text visually: UI concern, deferred to Slice C.
+
+**Gate evidence (reference/strong.txt → reference/sparse.txt):**
+```
+Strong   82/100  achievement 15/15, contact 8/8, confidence 10/10
+Medium   47/100  0/15 achievement (no numbers — correct), 0/10 confidence (weak language — correct)
+Sparse   40/100  0/15 achievement, 0/7 verb-first, skills advisory fires
+```
+- Strong resume scores 82 — **GATE PASS (need >75)**
+- Ordering correct: 82 > 47 > 40
+- 9/9 scorer tests still passing (zero regressions)
+- All three reference resumes in `/reference/` (strong.txt, medium.txt, sparse.txt)
+- Gate script: `backend/gate_slice_a.py`
+
 ## Slice 9 — Outcomes, flow UI, deploy prep (2026-07-20)
 
 **Built:** outcomes endpoints (`POST /outcomes`, `PATCH /outcomes/{id}`,

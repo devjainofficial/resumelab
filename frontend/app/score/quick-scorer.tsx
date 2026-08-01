@@ -7,12 +7,23 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const ACCEPT = ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const MAX_BYTES = 5 * 1024 * 1024;
 
-type Check = {
+type Finding = {
   id: string;
   label: string;
   points: number;
   max_points: number;
+  section: string;
   detail: string;
+  criterion: string;
+  tip?: string;
+};
+
+type Criterion = {
+  id: string;
+  label: string;
+  score: number;
+  max: number;
+  findings: Finding[];
 };
 
 type ScoredFile = {
@@ -20,17 +31,24 @@ type ScoredFile = {
   filename: string;
   status: "scoring" | "done" | "error";
   score?: number;
-  checks?: Check[];
+  criteria?: Criterion[];
   error?: string;
 };
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 const CIRC = 2 * Math.PI * 20;
 
+function scoreColor(pct: number) {
+  if (pct >= 0.8) return "var(--brand)";
+  if (pct >= 0.5) return "#d97706";
+  return "#dc2626";
+}
+
 function MiniRing({ score }: { score: number }) {
-  const color = score >= 80 ? "var(--brand)" : score >= 60 ? "#d97706" : "#dc2626";
-  const offset = CIRC * (1 - score / 100);
+  const pct = score / 100;
+  const color = scoreColor(pct);
+  const offset = CIRC * (1 - pct);
   return (
     <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
       <svg viewBox="0 0 48 48" width="44" height="44">
@@ -51,24 +69,79 @@ function scoreLabel(v: number) {
   return { text: "High risk", cls: "text-red-600 dark:text-red-400" };
 }
 
-function CheckRow({ check }: { check: Check }) {
-  const full = check.points / check.max_points >= 0.99;
-  const zero = check.points <= 0;
+function FindingRow({ finding }: { finding: Finding }) {
+  const full = finding.points / finding.max_points >= 0.99;
+  const zero = finding.points <= 0;
   return (
-    <li className="flex items-start gap-3 py-2 border-b border-line/30 last:border-0">
+    <li className="flex items-start gap-2.5 py-2 border-b border-line/20 last:border-0">
       <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold
         ${full ? "bg-brand/15 text-brand" : zero ? "bg-red-500/10 text-red-500" : "bg-amber-500/10 text-amber-600 dark:text-amber-400"}`}>
         {full ? "✓" : zero ? "✗" : "~"}
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-xs font-medium text-ink">{check.label}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs font-medium text-ink">{finding.label}</span>
+            <span className="shrink-0 rounded px-1 py-px text-[9px] font-medium uppercase tracking-wide
+              bg-line/30 text-ink-soft">
+              {finding.section}
+            </span>
+          </div>
           <span className="shrink-0 font-mono text-[11px] text-muted tabular-nums">
-            {Math.round(check.points * 10) / 10}/{check.max_points}
+            {Math.round(finding.points * 10) / 10}/{finding.max_points}
           </span>
         </div>
-        <p className="mt-0.5 text-[11px] text-ink-soft">{check.detail}</p>
+        <p className="mt-0.5 text-[11px] leading-relaxed text-ink-soft">{finding.detail}</p>
+        {finding.tip && !full && (
+          <p className="mt-1 text-[11px] font-medium leading-relaxed text-brand/80">
+            Fix: {finding.tip}
+          </p>
+        )}
       </div>
+    </li>
+  );
+}
+
+function CriterionRow({ criterion, fileKey }: { criterion: Criterion; fileKey: string }) {
+  const [open, setOpen] = useState(false);
+  const pct = criterion.max > 0 ? criterion.score / criterion.max : 0;
+  const color = scoreColor(pct);
+  const scoreInt = Math.round(criterion.score);
+
+  return (
+    <li className="border-b border-line/30 last:border-0">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-sunken/60"
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-xs font-semibold text-ink">{criterion.label}</span>
+            <span className="shrink-0 font-mono text-[11px] tabular-nums"
+              style={{ color }}>
+              {scoreInt}/{criterion.max}
+            </span>
+          </div>
+          <div className="mt-1.5 h-1 w-full rounded-full bg-line/40 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${Math.min(100, pct * 100)}%`, background: color }}
+            />
+          </div>
+        </div>
+        <svg
+          className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+
+      {open && (
+        <ul className="px-4 pb-3 pt-1">
+          {criterion.findings.map((f) => <FindingRow key={f.id} finding={f} />)}
+        </ul>
+      )}
     </li>
   );
 }
@@ -100,11 +173,10 @@ export function QuickScorer() {
       setFiles((prev) =>
         prev.map((f) =>
           f.key === key
-            ? { ...f, status: "done", score: data.score, checks: data.checks }
+            ? { ...f, status: "done", score: data.score, criteria: data.criteria }
             : f
         )
       );
-      // Auto-expand first result
       setExpanded((e) => e ?? key);
     } catch (err) {
       setFiles((prev) =>
@@ -265,11 +337,13 @@ export function QuickScorer() {
                   )}
                 </button>
 
-                {/* Expanded breakdown */}
-                {expanded === f.key && f.checks && (
-                  <div className="border-t border-line/40 px-4 pb-4 pt-2">
+                {/* Expanded breakdown — criteria + findings */}
+                {expanded === f.key && f.criteria && (
+                  <div className="border-t border-line/40 pb-1">
                     <ul>
-                      {f.checks.map((c) => <CheckRow key={c.id} check={c} />)}
+                      {f.criteria.map((c) => (
+                        <CriterionRow key={c.id} criterion={c} fileKey={f.key} />
+                      ))}
                     </ul>
                   </div>
                 )}

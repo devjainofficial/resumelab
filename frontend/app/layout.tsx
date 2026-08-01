@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // GeistSans.variable → --font-geist-sans
@@ -38,6 +39,7 @@ export default function RootLayout({
         className={`${newsreader.variable} ${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-paper font-sans text-ink antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );

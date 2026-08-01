@@ -16,7 +16,17 @@ resume from this file alone.
       All credentials verified; Gemini key in backend/.env (mock mode still
       on — real calls need one-time user approval).
 
-## Slice status
+## Slice status (new plan — score-first flow)
+
+| Slice | Status | Gate evidence |
+|---|---|---|
+| A Scorer bug fixes | **DONE** | BUILDLOG "Slice A": strong 82/100, medium 47, sparse 40; 9/9 tests; 5 fixes shipped |
+| B Criterion scoring | **DONE** | BUILDLOG "Slice B": 82/100 gate, 9/9 tests, custom headings, criteria UI |
+| C Score-first UI | Not started |
+| D Fix actions + contextual questions | Not started |
+| E Instrumentation | Not started |
+
+## Old slice status (slices 1-9, all DONE)
 
 | Slice | Status | Gate evidence |
 |---|---|---|

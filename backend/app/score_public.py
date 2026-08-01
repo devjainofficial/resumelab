@@ -60,5 +60,6 @@ async def public_score(file: UploadFile) -> dict:
     return {
         "score": result["value"],
         "checks": result["checks"],
+        "criteria": result["criteria"],
         "filename": filename,
     }
