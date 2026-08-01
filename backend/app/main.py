@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.admin import router as admin_router
 from app.auth import CurrentUser
+from app.demo_auth import router as demo_auth_router
 from app.billing import router as billing_router
 from app.enhance import router as enhance_router
 from app.outcomes import router as outcomes_router
@@ -17,6 +18,7 @@ from app.wizard import router as wizard_router
 
 app = FastAPI(title="ResumeLab API", version="0.1.0")
 app.include_router(admin_router)
+app.include_router(demo_auth_router)
 app.include_router(score_public_router)
 app.include_router(resumes_router)
 app.include_router(wizard_router)
