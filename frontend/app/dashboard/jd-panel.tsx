@@ -186,18 +186,13 @@ export function JdEnhancerPanel() {
             rows={7}
             className="w-full resize-none rounded-lg border border-line bg-sunken px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
-          <p className="mt-1 font-mono text-xs text-muted">
-            {jdText.length < 30
-              ? `${30 - jdText.length} more chars needed`
-              : `${jdText.length} chars`}
-          </p>
         </div>
 
         {/* CTA */}
         <button
           onClick={handleTailor}
           disabled={!ready}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-80 disabled:opacity-35"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong disabled:opacity-40"
         >
           {running ? (
             <>

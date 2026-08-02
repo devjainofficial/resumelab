@@ -16,8 +16,8 @@ STRUCTURES: dict[str, dict] = {
         "length_limit_pages": 1,
     },
     "S2": {
-        "name": "Jake's Resume",
-        "audience": "developers — the popular LaTeX-style template",
+        "name": "Portfolio Highlight",
+        "audience": "strong project / portfolio work alongside experience",
         "template": "jake",
         "section_order": ["contact", "summary", "skills", "experience", "projects", "education"],
         "bullet_rules": {"max_words": 40, "verb_first": True, "min_quantified_ratio": 2 / 3},

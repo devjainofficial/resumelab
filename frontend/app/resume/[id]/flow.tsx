@@ -1166,7 +1166,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 {busy === "score" ? "Scoring…" : "Get ATS Score"}
               </button>
             </div>
-            {/* Row 2: downloads + template switcher */}
+            {/* Row 2: downloads + layout switcher */}
             <div className="flex flex-wrap items-center gap-2 border-t border-line/50 pt-2">
               <button
                 onClick={() => download("pdf")}
@@ -1182,32 +1182,43 @@ export function Flow({ resumeId }: { resumeId: string }) {
               >
                 {busy === "docx" ? "…" : "DOCX"}
               </button>
-              <select
-                value={structureId}
-                onChange={async (e) => {
-                  const prevId = structureId;
-                  const newId = e.target.value;
-                  setStructureId(newId);
-                  const ok = await run("template-switch", async () => {
-                    await api(`/versions/${versionId}/structure`, {
-                      method: "PATCH",
-                      body: JSON.stringify({ structure_id: newId }),
+              <div className="ml-auto flex items-center gap-2">
+                <span className="font-mono text-xs text-muted">Layout:</span>
+                <select
+                  value={structureId}
+                  onChange={async (e) => {
+                    const prevId = structureId;
+                    const newId = e.target.value;
+                    setStructureId(newId);
+                    const ok = await run("template-switch", async () => {
+                      await api(`/versions/${versionId}/structure`, {
+                        method: "PATCH",
+                        body: JSON.stringify({ structure_id: newId }),
+                      });
                     });
-                  });
-                  if (ok) {
-                    recompose();
-                  } else {
-                    setStructureId(prevId);
-                  }
-                }}
-                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-soft"
-              >
-                {structures.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                    if (ok) {
+                      recompose();
+                    } else {
+                      setStructureId(prevId);
+                    }
+                  }}
+                  className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-soft"
+                >
+                  {structures.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setStep("template")}
+                  disabled={!!busy}
+                  title="Browse layouts with previews"
+                  className="rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-ink-soft transition hover:border-brand/40 hover:text-brand disabled:opacity-40"
+                >
+                  Browse →
+                </button>
+              </div>
             </div>
           </div>
 
