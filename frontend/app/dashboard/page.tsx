@@ -69,26 +69,34 @@ export default async function Dashboard() {
       </header>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-24 pt-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-8 sm:px-6">
+        {/*
+          Mobile order:  Upload → JD panel → History
+          Desktop order: [Upload  ] [JD panel (sticky, spans 2 rows)]
+                         [History ]
+        */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
 
-          {/* Left: Upload + History */}
-          <div className="space-y-10">
-            <section id="upload">
-              <UploadZone />
-            </section>
-            <section id="history">
-              <ResumeHistory />
-            </section>
-          </div>
+          {/* 1 — Upload (col 1 row 1 on desktop) */}
+          <section id="upload" className="lg:col-start-1 lg:row-start-1">
+            <UploadZone />
+          </section>
 
-          {/* Right: JD Tailoring panel */}
-          <aside id="jd" className="lg:sticky lg:top-[72px]">
+          {/* 2 — JD panel (col 2 rows 1-2 on desktop, between upload+history on mobile) */}
+          <aside
+            id="jd"
+            className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-[72px]"
+          >
             <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">
               Job Tailoring
             </p>
             <JdEnhancerPanel />
           </aside>
+
+          {/* 3 — History (col 1 row 2 on desktop) */}
+          <section id="history" className="lg:col-start-1 lg:row-start-2">
+            <ResumeHistory />
+          </section>
         </div>
       </main>
     </div>
