@@ -1,23 +1,42 @@
-export function BrandMark({ size = 28 }: { size?: number }) {
+export function BrandMark({
+  size = 28,
+  color = "var(--brand)",
+  bg = "var(--surface)",
+}: {
+  size?: number;
+  color?: string;
+  bg?: string;
+}) {
+  const w = Math.round((size * 68) / 60);
   return (
     <svg
-      width={size}
+      width={w}
       height={size}
-      viewBox="0 0 48 48"
+      viewBox="4 -1 68 60"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="ResumeLab"
+      stroke={color}
+      strokeWidth={3}
+      strokeLinejoin="round"
     >
-      <rect width="48" height="48" rx="11" fill="#266df0" />
-
-      {/* R: stem + D-bowl (radius 8, sweeps right to x=20) + diagonal leg */}
-      <rect x="6" y="9" width="6" height="30" fill="white" />
-      <path d="M 12 9 A 8 8 0 0 1 12 25 Z" fill="white" />
-      <line x1="14" y1="25" x2="22" y2="39" stroke="white" strokeWidth="6" strokeLinecap="round" />
-
-      {/* L: stem + base foot */}
-      <rect x="27" y="9" width="6" height="30" fill="white" />
-      <rect x="27" y="34" width="15" height="5" fill="white" />
+      {/* right arm — woven under the diagonal */}
+      <path d="M44 6 L55 6 L47 56 L36 56 Z" fill={bg} />
+      {/* diagonal ribbon rising into an arrow */}
+      <path
+        d="M8.54 44.73 L53.33 8.43 L49.86 4.15 L70 2 L63.72 21.25 L60.25 16.97 L15.46 53.27 Z"
+        fill={bg}
+      />
+      {/* left arm — woven over the diagonal */}
+      <path d="M14 6 L25 6 L17 56 L6 56 Z" fill={bg} />
     </svg>
+  );
+}
+
+export function BrandWord({ className = "" }: { className?: string }) {
+  return (
+    <span className={className}>
+      Resume<span className="text-brand">Lab</span>
+    </span>
   );
 }

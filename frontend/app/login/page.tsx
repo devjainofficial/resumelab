@@ -32,7 +32,7 @@ function LoginInner() {
       <div className="w-full max-w-sm">
         {/* Brand mark */}
         <div className="mb-8 flex justify-center">
-          <BrandMark size={40} />
+          <BrandMark size={40} bg="var(--paper)" />
         </div>
 
         {/* Card */}

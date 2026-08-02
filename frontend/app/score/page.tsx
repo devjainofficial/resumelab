@@ -18,7 +18,7 @@ export default async function ScorePage() {
         <div className="mx-auto flex h-14 max-w-4xl items-center gap-3 px-6">
           <Link href="/" className="flex items-center gap-2">
             <BrandMark size={28} />
-            <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
           </Link>
           <div className="flex-1" />
           <ThemeToggle />

@@ -339,7 +339,7 @@ export default function ScratchPage() {
           <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-6">
             <Link href="/dashboard" className="flex items-center gap-2">
               <BrandMark size={26} />
-              <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+              <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
             </Link>
           </div>
         </header>
@@ -386,7 +386,7 @@ export default function ScratchPage() {
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <BrandMark size={26} />
-            <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
           </Link>
           <div className="flex-1" />
           <button

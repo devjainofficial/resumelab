@@ -108,7 +108,7 @@ export default function AdminPage() {
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <BrandMark size={26} />
-            <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
           </Link>
           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
             Admin

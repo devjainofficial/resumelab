@@ -33,7 +33,7 @@ export default async function Dashboard() {
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2.5">
             <BrandMark size={30} />
-            <span className="text-[15px] font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="text-[15px] font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
             <span className="hidden rounded-full bg-brand-tint px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-brand sm:inline">
               Beta
             </span>

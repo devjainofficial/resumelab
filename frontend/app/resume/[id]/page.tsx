@@ -10,7 +10,7 @@ export default function ResumePage({ params }: { params: { id: string } }) {
         <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
           <div className="flex items-center gap-2">
             <BrandMark size={28} />
-            <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
           </div>
           <div className="flex-1" />
           <ThemeToggle />
