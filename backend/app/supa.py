@@ -78,6 +78,24 @@ class Supa:
             r.raise_for_status()
             return r.content
 
+    async def delete(self, table: str, params: dict) -> None:
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.delete(
+                f"{self.base}/rest/v1/{table}",
+                params=params,
+                headers=self._headers(),
+            )
+            r.raise_for_status()
+
+    async def delete_file(self, bucket: str, paths: list[str]) -> None:
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.delete(
+                f"{self.base}/storage/v1/object/{bucket}",
+                json={"prefixes": paths},
+                headers=self._headers(),
+            )
+            r.raise_for_status()
+
 
 _instance: Supa | None = None
 

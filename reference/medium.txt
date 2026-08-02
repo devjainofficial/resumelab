@@ -1,0 +1,34 @@
+Sneha Patel
+Mumbai, India | sneha.patel@example.com | +91 99887 22222
+linkedin.com/in/snehapatel
+
+Summary
+Full-stack developer with 4 years of experience building web applications.
+Passionate about clean code and good user experience.
+
+Skills
+Languages: JavaScript, TypeScript, Python
+Frameworks: React, Node.js, Express, Django
+Tools: Git, Docker, AWS
+
+Experience
+Software Developer
+StartupCo, Mumbai
+Jun 2021 - Present
+• Worked on building new features for the main product
+• Helped with migration from REST to GraphQL
+• Participated in code reviews and contributed to improving test coverage
+• Responsible for maintaining the CI/CD pipeline
+• Developed dashboard components used by customers
+
+Junior Developer
+WebAgency, Pune
+Aug 2019 - May 2021
+• Assisted with frontend development tasks
+• Worked with designers to implement UI components
+• Involved in building client websites
+• Handled bug fixes and minor feature requests
+
+Education
+B.E. Computer Engineering, University of Mumbai
+2015 - 2019

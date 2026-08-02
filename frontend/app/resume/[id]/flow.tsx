@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { api, ApiError } from "@/lib/api";
 import { BuilderStep } from "./builder-step";
+import { LabLoader } from "@/app/_components/lab-loader";
 
 type Question = {
   id: string;
@@ -23,19 +24,6 @@ type Structure = {
   audience: string;
   section_order: string[];
 };
-
-const RESUME_FACTS = [
-  "Recruiters spend an average of 7.4 seconds on a resume.",
-  "75% of resumes are rejected by ATS before a human sees them.",
-  "Resumes with quantified achievements get 40% more interviews.",
-  "One-page resumes are preferred by 66% of employers.",
-  "Action verbs at the start of bullets increase readability by 33%.",
-  "Tailoring your resume to each job boosts response rates by 50%.",
-  "Spelling errors eliminate 58% of candidates immediately.",
-  "Keywords from the job description can double your ATS score.",
-  "Consistent formatting makes resumes 3x easier to scan.",
-  "Adding LinkedIn increases callback rates by 71%.",
-];
 
 const NUMBER_HINTS: Record<string, string> = {
   team: "e.g. 5, 12, 30+",
@@ -66,43 +54,6 @@ function getHint(question: string): string | null {
     if (q.includes(key)) return hint;
   }
   return null;
-}
-
-function LoadingScreen({ message }: { message: string }) {
-  const [factIdx, setFactIdx] = useState(
-    Math.floor(Math.random() * RESUME_FACTS.length)
-  );
-  const [fade, setFade] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setFactIdx((i) => (i + 1) % RESUME_FACTS.length);
-        setFade(true);
-      }, 300);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="mb-8">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-line border-t-brand" />
-      </div>
-      <p className="text-lg font-medium text-ink">{message}</p>
-      <p className="mt-2 text-sm text-muted">
-        First visit? The backend may take up to 30 seconds to wake up.
-      </p>
-      <p
-        className={`mt-6 max-w-md text-sm text-muted transition-opacity duration-300 ${
-          fade ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {RESUME_FACTS[factIdx]}
-      </p>
-    </div>
-  );
 }
 
 function TypeformWizard({
@@ -792,7 +743,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
   const [showReadyBanner, setShowReadyBanner] = useState(false);
   const [jdText, setJdText] = useState("");
   const [enhanceResult, setEnhanceResult] = useState<any>(null);
-  const [paywall, setPaywall] = useState<any>(null);
   const [outcomeSentTo, setOutcomeSentTo] = useState("");
   const [outcomeLogged, setOutcomeLogged] = useState(false);
 
@@ -843,13 +793,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
       await fn();
       return true;
     } catch (e) {
-      if (
-        e instanceof ApiError &&
-        typeof e.detail === "object" &&
-        (e.detail as any)?.paywall
-      ) {
-        setPaywall(e.detail);
-      } else if (e instanceof TypeError) {
+      if (e instanceof TypeError) {
         setError(
           "The backend took too long to respond. It may still be starting up — please refresh the page in 30 seconds."
         );
@@ -1059,7 +1003,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
 
   const runEnhance = () =>
     run("enhance", async () => {
-      setPaywall(null);
       const r = await api(`/versions/${versionId}/enhance`, {
         method: "POST",
         body: JSON.stringify({ jd_text: jdText }),
@@ -1114,7 +1057,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
       )}
 
       {/* Init */}
-      {step === "init" && <LoadingScreen message="Loading your resume..." />}
+      {step === "init" && <LabLoader message="Loading your resume..." />}
 
       {/* Start (legacy fallback) */}
       {step === "start" && (
@@ -1149,7 +1092,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
 
       {/* Loading / Composing */}
       {(step === "loading" || step === "composing") && (
-        <LoadingScreen message={loadingMsg} />
+        <LabLoader message={loadingMsg} />
       )}
 
       {/* Wizard */}
@@ -1487,15 +1430,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
                 >
                   {busy === "enhance" ? "Tailoring…" : "Create Tailored Variant →"}
                 </button>
-                {paywall && (
-                  <div className="mt-3 rounded-lg border border-caution/20 bg-caution-tint p-4 text-sm">
-                    <p className="font-semibold text-caution">{paywall.message}</p>
-                    <p className="mt-1 text-muted">
-                      ₹{paywall.price_inr} per run. Payment options on the
-                      dashboard.
-                    </p>
-                  </div>
-                )}
                 {enhanceResult && (
                   <div className="mt-3 rounded-lg border border-brand/20 bg-surface p-4 text-sm">
                     <p className="font-semibold text-brand-strong">Tailored variant created.</p>

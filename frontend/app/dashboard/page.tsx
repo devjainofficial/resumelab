@@ -16,7 +16,7 @@ export default async function Dashboard() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("email, full_name, avatar_url, credits, is_free_user")
+    .select("email, full_name, avatar_url, is_free_user")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +30,9 @@ export default async function Dashboard() {
           <div className="flex items-center gap-2">
             <BrandMark size={28} />
             <span className="font-semibold tracking-tight text-ink">ResumeLab</span>
+            <span className="rounded-full bg-brand-tint px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-brand">
+              Beta
+            </span>
           </div>
 
           <div className="flex-1" />
@@ -42,14 +45,6 @@ export default async function Dashboard() {
           >
             Quick Score
           </Link>
-
-          {/* JD credits chip */}
-          <div className="flex items-center gap-1.5 rounded-full border border-line bg-sunken px-3 py-1 font-mono text-xs">
-            <span className="text-muted">JD credits</span>
-            <span className="font-semibold tabular-nums text-ink">
-              {profile?.credits ?? 0}
-            </span>
-          </div>
 
           <SignOutButton />
 
@@ -76,18 +71,17 @@ export default async function Dashboard() {
       {/* ── GREETING ── */}
       <div className="border-b border-line bg-paper">
         <div className="mx-auto max-w-4xl px-6 pb-8 pt-10">
-          <h1 className="font-serif text-3xl font-medium tracking-tight text-ink">
+          <h1 className="text-3xl font-semibold tracking-tight text-ink">
             Welcome back, {firstName}.
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            {profile?.is_free_user ? "Free access" : "Standard"} ·{" "}
-            {profile?.email ?? user.email}
+          <p className="mt-1.5 text-sm text-muted">
+            {profile?.email ?? user.email} · Everything is free during beta.
           </p>
         </div>
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="mx-auto max-w-4xl px-6 pb-20 pt-8">
+      <main className="mx-auto max-w-4xl px-6 pb-20 pt-8 space-y-10">
         <UploadZone />
         <ResumeHistory />
       </main>

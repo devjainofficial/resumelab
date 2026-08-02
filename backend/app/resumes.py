@@ -298,3 +298,30 @@ async def list_resumes(
             "order": "created_at.desc",
         },
     )
+
+
+@router.delete("/{resume_id}")
+async def delete_resume(
+    resume_id: str,
+    user: dict = Depends(get_current_user),
+    supa: Supa = Depends(get_supa),
+) -> dict:
+    user_id = user["id"]
+    rows = await supa.select(
+        "resumes",
+        {"id": f"eq.{resume_id}", "user_id": f"eq.{user_id}", "select": "id,file_hash,filename"},
+    )
+    if not rows:
+        raise HTTPException(404, "Resume not found")
+    resume = rows[0]
+
+    # Delete stored file — non-fatal if already gone
+    suffix = ".pdf" if resume["filename"].lower().endswith(".pdf") else ".docx"
+    try:
+        await supa.delete_file("resumes", [f"{user_id}/{resume['file_hash']}{suffix}"])
+    except Exception:
+        pass
+
+    # Delete the resume row — cascade handles versions → answers/scores/outcomes
+    await supa.delete("resumes", {"id": f"eq.{resume_id}", "user_id": f"eq.{user_id}"})
+    return {"deleted": True}

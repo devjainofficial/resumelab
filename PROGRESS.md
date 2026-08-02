@@ -22,9 +22,9 @@ resume from this file alone.
 |---|---|---|
 | A Scorer bug fixes | **DONE** | BUILDLOG "Slice A": strong 82/100, medium 47, sparse 40; 9/9 tests; 5 fixes shipped |
 | B Criterion scoring | **DONE** | BUILDLOG "Slice B": 82/100 gate, 9/9 tests, custom headings, criteria UI |
-| C Score-first UI | Not started |
-| D Fix actions + contextual questions | Not started |
-| E Instrumentation | Not started |
+| C Score-first UI | **DONE** | QuickScorer embedded in homepage hero; CTA fires after score; 114 tests green |
+| D Fix actions + contextual questions | **DONE** | FINDING_TIPS dict; Check.as_dict() injects tip when points < max; FindingRow renders tip in brand color |
+| E Instrumentation | **DONE** | @vercel/analytics installed; Analytics component in root layout; prod auto-tracks |
 
 ## Old slice status (slices 1-9, all DONE)
 

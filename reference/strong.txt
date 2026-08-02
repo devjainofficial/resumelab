@@ -1,0 +1,38 @@
+Arjun Mehta
+Bengaluru, India | arjun.mehta@example.com | +91 98765 11111
+linkedin.com/in/arjunmehta | github.com/arjunmehta
+
+Summary
+Senior software engineer with 8 years building high-scale distributed systems.
+Led teams of 10+ engineers delivering products serving 1.2M daily active users.
+
+Skills
+Languages: Python, Go, Java, TypeScript
+Infrastructure: AWS, GCP, Kubernetes, Terraform, Docker
+Data: PostgreSQL, Redis, Kafka, Elasticsearch
+
+Experience
+Staff Software Engineer
+Fintech Platform, Bengaluru
+Mar 2020 - Present
+• Led a team of 12 engineers across 3 product lines, shipping 6 major releases per quarter
+• Achieved 1.2M API requests/day throughput by rebuilding the gateway in Go
+• Reduced p99 latency from 840ms to 95ms by migrating to async event processing
+• Onboarded 50+ enterprise clients, growing ARR by $2.5M in 18 months
+• Cut infrastructure cost by 38% by right-sizing 200+ Kubernetes workloads
+
+Senior Software Engineer
+Logistics Tech, Hyderabad
+Jan 2017 - Feb 2020
+• Built real-time tracking system processing 40k+ events per minute
+• Improved delivery prediction accuracy from 62% to 91% using ML pipeline
+• Designed data warehouse ingesting 1,00,000+ records per hour
+• Mentored 8 junior developers, reducing onboarding time from 6 weeks to 3 weeks
+
+Education
+B.Tech Computer Science, IIT Bombay
+2013 - 2017
+
+Certifications
+AWS Certified Solutions Architect - Professional
+Google Cloud Professional Data Engineer

@@ -1,0 +1,19 @@
+Ravi Kumar
+ravi.kumar@example.com
+
+Objective
+Looking for a software engineering job.
+
+Education
+B.Sc Computer Science, Osmania University
+2020 - 2023
+
+Skills
+HTML, CSS, JavaScript
+
+Experience
+Intern
+TechFirm, Hyderabad
+2023
+• Worked on the website
+• Helped with testing

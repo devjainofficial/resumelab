@@ -19,5 +19,7 @@ dist/
 *.log
 .pytest_cache/
 .vercel/
+supabase/.temp/
+*.tsbuildinfo
 
 .vercel
