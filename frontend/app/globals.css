@@ -2,25 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Ink & Signal token system — blue-indigo palette ─── */
+/* ─── Ink & Signal token system — Attio-matched cobalt blue palette ─── */
+/*
+ * Attio color primitives (extracted from attio.com):
+ *   blue-100 #e8f0ff  blue-200 #c8dcff  blue-300 #94b9ff
+ *   blue-400 #709ff5  blue-450 #538bf3  blue-500 #266df0  blue-600 #245bc2
+ *   white-200 #fafafb  white-300 #f3f4f6  white-400 #edeff3
+ *   white-500 #e4e7ec  white-800 #cad0d9  white-900 #b5bdc9
+ *   black-50 #101010  black-100 #1c1d1f  black-200 #202124
+ *   black-300 #232529  black-400 #2e3238  black-500 #383e47
+ *   black-600 #505967  black-700 #6f7988  black-800 #8f99a8  black-900 #a4adba
+ */
 :root {
-  /* Neutrals: cool blue-cast (Attio-style), not warm greenish */
-  --paper:       #F8F9FC;
+  /* Neutrals: near-pure white, Attio-style (no blue tint) */
+  --paper:       #fafafb;   /* white-200 */
   --surface:     #FFFFFF;
-  --sunken:      #EEF0F8;
-  --ink:         #16181F;
-  --ink-soft:    #3D4159;
-  --muted:       #6B7080;
-  --line:        #E3E7F0;
-  --line-strong: #CDD2E5;
+  --sunken:      #f3f4f6;   /* white-300 */
+  --ink:         #2e3238;   /* black-400 */
+  --ink-soft:    #383e47;   /* black-500 */
+  --muted:       #6f7988;   /* black-700 */
+  --line:        #e4e7ec;   /* white-500 */
+  --line-strong: #cad0d9;   /* white-800 */
 
-  /* Brand: deep indigo (replaces teal) */
-  --brand:       #4338CA;
-  --brand-strong:#3730A3;
-  --brand-tint:  #EEF2FF;
+  /* Brand: Attio cobalt blue (no indigo/violet cast) */
+  --brand:       #266df0;   /* blue-500 */
+  --brand-strong:#245bc2;   /* blue-600 */
+  --brand-tint:  #e8f0ff;   /* blue-100 */
   --on-brand:    #FFFFFF;
 
-  /* Semantic — unchanged */
+  /* Semantic */
   --caution:       #8A5A0B;
   --caution-tint:  #F6EEDD;
   --critical:      #A5382B;
@@ -29,24 +39,24 @@
   --violet-tint:   #ECE9F5;
   --violet-strong: #40356A;
   --info:          #1A56A6;
-  --info-tint:     #E3EEFB;
+  --info-tint:     #e8f0ff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper:       #0F1117;
-    --surface:     #161B28;
-    --sunken:      #1C2135;
-    --ink:         #EEF0F8;
-    --ink-soft:    #BFC5DC;
-    --muted:       #8891A8;
-    --line:        #252B3F;
-    --line-strong: #343B55;
+    --paper:       #101010;   /* black-50 */
+    --surface:     #1c1d1f;   /* black-100 */
+    --sunken:      #202124;   /* black-200 */
+    --ink:         #f3f4f6;   /* white-300 */
+    --ink-soft:    #a4adba;   /* black-900 */
+    --muted:       #8f99a8;   /* black-800 */
+    --line:        #232529;   /* black-300 */
+    --line-strong: #2e3238;   /* black-400 */
 
-    --brand:       #818CF8;
-    --brand-strong:#A5B4FC;
-    --brand-tint:  #1E2040;
-    --on-brand:    #0F1117;
+    --brand:       #709ff5;   /* blue-400 */
+    --brand-strong:#94b9ff;   /* blue-300 */
+    --brand-tint:  #1a2233;   /* blue-800 */
+    --on-brand:    #101010;
 
     --caution:       #D89A3A;
     --caution-tint:  #2B2414;
@@ -55,25 +65,25 @@
     --violet:        #A99BD4;
     --violet-tint:   #201B30;
     --violet-strong: #C7BCEC;
-    --info:          #6BA3E0;
-    --info-tint:     #12243A;
+    --info:          #709ff5;
+    --info-tint:     #1a2233;
   }
 }
 
 :root[data-theme='dark'] {
-  --paper:       #0F1117;
-  --surface:     #161B28;
-  --sunken:      #1C2135;
-  --ink:         #EEF0F8;
-  --ink-soft:    #BFC5DC;
-  --muted:       #8891A8;
-  --line:        #252B3F;
-  --line-strong: #343B55;
+  --paper:       #101010;
+  --surface:     #1c1d1f;
+  --sunken:      #202124;
+  --ink:         #f3f4f6;
+  --ink-soft:    #a4adba;
+  --muted:       #8f99a8;
+  --line:        #232529;
+  --line-strong: #2e3238;
 
-  --brand:       #818CF8;
-  --brand-strong:#A5B4FC;
-  --brand-tint:  #1E2040;
-  --on-brand:    #0F1117;
+  --brand:       #709ff5;
+  --brand-strong:#94b9ff;
+  --brand-tint:  #1a2233;
+  --on-brand:    #101010;
 
   --caution:       #D89A3A;
   --caution-tint:  #2B2414;
@@ -82,23 +92,23 @@
   --violet:        #A99BD4;
   --violet-tint:   #201B30;
   --violet-strong: #C7BCEC;
-  --info:          #6BA3E0;
-  --info-tint:     #12243A;
+  --info:          #709ff5;
+  --info-tint:     #1a2233;
 }
 
 :root[data-theme='light'] {
-  --paper:       #F8F9FC;
+  --paper:       #fafafb;
   --surface:     #FFFFFF;
-  --sunken:      #EEF0F8;
-  --ink:         #16181F;
-  --ink-soft:    #3D4159;
-  --muted:       #6B7080;
-  --line:        #E3E7F0;
-  --line-strong: #CDD2E5;
+  --sunken:      #f3f4f6;
+  --ink:         #2e3238;
+  --ink-soft:    #383e47;
+  --muted:       #6f7988;
+  --line:        #e4e7ec;
+  --line-strong: #cad0d9;
 
-  --brand:       #4338CA;
-  --brand-strong:#3730A3;
-  --brand-tint:  #EEF2FF;
+  --brand:       #266df0;
+  --brand-strong:#245bc2;
+  --brand-tint:  #e8f0ff;
   --on-brand:    #FFFFFF;
 
   --caution:       #8A5A0B;
@@ -109,34 +119,34 @@
   --violet-tint:   #ECE9F5;
   --violet-strong: #40356A;
   --info:          #1A56A6;
-  --info-tint:     #E3EEFB;
+  --info-tint:     #e8f0ff;
 }
 
 /* ─── Glassmorphism card ─── */
 .glass-card {
-  background: rgba(248, 249, 252, 0.90);
+  background: rgba(250, 250, 251, 0.92);  /* #fafafb = Attio white-200 */
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
 @media (prefers-color-scheme: dark) {
   .glass-card {
-    background: rgba(22, 27, 40, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    background: rgba(28, 29, 31, 0.90);  /* #1c1d1f = Attio black-100 */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.50), 0 4px 16px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04);
   }
 }
 :root[data-theme='dark'] .glass-card {
-  background: rgba(22, 27, 40, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(28, 29, 31, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.50), 0 4px 16px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 :root[data-theme='light'] .glass-card {
-  background: rgba(248, 249, 252, 0.90);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+  background: rgba(250, 250, 251, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
 /* ─── Dot grid background utility ─── */

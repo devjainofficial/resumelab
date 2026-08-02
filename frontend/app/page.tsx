@@ -10,29 +10,33 @@ import { FeatureTabs } from "./_components/feature-tabs";
 // page is intentionally always-light regardless of OS/app theme setting.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Attio blue palette (extracted from attio.com):
+//   blue-500 #266df0  blue-600 #245bc2  blue-100 #e8f0ff
+//   white-200 #fafafb  white-300 #f3f4f6  white-500 #e4e7ec
+//   black-400 #2e3238  black-500 #383e47  black-700 #6f7988
 const T = {
-  text:         "#16181F",   // ink
-  soft:         "#3D4159",   // ink-soft
-  muted:        "#6B7080",   // muted
+  text:         "#2e3238",   // Attio black-400
+  soft:         "#383e47",   // Attio black-500
+  muted:        "#6f7988",   // Attio black-700
   bg:           "#FFFFFF",
-  subtle:       "#F8F9FC",   // paper — cool blue cast
-  blueFade:     "#EEF2FF",   // indigo-50 — section tint
-  border:       "rgba(22,24,31,0.08)",
-  brand:        "#4338CA",   // indigo-700
-  brandVivid:   "#6366F1",   // indigo-500
-  indigo:       "#3730A3",   // indigo-800
-  indigoMid:    "#4F46E5",   // indigo-600
-  green:        "#10B981",   // emerald-500
-  amber:        "#F59E0B",   // amber-500
-  red:          "#EF4444",   // red-500
-  btn:          "#4338CA",   // indigo — matches brand
-  btnShadow:    "0 4px 16px rgba(67,56,202,0.28), 0 2px 6px rgba(67,56,202,0.14)",
+  subtle:       "#fafafb",   // Attio white-200 — near-pure white
+  blueFade:     "#e8f0ff",   // Attio blue-100 — soft blue section tint
+  border:       "rgba(46,50,56,0.08)",
+  brand:        "#266df0",   // Attio blue-500 — cobalt, no violet cast
+  brandVivid:   "#538bf3",   // Attio blue-450
+  indigo:       "#245bc2",   // Attio blue-600
+  indigoMid:    "#266df0",   // same as brand
+  green:        "#10B981",
+  amber:        "#F59E0B",
+  red:          "#EF4444",
+  btn:          "#266df0",
+  btnShadow:    "0 4px 16px rgba(38,109,240,0.22), 0 2px 6px rgba(38,109,240,0.10)",
 } as const;
 
 const HERO_BG: CSSProperties = {
   background: [
-    "radial-gradient(ellipse 100% 80% at 12% -10%, rgba(99,102,241,0.12) 0%, transparent 55%)",
-    "radial-gradient(ellipse 80% 60% at 88%  -5%, rgba(67,56,202,0.08) 0%, transparent 50%)",
+    "radial-gradient(ellipse 100% 80% at 12% -10%, rgba(38,109,240,0.09) 0%, transparent 55%)",
+    "radial-gradient(ellipse 80% 60% at 88%  -5%, rgba(36,91,194,0.06) 0%, transparent 50%)",
     "#FFFFFF",
   ].join(", "),
 };

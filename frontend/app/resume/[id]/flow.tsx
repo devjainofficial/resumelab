@@ -378,30 +378,30 @@ const TEMPLATE_SVGS: Record<string, string> = {
 
   S2: `
     <text x="6" y="11" font-size="8" font-weight="700" fill="#0f172a">Full Name</text>
-    <line x1="6" y1="14.5" x2="88" y2="14.5" stroke="#1e40af" stroke-width="1.5"/>
+    <line x1="6" y1="14.5" x2="88" y2="14.5" stroke="#266df0" stroke-width="1.5"/>
     <text x="6" y="20" font-size="3.5" fill="#64748b">email · phone · linkedin · github</text>
     <rect x="6" y="24" width="80" height="2" rx="1" fill="#cbd5e1"/>
     <rect x="6" y="28" width="62" height="2" rx="1" fill="#cbd5e1"/>
-    <text x="6" y="37" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">SKILLS</text>
-    <line x1="6" y1="38.5" x2="88" y2="38.5" stroke="#1e40af" stroke-width="0.4"/>
+    <text x="6" y="37" font-size="4" font-weight="700" letter-spacing="0.9" fill="#266df0">SKILLS</text>
+    <line x1="6" y1="38.5" x2="88" y2="38.5" stroke="#266df0" stroke-width="0.4"/>
     <rect x="6" y="41" width="78" height="2" rx="1" fill="#d1d5db"/>
     <rect x="6" y="45" width="55" height="2" rx="1" fill="#d1d5db"/>
-    <text x="6" y="53" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">EXPERIENCE</text>
-    <line x1="6" y1="54.5" x2="88" y2="54.5" stroke="#1e40af" stroke-width="0.4"/>
+    <text x="6" y="53" font-size="4" font-weight="700" letter-spacing="0.9" fill="#266df0">EXPERIENCE</text>
+    <line x1="6" y1="54.5" x2="88" y2="54.5" stroke="#266df0" stroke-width="0.4"/>
     <rect x="6" y="57" width="44" height="3" rx="1" fill="#374151" opacity="0.7"/>
     <rect x="60" y="57" width="28" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
     <rect x="8" y="63" width="72" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="67" width="65" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="71" width="70" height="2" rx="1" fill="#d1d5db"/>
-    <text x="6" y="80" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">PROJECTS</text>
-    <line x1="6" y1="81.5" x2="88" y2="81.5" stroke="#1e40af" stroke-width="0.4"/>
+    <text x="6" y="80" font-size="4" font-weight="700" letter-spacing="0.9" fill="#266df0">PROJECTS</text>
+    <line x1="6" y1="81.5" x2="88" y2="81.5" stroke="#266df0" stroke-width="0.4"/>
     <rect x="6" y="84" width="36" height="3" rx="1" fill="#374151" opacity="0.6"/>
     <rect x="8" y="90" width="75" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="94" width="60" height="2" rx="1" fill="#d1d5db"/>
     <rect x="6" y="99" width="30" height="3" rx="1" fill="#374151" opacity="0.5"/>
     <rect x="8" y="105" width="68" height="2" rx="1" fill="#d1d5db"/>
-    <text x="6" y="113" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e40af">EDUCATION</text>
-    <line x1="6" y1="114.5" x2="88" y2="114.5" stroke="#1e40af" stroke-width="0.4"/>
+    <text x="6" y="113" font-size="4" font-weight="700" letter-spacing="0.9" fill="#266df0">EDUCATION</text>
+    <line x1="6" y1="114.5" x2="88" y2="114.5" stroke="#266df0" stroke-width="0.4"/>
     <rect x="6" y="117" width="46" height="2.5" rx="1" fill="#374151" opacity="0.6"/>
     <rect x="60" y="117" width="26" height="2.5" rx="1" fill="#9ca3af" opacity="0.4"/>
     <rect x="6" y="122" width="54" height="2" rx="1" fill="#d1d5db"/>`,
@@ -409,25 +409,25 @@ const TEMPLATE_SVGS: Record<string, string> = {
   S3: `
     <text x="6" y="11" font-size="7.5" font-weight="700" fill="#0a0a0a">Full Name</text>
     <text x="6" y="17" font-size="3.5" fill="#555">email · phone · linkedin</text>
-    <line x1="6" y1="20" x2="88" y2="20" stroke="#1e3a8a" stroke-width="1"/>
+    <line x1="6" y1="20" x2="88" y2="20" stroke="#245bc2" stroke-width="1"/>
     <rect x="6" y="24" width="80" height="2" rx="1" fill="#cbd5e1"/>
     <rect x="6" y="28" width="62" height="2" rx="1" fill="#cbd5e1"/>
-    <text x="6" y="36" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e3a8a">EDUCATION</text>
-    <line x1="6" y1="37.5" x2="88" y2="37.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <text x="6" y="36" font-size="4" font-weight="700" letter-spacing="0.9" fill="#245bc2">EDUCATION</text>
+    <line x1="6" y1="37.5" x2="88" y2="37.5" stroke="#245bc2" stroke-width="0.4"/>
     <rect x="6" y="40" width="48" height="3" rx="1" fill="#374151" opacity="0.7"/>
     <rect x="62" y="40" width="26" height="3" rx="1" fill="#9ca3af" opacity="0.5"/>
     <rect x="8" y="46" width="55" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="50" width="44" height="2" rx="1" fill="#d1d5db"/>
-    <text x="6" y="58" font-size="3.8" font-weight="700" letter-spacing="0.7" fill="#1e3a8a">PROJECTS &amp; INTERNSHIPS</text>
-    <line x1="6" y1="59.5" x2="88" y2="59.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <text x="6" y="58" font-size="3.8" font-weight="700" letter-spacing="0.7" fill="#245bc2">PROJECTS &amp; INTERNSHIPS</text>
+    <line x1="6" y1="59.5" x2="88" y2="59.5" stroke="#245bc2" stroke-width="0.4"/>
     <rect x="6" y="62" width="36" height="3" rx="1" fill="#374151" opacity="0.65"/>
     <rect x="8" y="68" width="74" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="72" width="60" height="2" rx="1" fill="#d1d5db"/>
     <rect x="6" y="77" width="32" height="3" rx="1" fill="#374151" opacity="0.55"/>
     <rect x="8" y="83" width="68" height="2" rx="1" fill="#d1d5db"/>
     <rect x="8" y="87" width="55" height="2" rx="1" fill="#d1d5db"/>
-    <text x="6" y="95" font-size="4" font-weight="700" letter-spacing="0.9" fill="#1e3a8a">SKILLS</text>
-    <line x1="6" y1="96.5" x2="88" y2="96.5" stroke="#1e3a8a" stroke-width="0.4"/>
+    <text x="6" y="95" font-size="4" font-weight="700" letter-spacing="0.9" fill="#245bc2">SKILLS</text>
+    <line x1="6" y1="96.5" x2="88" y2="96.5" stroke="#245bc2" stroke-width="0.4"/>
     <rect x="6" y="99" width="80" height="2" rx="1" fill="#d1d5db"/>
     <rect x="6" y="103" width="58" height="2" rx="1" fill="#d1d5db"/>`,
 
