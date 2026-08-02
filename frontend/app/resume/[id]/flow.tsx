@@ -464,6 +464,19 @@ const TEMPLATE_SVGS: Record<string, string> = {
     <rect x="6" y="115" width="55" height="2" rx="1" fill="#d1d5db"/>`,
 };
 
+function recommendStructure(parsed: any): string {
+  if (!parsed) return "S1";
+  const exp = parsed.sections?.experience ?? [];
+  const proj = parsed.sections?.projects ?? [];
+  const hasExp = exp.length > 0;
+  const hasProj = proj.length > 0;
+  // No dated experience at all + has projects → Fresher (S3)
+  if (!hasExp && hasProj) return "S3";
+  // Has both experience and notable projects → Jake's (S2)
+  if (hasExp && hasProj) return "S2";
+  return "S1";
+}
+
 function TemplateMiniSvg({ structureId }: { structureId: string; sections?: string[] }) {
   const inner = TEMPLATE_SVGS[structureId] ?? TEMPLATE_SVGS.S1;
   return (
@@ -477,11 +490,13 @@ function TemplateMiniSvg({ structureId }: { structureId: string; sections?: stri
 function TemplateSelector({
   structures,
   selected,
+  recommended,
   onSelect,
   onContinue,
 }: {
   structures: Structure[];
   selected: string;
+  recommended?: string;
   onSelect: (id: string) => void;
   onContinue: () => void;
 }) {
@@ -497,6 +512,13 @@ function TemplateSelector({
         <p className="mt-2 text-sm text-muted">
           All layouts are ATS-safe: single column, standard headings, text-selectable. Click any card to zoom.
         </p>
+        {recommended && recommended !== selected && (
+          <p className="mt-3 text-sm text-brand">
+            Based on your resume we pre-selected{" "}
+            <strong>{structures.find((s) => s.id === recommended)?.name ?? recommended}</strong>.
+            You can change it below.
+          </p>
+        )}
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {structures.map((s) => (
             <div key={s.id} className="group flex flex-col">
@@ -508,6 +530,11 @@ function TemplateSelector({
                     : "border-line hover:border-line-strong"
                 }`}
               >
+                {recommended === s.id && (
+                  <span className="absolute left-2 top-2 z-10 rounded-full bg-brand px-2 py-0.5 font-mono text-[9px] font-semibold text-brand-on shadow">
+                    Best match
+                  </span>
+                )}
                 <div className="p-1.5 shadow-sm" style={{ background: "#fff" }}>
                   <TemplateMiniSvg structureId={s.id} sections={s.section_order} />
                 </div>
@@ -876,7 +903,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
         body: JSON.stringify({ resume_id: resumeId }),
       });
       setVersionId(r.version_id);
-      setStructureId(r.structure_id);
+      // Use local recommendation from parsed resume; backend r.structure_id is fallback.
+      const rec = recommendStructure(parsedResume);
+      setStructureId(rec || r.structure_id);
 
       // Save any improve-popover answers as wizard answers for rewrite context
       if (Object.keys(bulletAnswers).length > 0) {
@@ -900,6 +929,9 @@ export function Flow({ resumeId }: { resumeId: string }) {
     run("answers", async () => {
       setStep("loading");
       setLoadingMsg("Saving your answers...");
+      // Apply fresher/non-fresher recommendation before showing template picker.
+      const rec = recommendStructure(parsedResume);
+      if (rec) setStructureId(rec);
       const allAnswers = questions.map((q) => ({
         id: q.id,
         question: q.question,
@@ -1134,6 +1166,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
         <TemplateSelector
           structures={structures}
           selected={structureId}
+          recommended={recommendStructure(parsedResume)}
           onSelect={setStructureId}
           onContinue={handleTemplateSelect}
         />
@@ -1287,6 +1320,18 @@ export function Flow({ resumeId }: { resumeId: string }) {
             </div>
           )}
 
+          {/* JD teaser — visible as soon as version exists, nudges toward finalize */}
+          {status !== "final" && !editing && (
+            <div className="mx-auto flex max-w-[820px] items-center gap-3 rounded-xl border border-brand/20 bg-brand-tint/50 px-5 py-3">
+              <svg className="h-4 w-4 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <p className="text-sm text-brand-strong">
+                Got a job description? <strong>Finalize</strong> your resume to tailor it with one click.
+              </p>
+            </div>
+          )}
+
           {showOriginal && !editing && (
             <OriginalResumeView parsed={parsedResume} />
           )}
@@ -1413,6 +1458,62 @@ export function Flow({ resumeId }: { resumeId: string }) {
           {/* Score Repair + JD Enhance + Outcomes */}
           {status === "final" && (
             <div className="mx-auto max-w-[680px] space-y-4">
+              {/* JD Enhancer — shown first so it's the obvious next step */}
+              <div className="rounded-xl border border-brand/30 bg-brand-tint p-6 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <h2 className="text-base font-semibold text-brand-strong">
+                      Tailor to a Job Description
+                    </h2>
+                    <p className="mt-0.5 text-sm text-ink-soft">
+                      Paste a job description and we'll mirror keywords, reorder skills, and sharpen your summary — without adding facts.
+                    </p>
+                  </div>
+                </div>
+                <textarea
+                  className="mt-4 w-full rounded-lg border border-brand/20 bg-surface p-3 text-sm text-ink outline-none transition focus:border-brand focus:bg-surface"
+                  rows={4}
+                  placeholder="Paste the full job description..."
+                  value={jdText}
+                  onChange={(e) => setJdText(e.target.value)}
+                />
+                <button
+                  onClick={runEnhance}
+                  disabled={jdText.trim().length < 30 || !!busy}
+                  className="mt-2 rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
+                >
+                  {busy === "enhance" ? "Tailoring…" : "Create Tailored Variant →"}
+                </button>
+                {paywall && (
+                  <div className="mt-3 rounded-lg border border-caution/20 bg-caution-tint p-4 text-sm">
+                    <p className="font-semibold text-caution">{paywall.message}</p>
+                    <p className="mt-1 text-muted">
+                      ₹{paywall.price_inr} per run. Payment options on the
+                      dashboard.
+                    </p>
+                  </div>
+                )}
+                {enhanceResult && (
+                  <div className="mt-3 rounded-lg border border-brand/20 bg-surface p-4 text-sm">
+                    <p className="font-semibold text-brand-strong">Tailored variant created.</p>
+                    <ul className="mt-2 list-disc pl-5 text-ink-soft">
+                      {enhanceResult.actions?.map((a: string) => (
+                        <li key={a}>{a}</li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-muted">
+                      Coverage: {enhanceResult.coverage.present.length} keywords matched,{" "}
+                      {enhanceResult.coverage.missing.length} missing
+                      {enhanceResult.coverage.missing.length > 0 &&
+                        ` (${enhanceResult.coverage.missing.slice(0, 6).join(", ")})`}
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Score Repair */}
               <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
                 <h2 className="text-base font-semibold text-ink">Score Repair</h2>
@@ -1522,53 +1623,6 @@ export function Flow({ resumeId }: { resumeId: string }) {
                         {repairResult.new_questions.length} question(s) need your input to complete the repair.
                       </p>
                     )}
-                  </div>
-                )}
-              </div>
-
-              {/* JD Enhancer */}
-              <div className="rounded-xl border border-line bg-surface p-6 shadow-sm">
-                <h2 className="text-base font-semibold text-ink">
-                  Tailor to a Job Description
-                </h2>
-                <textarea
-                  className="mt-3 w-full rounded-lg border border-line bg-sunken p-3 text-sm text-ink outline-none transition focus:border-line-strong focus:bg-surface"
-                  rows={4}
-                  placeholder="Paste the full job description..."
-                  value={jdText}
-                  onChange={(e) => setJdText(e.target.value)}
-                />
-                <button
-                  onClick={runEnhance}
-                  disabled={jdText.trim().length < 30 || !!busy}
-                  className="mt-2 rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-brand-on transition hover:bg-brand-strong disabled:opacity-40"
-                >
-                  {busy === "enhance" ? "Tailoring…" : "Create Tailored Variant"}
-                </button>
-                {paywall && (
-                  <div className="mt-3 rounded-lg border border-caution/20 bg-caution-tint p-4 text-sm">
-                    <p className="font-semibold text-caution">{paywall.message}</p>
-                    <p className="mt-1 text-muted">
-                      ₹{paywall.price_inr} per run. Payment options on the
-                      dashboard.
-                    </p>
-                  </div>
-                )}
-                {enhanceResult && (
-                  <div className="mt-3 text-sm text-ink-soft">
-                    <ul className="list-disc pl-5">
-                      {enhanceResult.actions?.map((a: string) => (
-                        <li key={a}>{a}</li>
-                      ))}
-                    </ul>
-                    <p className="mt-2 text-muted">
-                      Coverage: {enhanceResult.coverage.present.length} matched,{" "}
-                      {enhanceResult.coverage.missing.length} missing
-                      {enhanceResult.coverage.missing.length > 0 &&
-                        ` (${enhanceResult.coverage.missing
-                          .slice(0, 6)
-                          .join(", ")})`}
-                    </p>
                   </div>
                 )}
               </div>

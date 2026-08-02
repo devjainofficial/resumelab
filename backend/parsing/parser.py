@@ -94,6 +94,13 @@ def _merge_continuation(prev_bullet: str, line: str) -> str:
     return prev + " " + add
 
 
+_TECH_LINE_RE = re.compile(
+    r"^(?:language[s]?|technology|technologies(?:\s+used)?|tech[\s\-]?stack|"
+    r"tools?|stack|built\s+with|frameworks?|libraries?)\s*[:/\-–]\s*",
+    re.I,
+)
+
+
 def _split_entries(lines: list[str]) -> list[dict[str, Any]]:
     """Group experience/education/project lines into entries. A new entry
     starts at a non-bullet line that follows bullets, or a line with a date
@@ -183,6 +190,32 @@ def _parse_skills(lines: list[str]) -> list[str]:
     return skills
 
 
+def _clean_project_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Convert 'Language/Technology: X, Y' bullets into project header tech-stack lines.
+
+    Many fresher resumes use this pattern inside a project block. As a bullet
+    it reads terribly; as a secondary header line the composer renders it as
+    '**Project Name — React, Node.js**' which is correct ATS format.
+    """
+    for entry in entries:
+        clean_bullets: list[str] = []
+        tech_parts: list[str] = []
+        for bullet in entry["bullets"]:
+            m = _TECH_LINE_RE.match(bullet)
+            if m:
+                tech_str = bullet[m.end():].strip().rstrip(".")
+                if tech_str:
+                    tech_parts.append(tech_str)
+            else:
+                clean_bullets.append(bullet)
+        entry["bullets"] = clean_bullets
+        if tech_parts:
+            entry["header"].append(", ".join(tech_parts))
+    # Drop phantom entries that the tech-line was the only bullet for and that
+    # have no real bullets left AND no meaningful header of their own.
+    return [e for e in entries if e["bullets"] or e["header"]]
+
+
 def _dedupe_summary_prefix(summary: str) -> str:
     """Remove a leading phrase that immediately repeats itself.
 
@@ -254,7 +287,7 @@ def parse_resume(text: str) -> dict[str, Any]:
             "skills": _parse_skills(sections_raw.get("skills", [])),
             "experience": _split_entries(sections_raw.get("experience", [])),
             "education": _split_entries(sections_raw.get("education", [])),
-            "projects": _split_entries(sections_raw.get("projects", [])),
+            "projects": _clean_project_entries(_split_entries(sections_raw.get("projects", []))),
             "certifications": [
                 _clean_bullet(l) for l in sections_raw.get("certifications", []) if l.strip()
             ],

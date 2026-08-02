@@ -18,6 +18,18 @@ HARD_CAP = 10
 NUMBER_RE = re.compile(r"\d")
 YEAR_RE = re.compile(r"\b(19|20)\d{2}\b")
 
+# Bullets that describe features or tech stack rather than achievements.
+# These have no impact metric to capture, so a quant question is unhelpful.
+_FEATURE_STARTER_RE = re.compile(
+    r"^(?:user(?:s)?\s+can|allows?\s+(?:users?|you|the\s+user)|"
+    r"enables?\s+(?:users?|you)|provides?\s+|dynamic\s+(?:and|&)|"
+    r"responsive\s+(?:and|&)|interactive\s+|secure\s+|simple\s+|"
+    r"easy\s+|built\s+with\s+|uses?\s+(?:react|node|mongo|express|python|django|flask)|"
+    r"features?\s+|includes?\s+|implements?\s+|works\s+(?:with|on)|"
+    r"(?:the\s+)?(?:app|application|system|website|platform)\s+(?:allows?|provides?|supports?))",
+    re.I,
+)
+
 
 def _has_number(text: str) -> bool:
     return bool(NUMBER_RE.search(text))
@@ -110,12 +122,31 @@ def detect_gaps(parsed: dict) -> list[dict[str, Any]]:
             "score_impact": 7,
         })
 
-    # --- quantification: unnumbered bullets -> numeric questions, newest first
+    # --- fresher project outcomes: no experience + has projects → ask what the
+    # project achieved or whether it was deployed. These questions give the
+    # AI polish pass real substance to work with.
+    is_fresher = not sections["experience"] and bool(sections["projects"])
+    if is_fresher:
+        for i, entry in enumerate(sections["projects"][:2]):
+            project_name = entry["header"][0] if entry["header"] else f"project {i + 1}"
+            questions.append({
+                "id": f"project_outcome_{i}",
+                "kind": "text",
+                "question": (
+                    f'For "{project_name}": was it deployed or used by real people? '
+                    "If yes, share a number or URL. If no, what was the main technical "
+                    "problem it solved?"
+                ),
+                "score_impact": 7,
+            })
+
+    # --- quantification: unnumbered bullets that ARE achievement-oriented.
+    # Skip pure feature-descriptions — they have no impact number to capture.
     unquantified: list[tuple[str, str]] = []
     for section in ("experience", "projects"):
         for i, entry in enumerate(sections[section]):
             for j, bullet in enumerate(entry["bullets"]):
-                if not _has_number(bullet):
+                if not _has_number(bullet) and not _FEATURE_STARTER_RE.match(bullet):
                     unquantified.append((f"quant_{section}_{i}_{j}", bullet))
     for qid, bullet in unquantified[:4]:  # cap: leave room for other gaps
         questions.append({

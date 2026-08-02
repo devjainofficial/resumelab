@@ -50,6 +50,9 @@ def recommend_structure(level_answer: str | None, has_projects: bool, years: int
     text = (level_answer or "").lower()
     if "fresher" in text or "entry" in text or (years is not None and years <= 2):
         return "S3"
+    # No dated experience at all + has projects = fresher, even if not self-labeled.
+    if years is None and has_projects:
+        return "S3"
     if has_projects:
         return "S2"
     return "S1"

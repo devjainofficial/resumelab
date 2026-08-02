@@ -68,6 +68,14 @@ def merge_answers(parsed: dict, answers: list[dict]) -> tuple[dict, dict[str, st
                 merged["sections"]["education"][i]["header"].append(answer)
             except (IndexError, KeyError):
                 pass
+        elif qid.startswith("project_outcome_"):
+            i = int(qid.rsplit("_", 1)[1])
+            try:
+                # Append the user's outcome statement as an additional bullet.
+                answer_clean = answer.rstrip(".") + "."
+                merged["sections"]["projects"][i]["bullets"].append(answer_clean)
+            except (IndexError, KeyError):
+                pass
         elif qid == "additional_content":
             # User-volunteered extra content: appended as a note-line under
             # summary. Composer decides where to actually render it.
