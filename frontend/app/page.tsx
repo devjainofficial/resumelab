@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { BrandMark } from "./_components/brand-mark";
+import { BrandLockup } from "./_components/brand-mark";
 import { BackToTop } from "./_components/back-to-top";
 import { FeatureTabs } from "./_components/feature-tabs";
 
@@ -265,10 +265,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2" style={{ textDecoration: "none" }}>
-            <BrandMark size={26} color={T.brand} bg="#ffffff" />
-            <span style={{ fontWeight: 600, fontSize: 15, color: T.text, letterSpacing: "-0.01em" }}>
-              Resume<span style={{ color: T.brand }}>Lab</span>
-            </span>
+            <BrandLockup height={24} />
           </Link>
 
           <div className="flex-1" />
@@ -585,8 +582,7 @@ export default function LandingPage() {
       }}>
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6">
           <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
-            <BrandMark size={18} color={T.brand} bg={T.subtle} />
-            <span style={{ fontSize: 12, fontFamily: "monospace", color: T.muted }}>ResumeLab</span>
+            <BrandLockup height={18} />
           </Link>
 
           <div style={{ display: "flex", gap: 20 }}>

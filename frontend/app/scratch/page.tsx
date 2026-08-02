@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { BrandMark } from "@/app/_components/brand-mark";
+import { BrandLockup } from "@/app/_components/brand-mark";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -338,8 +338,7 @@ export default function ScratchPage() {
         <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
           <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <BrandMark size={26} />
-              <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
+              <BrandLockup height={22} />
             </Link>
           </div>
         </header>
@@ -385,8 +384,7 @@ export default function ScratchPage() {
       <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <BrandMark size={26} />
-            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
+            <BrandLockup height={22} />
           </Link>
           <div className="flex-1" />
           <button

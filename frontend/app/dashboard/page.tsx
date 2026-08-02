@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BrandMark } from "@/app/_components/brand-mark";
+import { BrandLockup } from "@/app/_components/brand-mark";
 import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { SignOutButton } from "./signout-button";
 import { UploadZone } from "./upload";
@@ -32,8 +32,7 @@ export default async function Dashboard() {
       <header className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <BrandMark size={30} />
-            <span className="text-[15px] font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
+            <BrandLockup height={22} />
             <span className="hidden rounded-full bg-brand-tint px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-brand sm:inline">
               Beta
             </span>

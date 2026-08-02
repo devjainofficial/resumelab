@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { BrandMark } from "@/app/_components/brand-mark";
+import { BrandLockup } from "@/app/_components/brand-mark";
 
 function LoginInner() {
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ function LoginInner() {
       <div className="w-full max-w-sm">
         {/* Brand mark */}
         <div className="mb-8 flex justify-center">
-          <BrandMark size={40} bg="var(--paper)" />
+          <BrandLockup height={30} />
         </div>
 
         {/* Card */}

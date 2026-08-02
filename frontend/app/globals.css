@@ -185,3 +185,20 @@
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* ── Brand artwork theme swap ─────────────────────────────────────────────
+   The lockup is raster, so light/dark are two files rather than one tinted
+   asset. Keep the data-theme rules after the media query so an explicit
+   toggle wins in both directions. */
+.brand-light { display: block; }
+.brand-dark  { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  .brand-light { display: none; }
+  .brand-dark  { display: block; }
+}
+
+:root[data-theme='dark']  .brand-light { display: none; }
+:root[data-theme='dark']  .brand-dark  { display: block; }
+:root[data-theme='light'] .brand-light { display: block; }
+:root[data-theme='light'] .brand-dark  { display: none; }

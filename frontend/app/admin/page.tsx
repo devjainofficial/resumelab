@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
-import { BrandMark } from "@/app/_components/brand-mark";
+import { BrandLockup } from "@/app/_components/brand-mark";
 import { ThemeToggle } from "@/app/_components/theme-toggle";
 
 type Overview = {
@@ -107,8 +107,7 @@ export default function AdminPage() {
       <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <BrandMark size={26} />
-            <span className="font-semibold tracking-tight text-ink">Resume<span className="text-brand">Lab</span></span>
+            <BrandLockup height={22} />
           </Link>
           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
             Admin

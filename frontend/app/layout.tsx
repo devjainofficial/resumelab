@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   description:
     "Build a truthful, ATS-strong resume in minutes. Facts only, no hallucinations, no invented metrics.",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/icon.png",
+    apple: "/icon.png",
   },
   other: {
     commit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",

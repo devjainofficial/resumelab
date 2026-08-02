@@ -1,42 +1,54 @@
-export function BrandMark({
-  size = 28,
-  color = "var(--brand)",
-  bg = "var(--surface)",
+/* Brand artwork. Source lockup lives in public/brand; the -dark variants lift the
+   near-black wordmark and brighten the blues so the art holds up on #101010. */
+
+const LOCKUP = { w: 821, h: 157 };
+const MARK = { w: 265, h: 157 };
+
+function Swap({
+  light,
+  dark,
+  width,
+  height,
+  alt,
 }: {
-  size?: number;
-  color?: string;
-  bg?: string;
+  light: string;
+  dark: string;
+  width: number;
+  height: number;
+  alt: string;
 }) {
-  const w = Math.round((size * 68) / 60);
   return (
-    <svg
-      width={w}
-      height={size}
-      viewBox="4 -1 68 60"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="ResumeLab"
-      stroke={color}
-      strokeWidth={3}
-      strokeLinejoin="round"
-    >
-      {/* right arm — woven under the diagonal */}
-      <path d="M44 6 L55 6 L47 56 L36 56 Z" fill={bg} />
-      {/* diagonal ribbon rising into an arrow */}
-      <path
-        d="M8.54 44.73 L53.33 8.43 L49.86 4.15 L70 2 L63.72 21.25 L60.25 16.97 L15.46 53.27 Z"
-        fill={bg}
-      />
-      {/* left arm — woven over the diagonal */}
-      <path d="M14 6 L25 6 L17 56 L6 56 Z" fill={bg} />
-    </svg>
+    <span className="inline-flex shrink-0" style={{ width, height }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={light} alt={alt} width={width} height={height} className="brand-light" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={dark} alt="" aria-hidden width={width} height={height} className="brand-dark" />
+    </span>
   );
 }
 
-export function BrandWord({ className = "" }: { className?: string }) {
+/** Mark only — for tight or square slots. `size` is the rendered height. */
+export function BrandMark({ size = 28 }: { size?: number }) {
   return (
-    <span className={className}>
-      Resume<span className="text-brand">Lab</span>
-    </span>
+    <Swap
+      light="/brand/mark.png"
+      dark="/brand/mark-dark.png"
+      width={Math.round((size * MARK.w) / MARK.h)}
+      height={size}
+      alt="ResumeLab"
+    />
+  );
+}
+
+/** Full mark + wordmark lockup. `height` is the rendered height. */
+export function BrandLockup({ height = 22 }: { height?: number }) {
+  return (
+    <Swap
+      light="/brand/logo.png"
+      dark="/brand/logo-dark.png"
+      width={Math.round((height * LOCKUP.w) / LOCKUP.h)}
+      height={height}
+      alt="ResumeLab"
+    />
   );
 }
