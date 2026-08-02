@@ -10,25 +10,14 @@ export function BrandMark({ size = 28 }: { size?: number }) {
     >
       <rect width="48" height="48" rx="11" fill="#266df0" />
 
-      {/* R — stem */}
-      <rect x="7" y="10" width="5" height="28" fill="white" />
-      {/* R — bowl: semicircle radius=7, from (12,10) clockwise to (12,24), bulges right to x=19 */}
-      <path d="M 12 10 A 7 7 0 0 1 12 24 Z" fill="white" />
-      {/* R — leg: diagonal from bowl-stem junction */}
-      <line
-        x1="14"
-        y1="24"
-        x2="22"
-        y2="38"
-        stroke="white"
-        strokeWidth="5"
-        strokeLinecap="round"
-      />
+      {/* R: stem + D-bowl (radius 8, sweeps right to x=20) + diagonal leg */}
+      <rect x="6" y="9" width="6" height="30" fill="white" />
+      <path d="M 12 9 A 8 8 0 0 1 12 25 Z" fill="white" />
+      <line x1="14" y1="25" x2="22" y2="39" stroke="white" strokeWidth="6" strokeLinecap="round" />
 
-      {/* L — stem */}
-      <rect x="27" y="10" width="5" height="28" fill="white" />
-      {/* L — base foot */}
-      <rect x="27" y="33" width="14" height="5" fill="white" />
+      {/* L: stem + base foot */}
+      <rect x="27" y="9" width="6" height="30" fill="white" />
+      <rect x="27" y="34" width="15" height="5" fill="white" />
     </svg>
   );
 }

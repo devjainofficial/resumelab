@@ -18,9 +18,12 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "ResumeLab — Honest resumes that pass ATS",
+  title: {
+    default: "ResumeLab",
+    template: "%s · ResumeLab",
+  },
   description:
-    "Build a truthful, ATS-strong resume in minutes. Facts only — no hallucinations, no invented metrics.",
+    "Build a truthful, ATS-strong resume in minutes. Facts only, no hallucinations, no invented metrics.",
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",

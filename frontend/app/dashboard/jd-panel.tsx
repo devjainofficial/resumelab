@@ -105,7 +105,7 @@ export function JdEnhancerPanel() {
         </p>
         <div className="mt-4 rounded-lg border border-brand/20 bg-brand-tint px-4 py-3">
           <p className="font-mono text-xs text-brand">
-            No finalized resumes yet — upload and complete the flow first.
+            No finalized resumes yet. Upload a resume and complete the lab flow first.
           </p>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function JdEnhancerPanel() {
           </span>
         </div>
         <p className="mt-0.5 text-xs text-muted">
-          Mirror keywords from a JD. No new facts — only what&apos;s in your resume.
+          Mirror keywords from the JD. No new facts, only what is already in your resume.
         </p>
       </div>
 

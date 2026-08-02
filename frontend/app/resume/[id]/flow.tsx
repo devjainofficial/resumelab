@@ -795,7 +795,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
     } catch (e) {
       if (e instanceof TypeError) {
         setError(
-          "The backend took too long to respond. It may still be starting up — please refresh the page in 30 seconds."
+          "The backend took too long to respond. It may still be starting up. Please refresh in 30 seconds."
         );
       } else {
         setError(e instanceof Error ? e.message : "Something went wrong");
@@ -1412,7 +1412,7 @@ export function Flow({ resumeId }: { resumeId: string }) {
                       Tailor to a Job Description
                     </h2>
                     <p className="mt-0.5 text-sm text-ink-soft">
-                      Paste a job description and we'll mirror keywords, reorder skills, and sharpen your summary — without adding facts.
+                      Paste a job description and we will mirror keywords, reorder skills, and sharpen your summary. No new facts added.
                     </p>
                   </div>
                 </div>
