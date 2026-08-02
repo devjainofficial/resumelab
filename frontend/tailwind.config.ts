@@ -42,15 +42,24 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Palatino", "Georgia", "serif"],
-        // geist package sets --font-geist-sans / --font-geist-mono on <body>
+        // display: alias for interDisplay-style headings (GeistSans is visually equivalent)
+        display: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        serif: ["var(--font-serif)", "Palatino", "Georgia", "serif"],
       },
       borderRadius: {
         sm: "6px",
         md: "10px",
         lg: "14px",
+      },
+      letterSpacing: {
+        // Attio-matched tracking scale
+        "heading-xl": "-1.28px", // H1 at 64px
+        "heading-lg": "-0.4px",  // H2 at 40px
+        "heading-md": "-0.3px",  // H3 at ~30px
+        "heading-sm": "-0.16px", // H4 + nav text
+        ui: "-0.07px",           // Buttons, labels
       },
     },
   },

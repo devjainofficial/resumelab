@@ -122,6 +122,19 @@
   --info-tint:     #e8f0ff;
 }
 
+/* ─── Typography scale (Attio-matched) ─────────────────────────────────────
+ * interDisplay metrics (extracted from attio.com):
+ *   H1 64px / 600 / −1.28px  |  H2 40px / 500 / −0.4px
+ *   nav 15px / 500 / −0.16px |  buttons 14px / 500 / −0.07px
+ * GeistSans is used in place of interDisplay (visually equivalent for our scale).
+ */
+@layer base {
+  h1 { letter-spacing: -1.28px; font-weight: 600; }
+  h2 { letter-spacing: -0.4px;  font-weight: 500; }
+  h3 { letter-spacing: -0.3px; }
+  h4, h5, h6 { letter-spacing: -0.16px; }
+}
+
 /* ─── Glassmorphism card ─── */
 .glass-card {
   background: rgba(250, 250, 251, 0.92);  /* #fafafb = Attio white-200 */
