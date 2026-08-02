@@ -1,5 +1,8 @@
 <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="48" height="48" rx="11" fill="#0D1915"/>
-  <polyline points="7,37 15,30 23,33 36,15" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="36" cy="15" r="4.5" fill="#3BFFCC"/>
+  <rect width="48" height="48" rx="11" fill="#266df0"/>
+  <rect x="7" y="10" width="5" height="28" fill="white"/>
+  <path d="M 12 10 A 7 7 0 0 1 12 24 Z" fill="white"/>
+  <line x1="14" y1="24" x2="22" y2="38" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <rect x="27" y="10" width="5" height="28" fill="white"/>
+  <rect x="27" y="33" width="14" height="5" fill="white"/>
 </svg>
